@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Product = void 0;
+const sequelize_1 = require("sequelize");
+const sequelize_2 = require("../config/sequelize");
+class Product extends sequelize_1.Model {
+}
+exports.Product = Product;
+Product.init({
+    id: { type: sequelize_1.DataTypes.STRING(64), primaryKey: true },
+    name: { type: sequelize_1.DataTypes.STRING(120), allowNull: false },
+    price: { type: sequelize_1.DataTypes.DECIMAL(10, 2), allowNull: false },
+    image: { type: sequelize_1.DataTypes.STRING(500), allowNull: false },
+    category: { type: sequelize_1.DataTypes.ENUM("bags", "toys", "accessories"), allowNull: false },
+    badge: { type: sequelize_1.DataTypes.STRING(40), allowNull: true },
+    description: { type: sequelize_1.DataTypes.TEXT, allowNull: true },
+    status: { type: sequelize_1.DataTypes.ENUM("active", "inactive"), allowNull: false, defaultValue: "active" },
+}, { sequelize: sequelize_2.sequelize, tableName: "products", underscored: true, timestamps: true, updatedAt: false });

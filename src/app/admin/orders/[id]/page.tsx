@@ -1,0 +1,137 @@
+'use client';
+
+import { useAdminStore } from '@/lib/adminStore';
+import { ArrowLeft, Package, User, MapPin } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useParams } from 'next/navigation';
+
+export default function OrderDetailsPage() {
+  const router = useRouter();
+  const { id } = useParams<{ id: string }>();
+  const { orders, updateOrderStatus } = useAdminStore();
+  const order = orders.find(o => o.id === id);
+
+  if (!order) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <h2 className="text-xl font-bold mb-4 font-serif text-[#2B2B2B]">Order not found</h2>
+        <Link href="/admin/orders" className="text-[#E6C97A] hover:underline">Return to Orders</Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/orders" className="p-2 text-[#AFAFAF] hover:text-[#2B2B2B] hover:bg-white rounded-xl transition-colors shrink-0">
+            <ArrowLeft size={20} />
+          </Link>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-serif font-bold text-[#2B2B2B]">Order {order.id}</h1>
+              <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
+                  order.status === 'delivered' ? 'bg-green-50 text-green-700 border-green-200' :
+                  order.status === 'shipped' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                  'bg-[#F8F5F2] text-[#7A7A7A] border-[#EADFD8]'
+                }`}>
+                {order.status}
+              </span>
+            </div>
+            <p className="text-[13px] text-[#7A7A7A] mt-1">
+              {order.date ? new Date(order.date).toLocaleString() : 'Date N/A'}
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <select 
+            value={order.status}
+            onChange={(e) => updateOrderStatus(order.id, e.target.value as any)}
+            className="bg-white border border-[#EADFD8] text-[13px] font-medium text-[#2B2B2B] py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 cursor-pointer shadow-sm"
+          >
+            <option value="pending">Mark as Pending</option>
+            <option value="shipped">Mark as Shipped</option>
+            <option value="delivered">Mark as Delivered</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left Column: Items */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm">
+             <h3 className="text-[15px] font-bold text-[#2B2B2B] flex items-center gap-2 mb-4 border-b border-[#EADFD8] pb-4">
+               <Package size={18} className="text-[#AFAFAF]" /> Ordered Items
+             </h3>
+             <div className="space-y-4">
+                {(order.items || []).map((item, i) => (
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-[#EADFD8] last:border-0 pl-2">
+                    <div>
+                      <p className="text-[14px] font-bold text-[#2B2B2B]">{item.name}</p>
+                      <p className="text-[13px] text-[#AFAFAF] mt-0.5">Quantity: {item.quantity}</p>
+                    </div>
+                    <p className="text-[14px] font-bold text-[#2B2B2B]">${(item.price * item.quantity).toFixed(2)}</p>
+                  </div>
+                ))}
+             </div>
+             
+             <div className="mt-6 border-t border-[#EADFD8] pt-4 space-y-2 text-right">
+                <div className="flex justify-end gap-12 text-[13px] text-[#7A7A7A]">
+                  <span>Subtotal</span>
+                  <span className="w-20 text-[#2B2B2B] font-medium">${Number(order.total ?? 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-end gap-12 text-[13px] text-[#7A7A7A]">
+                   <span>Shipping</span>
+                   <span className="w-20 text-[#2B2B2B] font-medium">$0.00</span>
+                </div>
+                <div className="flex justify-end gap-12 text-[15px] font-bold text-[#2B2B2B] pt-2">
+                   <span>Total</span>
+                   <span className="w-20">${Number(order.total ?? 0).toFixed(2)}</span>
+                </div>
+             </div>
+          </div>
+        </div>
+
+        {/* Right Column: Customer Info */}
+        <div className="space-y-6">
+          
+          <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm">
+            <h3 className="text-[15px] font-bold text-[#2B2B2B] flex items-center gap-2 mb-4 border-b border-[#EADFD8] pb-4">
+              <User size={18} className="text-[#AFAFAF]" /> Customer
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <p className="text-[11px] font-bold text-[#7A7A7A] uppercase tracking-wider">Name</p>
+                <p className="text-[14px] text-[#2B2B2B] font-medium mt-0.5">{order.customerName}</p>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-[#7A7A7A] uppercase tracking-wider">Contact</p>
+                <a href={`mailto:${order.customerEmail}`} className="text-[14px] text-[#E6C97A] hover:underline mt-0.5 block">{order.customerEmail}</a>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm">
+            <h3 className="text-[15px] font-bold text-[#2B2B2B] flex items-center gap-2 mb-4 border-b border-[#EADFD8] pb-4">
+              <MapPin size={18} className="text-[#AFAFAF]" /> Shipping Address
+            </h3>
+            <div className="text-[14px] text-[#2B2B2B] leading-relaxed space-y-1">
+              <p className="font-medium">{order.customerName}</p>
+              <p>123 Artisan Maker Way</p>
+              <p>Apt 4B</p>
+              <p>New York, NY 10012</p>
+              <p>United States</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}

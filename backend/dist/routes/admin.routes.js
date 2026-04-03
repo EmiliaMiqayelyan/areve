@@ -1,0 +1,35 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const admin_controller_1 = require("../controllers/admin.controller");
+const auth_1 = require("../middlewares/auth");
+const validate_1 = require("../middlewares/validate");
+const asyncHandler_1 = require("../utils/asyncHandler");
+const schemas_1 = require("../validators/schemas");
+const router = (0, express_1.Router)();
+router.use(auth_1.requireAdminAuth);
+router.get("/admin/products", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminProducts));
+router.post("/admin/products", (0, validate_1.validateBody)(schemas_1.productSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminProduct));
+router.put("/admin/products/:id", (0, validate_1.validateBody)(schemas_1.productSchema.partial()), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminProduct));
+router.delete("/admin/products/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.deleteAdminProduct));
+router.get("/admin/reviews", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminReviews));
+router.post("/admin/reviews", (0, validate_1.validateBody)(schemas_1.reviewSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminReview));
+router.put("/admin/reviews/:id", (0, validate_1.validateBody)(schemas_1.reviewSchema.partial()), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminReview));
+router.delete("/admin/reviews/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.deleteAdminReview));
+router.get("/admin/orders", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminOrders));
+router.get("/admin/orders/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminOrderById));
+router.patch("/admin/orders/:id/status", (0, validate_1.validateBody)(schemas_1.orderStatusSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminOrderStatus));
+router.get("/admin/faqs", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminFaqs));
+router.put("/admin/faqs", (0, asyncHandler_1.asyncHandler)(async (req, res) => {
+    if (!Array.isArray(req.body))
+        return res.status(400).json({ message: "Expected FAQ array" });
+    req.body.forEach((item) => schemas_1.faqSchema.parse(item));
+    return (0, admin_controller_1.replaceAdminFaqs)(req, res);
+}));
+router.get("/admin/gallery", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminGallery));
+router.post("/admin/gallery", (0, validate_1.validateBody)(schemas_1.gallerySchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminGallery));
+router.delete("/admin/gallery/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.deleteAdminGallery));
+router.get("/admin/settings", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminSettings));
+router.put("/admin/settings", (0, validate_1.validateBody)(schemas_1.settingsSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminSettings));
+router.get("/admin/users", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminUsers));
+exports.default = router;

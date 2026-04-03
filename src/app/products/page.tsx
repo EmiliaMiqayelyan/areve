@@ -1,0 +1,105 @@
+'use client';
+
+import { useState, useMemo, Suspense, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { SlidersHorizontal } from 'lucide-react';
+import ProductCard from '@/components/ui/ProductCard';
+import SectionHeader from '@/components/ui/SectionHeader';
+import { apiFetch } from '@/lib/api';
+
+type Category = 'all' | 'bags' | 'toys' | 'accessories';
+
+const catLabels: Record<Category, string> = {
+  all: 'All',
+  bags: 'Beaded Bags',
+  toys: 'Handmade Toys',
+  accessories: 'Accessories',
+};
+
+function ProductsContent() {
+  const sp = useSearchParams();
+  const [cat, setCat] = useState<Category>((sp.get('category') as Category) || 'all');
+  const [sort, setSort] = useState<'default' | 'price-asc' | 'price-desc'>('default');
+  const [productList, setProductList] = useState<Array<any>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    void apiFetch<any[]>('/products?active=true')
+      .then(setProductList)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = useMemo(() => {
+    let list = cat === 'all' ? productList : productList.filter(p => p.category === cat);
+    if (sort === 'price-asc') list = [...list].sort((a, b) => a.price - b.price);
+    if (sort === 'price-desc') list = [...list].sort((a, b) => b.price - a.price);
+    return list;
+  }, [cat, sort, productList]);
+
+  return (
+    <div style={{ minHeight: '100vh', paddingTop: 68 }}>
+      <div style={{ background: '#EADFD8', padding: 'var(--section-padding)', borderBottom: '1px solid #D6C3B3' }}>
+        <div className="mx-auto max-w-[1280px]">
+          <SectionHeader eyebrow="Shop AREVÉ" title="Our Collection" subtitle="Every piece is handmade — no two are exactly the same. Find what speaks to you." centered />
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
+        {loading && (
+          <div className="py-10 text-center font-sans text-[#AFAFAF]">
+            Loading products...
+          </div>
+        )}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-2">
+            {(Object.keys(catLabels) as Category[]).map(c => (
+              <button key={c} onClick={() => setCat(c)}
+                className={`px-5 py-2 rounded-full font-sans text-[13px] font-medium transition-all cursor-pointer border-none ${
+                    cat === c ? 'bg-gold text-[#5a4a1e] shadow-[0_2px_12px_#E6C97A55]' : 'bg-white text-subtle shadow-[0_1px_4px_rgba(180,156,140,0.12)]'
+                }`}
+              >
+                {catLabels[c]}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal size={14} className="text-[#AFAFAF]" />
+            <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}
+              className="appearance-none bg-white font-sans text-[13px] text-subtle border-[1.5px] border-beige rounded-xl py-2 px-3 outline-none cursor-pointer"
+            >
+              <option value="default">Featured</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+          </div>
+        </div>
+
+        <p className="mb-8 font-sans text-[13px] text-[#AFAFAF]">
+          {filtered.length} {filtered.length === 1 ? 'product' : 'products'}{cat !== 'all' ? ` in ${catLabels[cat]}` : ''}
+        </p>
+
+        <AnimatePresence mode="wait">
+          <motion.div key={cat} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}
+            className="grid grid-cols-1 gap-5 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+          </motion.div>
+        </AnimatePresence>
+
+        {!loading && filtered.length === 0 && (
+          <div className="py-10 text-center font-sans text-[#AFAFAF]">
+            No products found.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', paddingTop: 100, textAlign: 'center', fontFamily: "'DM Sans',sans-serif", color: '#AFAFAF' }}>Loading...</div>}>
+      <ProductsContent />
+    </Suspense>
+  );
+}

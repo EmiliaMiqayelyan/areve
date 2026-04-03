@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const asyncHandler_1 = require("../utils/asyncHandler");
+const public_controller_1 = require("../controllers/public.controller");
+const validate_1 = require("../middlewares/validate");
+const schemas_1 = require("../validators/schemas");
+const router = (0, express_1.Router)();
+router.get("/health", (0, asyncHandler_1.asyncHandler)(public_controller_1.getHealth));
+router.get("/products", (0, asyncHandler_1.asyncHandler)(public_controller_1.getProducts));
+router.get("/products/:id", (0, asyncHandler_1.asyncHandler)(public_controller_1.getProductById));
+router.get("/reviews", (0, asyncHandler_1.asyncHandler)(public_controller_1.getReviews));
+router.get("/faqs", (0, asyncHandler_1.asyncHandler)(public_controller_1.getFaqs));
+router.get("/gallery", (0, asyncHandler_1.asyncHandler)(public_controller_1.getGallery));
+router.post("/contact", (0, validate_1.validateBody)(schemas_1.contactSchema), (0, asyncHandler_1.asyncHandler)(public_controller_1.createContact));
+router.post("/orders", (0, validate_1.validateBody)(schemas_1.orderSchema), (0, asyncHandler_1.asyncHandler)(public_controller_1.createOrder));
+exports.default = router;
