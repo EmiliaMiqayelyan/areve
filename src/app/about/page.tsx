@@ -24,8 +24,6 @@ export default function AboutPage() {
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
 
-    <div style={{ minHeight: '100vh', paddingTop: 68 }}>
-
       {/* Hero */}
       <section className="bg-beige text-center border-b border-sand" style={{ padding: 'var(--section-padding)' }}>
         <div className="mx-auto max-w-[720px]">

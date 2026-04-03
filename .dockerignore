@@ -1,8 +1,0 @@
-node_modules
-.next
-.git
-.idea
-npm-debug.log*
-backend/node_modules
-backend/dist
-backend/.env
