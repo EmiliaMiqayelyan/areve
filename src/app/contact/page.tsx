@@ -1,14 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useState } from 'react';
-import { Mail, MessageCircle, ExternalLink, CheckCircle } from 'lucide-react';
+import { Mail, MessageCircle, ExternalLink } from 'lucide-react';
 import NextImg from 'next/image';
 import SectionHeader from '@/components/ui/SectionHeader';
-import { apiFetch } from '@/lib/api';
 
 const WA = () => (
   <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -28,230 +23,170 @@ const FB_ICON = () => (
     </svg>
 );
 
-const schema = z.object({
-  name: z.string().min(2, 'Name too short'),
-  email: z.string().email('Invalid email'),
-  message: z.string().min(10, 'Message too short'),
-});
+const TT_ICON = () => (
+  <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+  </svg>
+);
 
-type F = z.infer<typeof schema>;
+const YT_ICON = () => (
+  <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+  </svg>
+);
 
 export default function ContactPage() {
-  const [done, setDone] = useState(false);
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<F>({ 
-    resolver: zodResolver(schema) 
-  });
-
-  const onSubmit = async (data: F) => {
-    await apiFetch('/contact', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-    setDone(true);
-    reset();
-  };
-
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
-      {/* Header */}
-      <div style={{ background: '#EADFD8', padding: '80px 24px 64px', borderBottom: '1px solid #D6C3B3' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+      {/* Header Section */}
+      <div className="bg-beige border-b border-sand px-[var(--container-px)] py-20 sm:py-24">
+        <div className="max-w-[1280px] mx-auto">
           <SectionHeader 
             eyebrow="Get in Touch" 
             title="We'd Love to Hear from You" 
-            subtitle="Choose the preferred way to connect — traditional inquiry or direct social messaging." 
+            subtitle="Connect with us directly for custom orders, product advice, or just to say hello." 
             centered 
           />
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '80px 24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 64 }}>
+      {/* Main Content */}
+      <div className="max-w-[1280px] mx-auto px-[var(--container-px)] py-16 sm:py-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 items-stretch">
 
-          {/* LEFT SIDE: Info & Small Form */}
-          <motion.div initial={{ opacity: 0, x: -32 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            <div style={{ marginBottom: 48 }}>
-              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#2B2B2B', marginBottom: 16 }}>Inquiries</h3>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#7A7A7A', lineHeight: 1.7, marginBottom: 32 }}>
-                Have a question or want to discuss a project? Fill out this quick form and we'll get back to you soon.
-              </p>
-
-              {done ? (
-                <div style={{ background: '#C7D3C020', borderRadius: 20, padding: '32px', border: '1px dashed #C7D3C0', textAlign: 'center' }}>
-                  <CheckCircle size={32} color="#C7D3C0" style={{ marginBottom: 12 }} />
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#3d4d38', fontWeight: 500 }}>Message received! We'll reply within 24 hours.</p>
-                  <button onClick={() => setDone(false)} style={{ marginTop: 12, fontSize: 13, color: '#7A7A7A', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>Send another</button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    <div>
-                      <input {...register('name')} placeholder="Name" style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #EADFD8', background: '#fff', fontSize: 14, outline: 'none' }} />
-                      {errors.name && <p style={{ fontSize: 11, color: '#c97a7a', marginTop: 4 }}>{errors.name.message}</p>}
-                    </div>
-                    <div>
-                      <input {...register('email')} placeholder="Email" style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #EADFD8', background: '#fff', fontSize: 14, outline: 'none' }} />
-                      {errors.email && <p style={{ fontSize: 11, color: '#c97a7a', marginTop: 4 }}>{errors.email.message}</p>}
-                    </div>
-                  </div>
-                  <div>
-                    <textarea {...register('message')} placeholder="How can we help?" rows={3} style={{ width: '100%', padding: '12px 16px', borderRadius: 12, border: '1px solid #EADFD8', background: '#fff', fontSize: 14, outline: 'none', resize: 'none' }} />
-                    {errors.message && <p style={{ fontSize: 11, color: '#c97a7a', marginTop: 4 }}>{errors.message.message}</p>}
-                  </div>
-                  <button type="submit" disabled={isSubmitting} style={{ padding: '12px', background: '#2B2B2B', color: '#fff', borderRadius: 12, border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'opacity 0.2s' }}>
-                    {isSubmitting ? 'Sending...' : 'Send Inquiry'}
-                  </button>
-                </form>
-              )}
+          {/* CARD 1: Contact Details */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            viewport={{ once: true }} 
+            transition={{ duration: 0.6 }}
+            className="group flex flex-col bg-white rounded-[32px] p-8 sm:p-10 border border-beige shadow-[0_4px_24px_rgba(180,156,140,0.06)] transition-all hover:shadow-[0_12px_40px_rgba(180,156,140,0.12)] hover:-translate-y-1"
+          >
+            <div className="mb-8">
+              <h3 className="font-serif text-2xl text-ink mb-3 text-center sm:text-left">General Inquiry</h3>
+              <p className="font-sans text-[14px] text-subtle leading-relaxed text-center sm:text-left">For general questions and collaborations.</p>
             </div>
 
-            {/* Contact Details & Socials */}
-            <div>
-              <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: '#2B2B2B', marginBottom: 20 }}>Contact Details</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#F8F5F2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#BFA6A0' }}>
-                    <Mail size={16} />
-                  </div>
-                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#7A7A7A' }}>hello@areve.handmade</span>
+            <div className="flex flex-col gap-5 mt-auto">
+              <div className="flex items-center gap-4 group/item">
+                <div className="w-11 h-11 rounded-full bg-ivory flex items-center justify-center text-mocha transition-all group-hover/item:bg-mocha group-hover/item:text-white">
+                  <Mail size={18} strokeWidth={1.5} />
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#F8F5F2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#BFA6A0' }}>
-                    <MessageCircle size={16} />
-                  </div>
-                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#7A7A7A' }}>+374 XX XXX XXXX</span>
+                <div className="flex flex-col">
+                  <span className="font-sans text-[10px] uppercase tracking-widest text-muted">Email Us</span>
+                  <span className="font-sans text-[15px] font-medium text-ink">hello@areve.handmade</span>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 12, marginTop: 32 }}>
-                {[
-                  { icon: <IG_ICON />, href: 'https://instagram.com/areve.handmade' },
-                  { icon: <FB_ICON />, href: 'https://facebook.com' }
-                ].map((social, i) => (
-                  <a 
-                    key={i} 
-                    href={social.href} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    style={{ 
-                      width: 44, height: 44, borderRadius: '50%', background: '#fff', border: '1px solid #EADFD8', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#BFA6A0', 
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
-                    }}
-                    onMouseEnter={e => {
-                        e.currentTarget.style.background = '#E6C97A';
-                        e.currentTarget.style.color = '#5a4a1e';
-                        e.currentTarget.style.borderColor = '#E6C97A';
-                    }}
-                    onMouseLeave={e => {
-                        e.currentTarget.style.background = '#fff';
-                        e.currentTarget.style.color = '#BFA6A0';
-                        e.currentTarget.style.borderColor = '#EADFD8';
-                    }}
-                  >
-                    {social.icon}
-                  </a>
-                ))}
+              <div className="flex items-center gap-4 group/item">
+                <div className="w-11 h-11 rounded-full bg-ivory flex items-center justify-center text-mocha transition-all group-hover/item:bg-mocha group-hover/item:text-white">
+                  <MessageCircle size={18} strokeWidth={1.5} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-sans text-[10px] uppercase tracking-widest text-muted">WhatsApp</span>
+                  <span className="font-sans text-[15px] font-medium text-ink">+374 XX XXX XXXX</span>
+                </div>
               </div>
+            </div>
+
+            <div className="flex gap-3 mt-10 justify-center sm:justify-start">
+              {[
+                { icon: <IG_ICON />, href: 'https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr' },
+                { icon: <FB_ICON />, href: 'https://facebook.com' },
+                { icon: <TT_ICON />, href: 'https://tiktok.com/@areve.handmade' },
+                { icon: <YT_ICON />, href: 'https://youtube.com/@areve.handmade' }
+              ].map((social, i) => (
+                <a 
+                  key={i} 
+                  href={social.href} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-white border border-beige flex items-center justify-center text-[#BFA6A0] transition-all hover:bg-[#BFA6A0] hover:text-white hover:border-[#BFA6A0] hover:scale-110"
+                >
+                  {social.icon}
+                </a>
+              ))}
             </div>
           </motion.div>
 
-          {/* RIGHT SIDE: Direct Ordering Cards */}
-          <motion.div initial={{ opacity: 0, x: 32 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}>
-            <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
-              
-              <div style={{ marginBottom: 12 }}>
-                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: '#2B2B2B', marginBottom: 12 }}>Direct Ordering</h3>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: '#7A7A7A' }}>The fastest way to custom order or get product advice.</p>
-              </div>
-
-              {/* WhatsApp Card */}
-              <motion.div 
-                whileHover={{ y: -8 }}
-                style={{ 
-                  background: '#fff', 
-                  borderRadius: 24, 
-                  padding: 32, 
-                  border: '1px solid #EADFD8',
-                  boxShadow: '0 12px 30px rgba(180, 156, 140, 0.06)',
-                  textAlign: 'center'
-                }}
+          {/* CARD 2: WhatsApp Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            viewport={{ once: true }} 
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="flex flex-col bg-white rounded-[32px] p-8 sm:p-10 border border-beige shadow-[0_4px_24px_rgba(180,156,140,0.06)] text-center transition-all hover:shadow-[0_12px_40px_rgba(180,156,140,0.12)] hover:-translate-y-1"
+          >
+            <div className="w-16 h-16 rounded-full bg-[#25D36615] text-[#25D366] flex items-center justify-center mx-auto mb-8">
+              <WA />
+            </div>
+            <h3 className="font-serif text-2xl text-ink mb-3 uppercase tracking-tight">Direct Ordering</h3>
+            <p className="font-sans text-[14px] text-subtle leading-relaxed mb-10">The fastest way to custom order or get product advice in real-time.</p>
+            
+            <div className="mt-auto">
+              <a 
+                href="https://wa.me/1234567890" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 py-4 px-6 bg-[#25D366] text-white rounded-2xl no-underline font-sans text-[14px] font-bold tracking-wide transition-transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-[#25D36633]"
               >
-                <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#25D36615', color: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                  <WA />
-                </div>
-                <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: '#2B2B2B', marginBottom: 8 }}>WhatsApp Chat</h4>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#7A7A7A', marginBottom: 24 }}>Order directly or get real-time advice via WhatsApp.</p>
-                <a 
-                  href="https://wa.me/1234567890" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  style={{ 
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 0', 
-                    background: '#25D366', color: '#fff', borderRadius: 12, textDecoration: 'none', 
-                    fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700 
-                  }}
-                >
-                  Start Ordering <ExternalLink size={14} />
-                </a>
-              </motion.div>
+                CHAT ON WHATSAPP <ExternalLink size={16} strokeWidth={2} />
+              </a>
+            </div>
+          </motion.div>
 
-              {/* Instagram Card */}
-              <motion.div 
-                whileHover={{ y: -8 }}
-                style={{ 
-                  background: '#fff', 
-                  borderRadius: 24, 
-                  padding: 32, 
-                  border: '1px solid #EADFD8',
-                  boxShadow: '0 12px 30px rgba(180, 156, 140, 0.06)',
-                  textAlign: 'center'
-                }}
+          {/* CARD 3: Instagram Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            viewport={{ once: true }} 
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-col bg-white rounded-[32px] p-8 sm:p-10 border border-beige shadow-[0_4px_24px_rgba(180,156,140,0.06)] text-center transition-all hover:shadow-[0_12px_40_rgba(180,156,140,0.12)] hover:-translate-y-1"
+          >
+            <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white flex items-center justify-center mx-auto mb-8 shadow-inner">
+              <div className="scale-125"><IG_ICON /></div>
+            </div>
+            <h3 className="font-serif text-2xl text-ink mb-3 uppercase tracking-tight">Boutique Feed</h3>
+            <p className="font-sans text-[14px] text-subtle leading-relaxed mb-10">Follow us on Instagram for new arrivals, daily stories, and custom requests.</p>
+            
+            <div className="mt-auto">
+              <a 
+                href="https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white rounded-2xl no-underline font-sans text-[14px] font-bold tracking-wide transition-transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-rose/20"
               >
-                <div style={{ 
-                  width: 56, height: 56, borderRadius: '50%', 
-                  background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', 
-                  color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' 
-                }}>
-                  <div style={{ transform: 'scale(1.2)' }}><IG_ICON /></div>
-                </div>
-                <h4 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: '#2B2B2B', marginBottom: 8 }}>Instagram DM</h4>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#7A7A7A', marginBottom: 24 }}>Message us on Instagram for custom requests and arrivals.</p>
-                <a 
-                  href="https://instagram.com/areve.handmade" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  style={{ 
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 0', 
-                    background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', 
-                    color: '#fff', borderRadius: 12, textDecoration: 'none', 
-                    fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 700 
-                  }}
-                >
-                  Message on Instagram <ExternalLink size={14} />
-                </a>
-              </motion.div>
-
+                VISIT BOUTIQUE <ExternalLink size={16} strokeWidth={2} />
+              </a>
             </div>
           </motion.div>
 
         </div>
 
         {/* Studio Image Section */}
-        <div style={{ marginTop: 100, borderRadius: 32, overflow: 'hidden', height: 400, position: 'relative' }}>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }} 
+          whileInView={{ opacity: 1, scale: 1 }} 
+          viewport={{ once: true }}
+          className="mt-20 sm:mt-32 rounded-[40px] overflow-hidden min-h-[400px] sm:h-[500px] relative group"
+        >
           <NextImg 
             src="/images/gallery-light-3.png" 
             alt="AREVÉ Studio" 
             fill 
-            style={{ objectFit: 'cover' }} 
+            className="object-cover transition-transform duration-1000 group-hover:scale-105" 
           />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.4), transparent)' }} />
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 64px' }}>
-            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontStyle: 'italic', color: '#fff', maxWidth: 450 }}>
-              "Every piece is a tiny sun — made with warmth."
-            </p>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+          <div className="absolute inset-0 flex items-center px-8 sm:px-16 lg:px-24">
+            <div className="max-w-[500px]">
+              <span className="font-sans text-[10px] uppercase tracking-[0.3em] text-white/70 mb-4 block">At the Studio</span>
+              <p className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light italic text-white leading-tight mb-8">
+                "Every piece is a tiny sun — made with warmth & sunlight."
+              </p>
+              <div className="w-12 h-0.5 bg-gold rounded-full" />
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

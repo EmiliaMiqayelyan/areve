@@ -19,19 +19,26 @@ export default function ReviewsPage() {
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
-      <div style={{ background: '#EADFD8', padding: '64px 24px 56px', borderBottom: '1px solid #D6C3B3' }}>
+      <div className="bg-beige border-b border-sand px-[var(--container-px)] py-12 sm:py-16">
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <SectionHeader eyebrow="Customer Reviews" title="What Our Community Says" subtitle="Real words from real people who love handmade things." centered />
 
-          <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
-            style={{ display: 'inline-flex', gap: 40, background: '#fff', borderRadius: 20, padding: '20px 36px', border: '1px solid #D6C3B3', marginTop: 8 }}>
-            {[['5.0','Average Rating',<div style={{ display: 'flex', gap: 2 }}>{Array.from({length:5}).map((_,i)=><Star key={i} size={13} fill="#E6C97A" color="#E6C97A" />)}</div>],
-              [String(reviewList.length),'Total Reviews',null],
-              ['100%','5-Star Reviews',null]].map(([n,l,extra],i) => (
-              <div key={i} style={{ textAlign: 'center' }}>
-                <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 36, color: '#2B2B2B', fontWeight: 700 }}>{n}</p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: 0.3 }}
+            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 bg-white rounded-[24px] p-8 sm:p-10 border border-[#D6C3B3] shadow-[0_8px_30px_rgba(180,156,140,0.12)] w-full max-w-2xl mx-auto"
+          >
+            {[
+              ['5.0', 'Average Rating', <div className="flex gap-1 justify-center">{Array.from({length:5}).map((_,i)=><Star key={i} size={14} fill="#E6C97A" color="#E6C97A" />)}</div>],
+              [String(reviewList.length), 'Total Reviews', null],
+              ['100%', '5-Star Reviews', null]
+            ].map(([n, l, extra], i) => (
+              <div key={i} className="text-center w-full sm:w-auto">
+                <p className="font-serif text-3xl sm:text-4xl font-bold text-ink leading-none mb-2">{n}</p>
                 {extra}
-                <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12, color: '#AFAFAF', marginTop: 4 }}>{l}</p>
+                <p className="font-sans text-[11px] uppercase tracking-widest text-muted mt-2">{l}</p>
+                {i < 2 && <div className="hidden sm:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-beige" />}
               </div>
             ))}
           </motion.div>
@@ -39,7 +46,7 @@ export default function ReviewsPage() {
       </div>
 
       {/* Featured quote */}
-      <div style={{ background: '#F8F5F2', padding: '64px 24px', textAlign: 'center', borderBottom: '1px solid #EADFD8' }}>
+      <div className="bg-ivory border-b border-beige px-[var(--container-px)] py-16 sm:py-20 text-center">
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
           <p style={{ fontSize: 36, marginBottom: 16 }}>❝</p>
           <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(18px,2.5vw,26px)', color: '#2B2B2B', fontStyle: 'italic', lineHeight: 1.65 }}>
@@ -49,7 +56,7 @@ export default function ReviewsPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '56px 24px' }}>
+      <div className="max-w-[1280px] mx-auto px-[var(--container-px)] py-14 sm:py-16">
         {loading && (
           <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: "'DM Sans',sans-serif", color: '#AFAFAF' }}>
             Loading reviews...
@@ -65,11 +72,6 @@ export default function ReviewsPage() {
           </div>
         )}
 
-        <div style={{ textAlign: 'center', marginTop: 56 }}>
-          <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 28, color: '#2B2B2B', marginBottom: 12 }}>Share Your Experience</h3>
-          <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 15, color: '#7A7A7A', marginBottom: 24 }}>Have a piece from AREVÉ? We'd love to hear your story.</p>
-          <a href="mailto:hello@areve.handmade?subject=My Review for AREVÉ" className="btn-primary" style={{ textDecoration: 'none' }}>Write a Review</a>
-        </div>
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Heart, Menu, X } from 'lucide-react';
 import { useCartStore, useWishlistStore } from '@/lib/store';
 import CartDrawer from '../CartDrawer';
+import areve from "../../../public/areve.png"
+import Image from "next/image";
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -53,15 +55,10 @@ export default function Header() {
       >
         <div className="mx-auto flex h-[68px] items-center justify-between px-4 sm:px-6 lg:max-w-[1280px]">
 
-          {/* Logo */}
           <Link href="/" className="flex items-center gap-2 no-underline sm:gap-2.5">
-            <span className="text-[20px] leading-none sm:text-[22px]">☀️</span>
-            <span style={{ fontFamily: "'Playfair Display', serif" }} className="text-xl font-bold tracking-tight text-ink sm:text-2xl sm:tracking-normal">
-              AREVÉ
-            </span>
+           <Image src={areve} alt="areve" width="90" height="90" />
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hidden gap-8 items-center lg:flex">
             {navLinks.map(link => (
               <Link
@@ -93,7 +90,6 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Icons */}
           <div className="flex items-center gap-3 sm:gap-4">
             <Link href="/products" className="hidden sm:flex relative text-subtle" style={{ color: '#7A7A7A' }}>
               <Heart size={20} strokeWidth={1.6} />
@@ -113,7 +109,6 @@ export default function Header() {
               )}
             </button>
 
-            {/* Hamburger */}
             <button
               className="lg:hidden border-none bg-none p-1 cursor-pointer text-ink flex items-center justify-center"
               onClick={() => setMobileOpen(v => !v)}
@@ -123,7 +118,6 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile menu */}
         <AnimatePresence>
           {mobileOpen && (
             <motion.div

@@ -24,7 +24,6 @@ export default function AboutPage() {
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
 
-      {/* Hero */}
       <section className="bg-beige text-center border-b border-sand" style={{ padding: 'var(--section-padding)' }}>
         <div className="mx-auto max-w-[720px]">
           <motion.div initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
@@ -41,7 +40,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Story */}
       <section className="bg-ivory" style={{ padding: 'var(--section-padding)' }}>
         <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
           <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.65 }}>
@@ -66,7 +64,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Values */}
       <section className="bg-beige" style={{ padding: 'var(--section-padding)' }}>
         <div className="mx-auto max-w-[1280px] px-4 sm:px-6" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
           <SectionHeader eyebrow="What We Believe" title="Our Values" subtitle="The principles behind every piece we create." centered />
@@ -83,7 +80,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Process */}
       <section className="bg-ivory" style={{ padding: 'var(--section-padding)' }}>
         <div className="mx-auto max-w-[1280px] px-4 sm:px-6" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
           <SectionHeader eyebrow="How We Work" title="Behind the Scenes" subtitle="From first sketch to your hands — the journey of every AREVÉ piece." centered />
@@ -99,7 +95,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Gallery strip */}
       <section className="bg-beige p-0">
         <div className="grid h-[200px] grid-cols-1 sm:h-[260px] sm:grid-cols-3">
           {['/images/gallery-light-3.png', '/images/gallery-light-4.png', '/images/gallery-light-1.png'].map((img, i) => (
@@ -110,7 +105,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="bg-ivory text-center" style={{ padding: 'var(--section-padding)' }}>
         <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mx-auto max-w-[480px]">
           <h2 className="mb-3 font-serif text-3xl font-bold text-ink sm:text-4xl">Ready to find your piece?</h2>

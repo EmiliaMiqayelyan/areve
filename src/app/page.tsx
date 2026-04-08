@@ -54,21 +54,17 @@ export default function Home() {
   return (
     <div style={S.page}>
 
-      {/* ═══════════════ HERO ═══════════════ */}
       <section ref={heroRef} style={{ position: 'relative', minHeight: '90vh', display: 'flex', alignItems: 'center', overflow: 'hidden', background: '#F8F5F2' }}>
 
-        {/* Bg image */}
         <motion.div style={{ y: imgY, position: 'absolute', inset: 0 }}>
           <Image src="/images/hero-light.png" alt="AREVÉ" fill style={{ objectFit: 'cover', objectPosition: 'center' }} priority />
-          {/* soft cream overlay */}
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(248,245,242,0.96) 0%, rgba(248,245,242,0.85) 45%, rgba(248,245,242,0.20) 100%)' }} />
         </motion.div>
 
-        {/* Content */}
-        <motion.div className="relative z-10 mx-auto w-full px-4 sm:px-6 lg:max-w-[1280px]" style={{ y: textY, opacity, paddingTop: 'calc(var(--container-px) * 4)' }}>
+        <motion.div className="relative z-10 mx-auto w-full px-4 sm:px-6 lg:max-w-[1280px]" style={{ y: textY, opacity, paddingTop: 'calc(var(--container-px) * 2.5)' }}>
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="flex items-center gap-2.5 mb-6">
-            <span className="badge badge-sage">New Collection 2025</span>
+            <span className="badge badge-sage">New Collection {new Date().getFullYear()}</span>
             <span className="text-[#D6C3B3] text-xs sm:text-sm">☀️</span>
           </motion.div>
 
@@ -109,7 +105,6 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        {/* Scroll hint */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 hidden sm:flex">
           <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-[#AFAFAF]">Scroll</p>
@@ -118,7 +113,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ═══════════════ CATEGORIES ═══════════════ */}
+
       <section style={{ ...S.section('#EADFD8'), padding: 'var(--section-padding)' }}>
         <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
           <SectionHeader eyebrow="Our Collections" title="Made for Every Moment" subtitle="Three collections, one soul — each crafted with the same dedication to beauty and authenticity." centered />
@@ -142,7 +137,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════ FEATURED PRODUCTS ═══════════════ */}
       <section style={{ ...S.section(), padding: 'var(--section-padding)' }}>
         <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
           <div className="flex flex-wrap items-end justify-between gap-4 mb-4 sm:mb-8">
@@ -167,16 +161,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════ ABOUT PREVIEW ═══════════════ */}
       <section style={{ ...S.section('#EADFD8'), padding: 'var(--section-padding)' }}>
         <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-12 items-center px-4 sm:px-6 lg:grid-cols-2 lg:gap-16">
           <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.65 }} className="relative">
             <div className="relative h-[400px] overflow-hidden rounded-[24px] sm:h-[500px]">
               <Image src="/images/about-light.png" alt="Crafting" fill className="object-cover" loading="lazy" />
             </div>
-            {/* Decorative border */}
+
             <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-[20px] border-2 border-gold/30" />
-            {/* Floating stat */}
+
             <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 3.5, repeat: Infinity }}
               className="absolute -left-4 bottom-8 rounded-[16px] bg-white p-4 shadow-[0_8px_32px_rgba(180,156,140,0.22)] sm:p-5">
               <p className="font-serif text-2xl font-bold text-ink sm:text-3xl">40+</p>
@@ -213,7 +206,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════ REVIEWS PREVIEW ═══════════════ */}
       <section style={{ ...S.section('#D6C3B3'), padding: 'var(--section-padding)' }}>
         <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
           <SectionHeader eyebrow="Testimonials" title="Words from Hearts" subtitle="The most meaningful reward is knowing our pieces bring joy." centered />
@@ -238,7 +230,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════ INSTAGRAM GRID ═══════════════ */}
       <section style={{ ...S.section(), padding: 'var(--section-padding)' }}>
         <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
           <SectionHeader eyebrow="@areve.handmade" title="Follow Our Journey" subtitle="Behind the scenes, new arrivals, and stories from our community." centered />
@@ -253,14 +244,13 @@ export default function Home() {
             ))}
           </div>
           <p className="mt-8 text-center font-sans text-[13px] text-mocha">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="border-b border-sand text-mocha no-underline transition-colors hover:text-gold hover:border-gold">
+            <a href="https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="border-b border-sand text-mocha no-underline transition-colors hover:text-gold hover:border-gold">
               View on Instagram →
             </a>
           </p>
         </div>
       </section>
 
-      {/* ═══════════════ CTA BANNER ═══════════════ */}
       <section className="border-t border-beige bg-ivory text-center" style={{ padding: 'var(--section-padding)' }}>
         <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="mx-auto max-w-[600px]">
           <span className="mb-5 block text-[40px]">☀️</span>
