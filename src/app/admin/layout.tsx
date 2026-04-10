@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, Package, ShoppingCart, Tags, 
   MessageSquare, Image as ImageIcon, HelpCircle, 
-  Users, Settings, Search, Bell, LogOut 
+  Users, Settings, Search, Bell, LogOut, FileText 
 } from 'lucide-react';
 import { useAdminStore } from '@/lib/adminStore';
 
@@ -22,6 +22,7 @@ const links = [
   { href: '/admin/gallery', label: 'Gallery', icon: ImageIcon },
   { href: '/admin/faq', label: 'FAQ', icon: HelpCircle },
   { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/site-content', label: 'Site content', icon: FileText },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 

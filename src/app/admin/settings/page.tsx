@@ -19,6 +19,8 @@ export default function AdminSettingsPage() {
     instagramUrl: 'https://instagram.com/areve_brand',
     facebookUrl: 'https://facebook.com/areve.brand',
     whatsappUrl: 'https://wa.me/message/xyz',
+    tiktokUrl: '',
+    youtubeUrl: '',
   });
 
   useEffect(() => {
@@ -135,6 +137,14 @@ export default function AdminSettingsPage() {
             <div className="space-y-1.5">
               <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">WhatsApp Business Link</label>
               <input type="url" value={settings.whatsappUrl} onChange={(e) => setSettings((s) => ({ ...s, whatsappUrl: e.target.value }))} className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">TikTok URL</label>
+              <input type="url" value={settings.tiktokUrl} onChange={(e) => setSettings((s) => ({ ...s, tiktokUrl: e.target.value }))} className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow" placeholder="https://tiktok.com/@..." />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">YouTube URL</label>
+              <input type="url" value={settings.youtubeUrl} onChange={(e) => setSettings((s) => ({ ...s, youtubeUrl: e.target.value }))} className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow" placeholder="https://youtube.com/@..." />
             </div>
           </div>
         </div>

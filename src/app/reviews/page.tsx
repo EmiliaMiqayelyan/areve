@@ -6,8 +6,11 @@ import { useEffect, useState } from 'react';
 import ReviewCard from '@/components/ui/ReviewCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { apiFetch } from '@/lib/api';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 
 export default function ReviewsPage() {
+  const { settings } = useSiteSettings();
+  const pg = settings.siteContent.pages.reviews;
   const [reviewList, setReviewList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +24,7 @@ export default function ReviewsPage() {
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
       <div className="bg-beige border-b border-sand px-[var(--container-px)] py-12 sm:py-16">
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <SectionHeader eyebrow="Customer Reviews" title="What Our Community Says" subtitle="Real words from real people who love handmade things." centered />
+          <SectionHeader eyebrow={pg.eyebrow} title={pg.title} subtitle={pg.subtitle} centered />
 
           <motion.div 
             initial={{ opacity: 0, y: 20 }} 
@@ -30,9 +33,9 @@ export default function ReviewsPage() {
             className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 bg-white rounded-[24px] p-8 sm:p-10 border border-[#D6C3B3] shadow-[0_8px_30px_rgba(180,156,140,0.12)] w-full max-w-2xl mx-auto"
           >
             {[
-              ['5.0', 'Average Rating', <div className="flex gap-1 justify-center">{Array.from({length:5}).map((_,i)=><Star key={i} size={14} fill="#E6C97A" color="#E6C97A" />)}</div>],
-              [String(reviewList.length), 'Total Reviews', null],
-              ['100%', '5-Star Reviews', null]
+              [pg.avgRating, pg.avgRatingLabel, <div className="flex gap-1 justify-center">{Array.from({length:5}).map((_,i)=><Star key={i} size={14} fill="#E6C97A" color="#E6C97A" />)}</div>],
+              [String(reviewList.length), pg.totalReviewsLabel, null],
+              [pg.fiveStarValue, pg.fiveStarLabel, null]
             ].map(([n, l, extra], i) => (
               <div key={i} className="text-center w-full sm:w-auto">
                 <p className="font-serif text-3xl sm:text-4xl font-bold text-ink leading-none mb-2">{n}</p>

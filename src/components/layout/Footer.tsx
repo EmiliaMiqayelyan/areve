@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from "next/image";
 import areve from "../../../public/areve.png";
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 
 const IG = () => (
   <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
@@ -37,6 +38,16 @@ const headStyle: React.CSSProperties = { fontFamily: "'Playfair Display',serif",
 
 export default function Footer() {
   const pathname = usePathname();
+  const { settings } = useSiteSettings();
+  const { storeName, tagline, footerDescription, instagramUrl, facebookUrl, whatsappUrl, tiktokUrl, youtubeUrl, siteContent } = settings;
+  const socials = [
+    { icon: <IG />, href: instagramUrl },
+    { icon: <FB />, href: facebookUrl },
+    { icon: <WA />, href: whatsappUrl },
+    { icon: <TT />, href: tiktokUrl },
+    { icon: <YT />, href: youtubeUrl },
+  ].filter((s) => typeof s.href === 'string' && s.href.trim().length > 0);
+
   if (pathname.startsWith('/admin')) return null;
 
   return (
@@ -47,17 +58,13 @@ export default function Footer() {
           {/* Column 1: Brand */}
           <div style={{ ...col }} className="max-w-xs">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <Image src={areve} alt="areve" width="90" height="90" />
+              <Image src={areve} alt={storeName} width="90" height="90" />
             </div>
             <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 14, color: '#7A7A7A', lineHeight: 1.7 }}>
-              Every piece is a tiny sun — made with warmth, patience, and the kind of love only hands can give.
+              {footerDescription}
             </p>
             <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-              {[{ icon: <IG />, href: 'https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr' },
-                { icon: <FB />, href: 'https://facebook.com' },
-                { icon: <WA />, href: 'https://wa.me/' },
-                { icon: <TT />, href: 'https://tiktok.com/@areve.handmade' },
-                { icon: <YT />, href: 'https://youtube.com/@areve.handmade' }].map((s, i) => (
+              {socials.map((s, i) => (
                 <a key={i} href={s.href} target="_blank" rel="noopener noreferrer"
                   className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-mocha no-underline transition-all hover:bg-gold hover:text-[#5a4a1e]"
                 >
@@ -72,8 +79,8 @@ export default function Footer() {
             {/* Explore */}
             <div style={col}>
               <h4 style={headStyle}>Explore</h4>
-              {[['/', 'Home'], ['/products', 'Products'], ['/gallery', 'Gallery'], ['/about', 'Our Story'], ['/reviews', 'Reviews']].map(([href, label]) => (
-                <Link key={href} href={href} style={linkStyle} className="hover:text-gold">
+              {siteContent.footer.explore.map(([href, label]) => (
+                <Link key={`${href}-${label}`} href={href} style={linkStyle} className="hover:text-gold">
                   {label}
                 </Link>
               ))}
@@ -82,8 +89,8 @@ export default function Footer() {
             {/* Support */}
             <div style={col}>
               <h4 style={headStyle}>Support</h4>
-              {[['/faq', 'FAQ'], ['/contact', 'Contact Us'], ['/contact', 'Custom Orders'], ['/faq', 'Care Guide'], ['/faq', 'Shipping']].map(([href, label], i) => (
-                <Link key={i} href={href} style={linkStyle} className="hover:text-gold">
+              {siteContent.footer.support.map(([href, label], i) => (
+                <Link key={`${href}-${label}-${i}`} href={href} style={linkStyle} className="hover:text-gold">
                   {label}
                 </Link>
               ))}
@@ -94,10 +101,10 @@ export default function Footer() {
 
         <div className="border-t border-[#D6C3B3] pt-6 flex flex-wrap gap-4 items-center justify-between">
           <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 13, color: '#AFAFAF' }}>
-            © {new Date().getFullYear()} AREVÉ. All rights reserved. Made with ☀️ and love.
+            © {new Date().getFullYear()} {storeName}. {siteContent.footer.copyrightSuffix}
           </p>
           <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 13, color: '#AFAFAF' }} className="hidden sm:block">
-            Handcrafted · Unique · Made with Love
+            {tagline}
           </p>
         </div>
       </div>

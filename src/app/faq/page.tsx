@@ -7,8 +7,11 @@ import { ChevronDown, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { apiFetch } from '@/lib/api';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 
 export default function FAQPage() {
+  const { settings } = useSiteSettings();
+  const pg = settings.siteContent.pages.faq;
   const [open, setOpen] = useState<number | null>(0);
   const [faqList, setFaqList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +26,7 @@ export default function FAQPage() {
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
       <div style={{ background: '#EADFD8', padding: '64px 24px 56px', borderBottom: '1px solid #D6C3B3' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <SectionHeader eyebrow="Help Center" title="Frequently Asked Questions" subtitle="Everything you need to know about AREVÉ — answered with care." centered />
+          <SectionHeader eyebrow={pg.eyebrow} title={pg.title} subtitle={pg.subtitle} centered />
         </div>
       </div>
 

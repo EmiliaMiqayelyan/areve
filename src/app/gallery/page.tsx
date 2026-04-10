@@ -6,8 +6,11 @@ import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { apiFetch } from '@/lib/api';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 
 export default function GalleryPage() {
+  const { settings } = useSiteSettings();
+  const pg = settings.siteContent.pages.gallery;
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [galleryItems, setGalleryItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +25,7 @@ export default function GalleryPage() {
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
       <div style={{ background: '#EADFD8', padding: '64px 24px 56px', borderBottom: '1px solid #D6C3B3' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <SectionHeader eyebrow="Visual Stories" title="The Gallery" subtitle="A window into the world of AREVÉ — products, process, and the beauty of handmade." centered />
+          <SectionHeader eyebrow={pg.eyebrow} title={pg.title} subtitle={pg.subtitle} centered />
         </div>
       </div>
 

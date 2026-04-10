@@ -75,4 +75,7 @@ export const settingsSchema = z.object({
   instagramUrl: z.string().url(),
   facebookUrl: z.string().url(),
   whatsappUrl: z.string().url(),
+  tiktokUrl: z.string().max(255).optional(),
+  youtubeUrl: z.string().max(255).optional(),
+  siteContent: z.any().optional(),
 });

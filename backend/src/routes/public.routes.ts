@@ -8,6 +8,7 @@ import {
   getHealth,
   getProductById,
   getProducts,
+  getPublicSettings,
   getReviews,
 } from "../controllers/public.controller";
 import { validateBody } from "../middlewares/validate";
@@ -16,6 +17,7 @@ import { contactSchema, orderSchema } from "../validators/schemas";
 const router = Router();
 
 router.get("/health", asyncHandler(getHealth));
+router.get("/settings", asyncHandler(getPublicSettings));
 router.get("/products", asyncHandler(getProducts));
 router.get("/products/:id", asyncHandler(getProductById));
 router.get("/reviews", asyncHandler(getReviews));

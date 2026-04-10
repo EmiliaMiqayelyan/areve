@@ -12,6 +12,7 @@ import { useCartStore } from '@/lib/store';
 import { ArrowLeft, CheckCircle2, Lock, ShieldCheck, ShoppingBag, Truck } from 'lucide-react';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { apiFetch } from '@/lib/api';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 
 // Validation Schema
 const checkoutSchema = z.object({
@@ -122,7 +123,7 @@ export default function CheckoutPage() {
             <ArrowLeft size={16} />
             Back to Shop
           </Link>
-          <SectionHeader title="Checkout" subtitle="Complete your order" centered={false} />
+          <SectionHeader title={co.title} subtitle={co.subtitle} centered={false} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">

@@ -9,16 +9,7 @@ import { useCartStore, useWishlistStore } from '@/lib/store';
 import CartDrawer from '../CartDrawer';
 import areve from "../../../public/areve.png"
 import Image from "next/image";
-
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/products', label: 'Products' },
-  { href: '/gallery', label: 'Gallery' },
-  { href: '/about', label: 'About' },
-  { href: '/reviews', label: 'Reviews' },
-  { href: '/faq', label: 'FAQ' },
-  { href: '/contact', label: 'Contact' },
-];
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -26,6 +17,8 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
   const pathname = usePathname();
+  const { settings } = useSiteSettings();
+  const navLinks = settings.siteContent.nav;
   const { count, toggleCart } = useCartStore();
   const { items: wishlist } = useWishlistStore();
 

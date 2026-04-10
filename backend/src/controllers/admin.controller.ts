@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { randomUUID } from "crypto";
 import { Admin, Faq, Gallery, Order, OrderItem, Product, Review, Setting } from "../models";
+import { mergeSiteContent } from "../utils/mergeSiteContent";
 
 export async function getAdminProducts(req: Request, res: Response) {
   return res.json(await Product.findAll({ order: [["createdAt", "DESC"]] }));
@@ -74,10 +75,17 @@ export async function deleteAdminGallery(req: Request, res: Response) {
 }
 
 export async function getAdminSettings(req: Request, res: Response) {
-  return res.json(await Setting.findByPk(1));
+  const row = await Setting.findByPk(1);
+  if (!row) return res.status(404).json({ message: "Settings not found" });
+  const j = row.toJSON() as Record<string, unknown>;
+  return res.json({ ...j, siteContent: mergeSiteContent(j.siteContent) });
 }
 export async function updateAdminSettings(req: Request, res: Response) {
-  await Setting.update(req.body, { where: { id: 1 } });
+  const body = { ...req.body } as Record<string, unknown>;
+  if (body.siteContent !== undefined) {
+    body.siteContent = mergeSiteContent(body.siteContent);
+  }
+  await Setting.update(body, { where: { id: 1 } });
   return res.json({ message: "Settings updated" });
 }
 

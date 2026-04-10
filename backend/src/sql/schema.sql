@@ -86,11 +86,14 @@ CREATE TABLE IF NOT EXISTS settings (
   address VARCHAR(255) NOT NULL,
   instagram_url VARCHAR(255) NOT NULL,
   facebook_url VARCHAR(255) NOT NULL,
-  whatsapp_url VARCHAR(255) NOT NULL
+  whatsapp_url VARCHAR(255) NOT NULL,
+  tiktok_url VARCHAR(255) NOT NULL DEFAULT '',
+  youtube_url VARCHAR(255) NOT NULL DEFAULT '',
+  site_content JSON NULL
 );
 
 INSERT IGNORE INTO settings (
-  id, store_name, tagline, footer_description, support_email, business_phone, address, instagram_url, facebook_url, whatsapp_url
+  id, store_name, tagline, footer_description, support_email, business_phone, address, instagram_url, facebook_url, whatsapp_url, tiktok_url, youtube_url, site_content
 ) VALUES (
   1, 'AREVE', 'Handcrafted · Unique · Made with Love',
   'Every piece is a tiny sun — made with warmth, patience, and the kind of love only hands can give.',
@@ -98,5 +101,8 @@ INSERT IGNORE INTO settings (
   '123 Artisan Maker Way, Creative District, NY 10012',
   'https://instagram.com/areve_brand',
   'https://facebook.com/areve.brand',
-  'https://wa.me/message/xyz'
+  'https://wa.me/message/xyz',
+  '',
+  '',
+  NULL
 );

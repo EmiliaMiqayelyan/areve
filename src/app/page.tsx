@@ -4,52 +4,49 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
 import ReviewCard from '@/components/ui/ReviewCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { apiFetch } from '@/lib/api';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 
-/* ── tiny helpers ── */
 const S = {
   page: { minHeight: '100vh' },
   section: (bg?: string): React.CSSProperties => ({ background: bg ?? '#F8F5F2', padding: '96px 24px' }),
   wrap: { maxWidth: 1280, margin: '0 auto' } as React.CSSProperties,
 };
 
-const categories = [
-  { title: 'Beaded Bags', desc: 'Each bag is a wearable artwork — beaded by hand, one stitch at a time.', img: '/images/prod-bag-a.png', href: '/products?category=bags' },
-  { title: 'Handmade Toys', desc: 'Soft, safe, and full of soul — toys that become treasured companions.', img: '/images/prod-toy-a.png', href: '/products?category=toys' },
-  { title: 'Accessories', desc: 'From morning to evening — our accessories add a golden touch to every look.', img: '/images/prod-acc-a.png', href: '/products?category=accessories' },
-];
-
-const instagramImages = [
-  '/images/gallery-light-1.png', '/images/gallery-light-2.png',
-  '/images/gallery-light-3.png', '/images/gallery-light-4.png',
-  '/images/prod-bag-b.png', '/images/prod-acc-b.png',
-];
-
 export default function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
-  const [reviewList, setReviewList] = useState<any[]>([]);
+  const { settings } = useSiteSettings();
+  const { siteContent: sc, instagramUrl } = settings;
+  const home = sc.home;
+
+  const [featuredProducts, setFeaturedProducts] = useState<Array<Record<string, unknown>>>([]);
+  const [reviewList, setReviewList] = useState<Array<Record<string, unknown>>>([]);
+  const [galleryPreview, setGalleryPreview] = useState<Array<{ id?: string; src: string; alt: string }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     void Promise.all([
-      apiFetch<any[]>('/products?active=true'),
-      apiFetch<any[]>('/reviews'),
+      apiFetch<Array<Record<string, unknown>>>('/products?active=true'),
+      apiFetch<Array<Record<string, unknown>>>('/reviews'),
+      apiFetch<Array<{ id?: string; src: string; alt: string }>>('/gallery'),
     ])
-      .then(([p, r]) => {
+      .then(([p, r, g]) => {
         setFeaturedProducts(p);
         setReviewList(r);
+        setGalleryPreview(Array.isArray(g) ? g.slice(0, 6) : []);
       })
       .finally(() => setLoading(false));
   }, []);
+
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const imgY = useTransform(scrollYProgress, [0, 1], [0, 80]);
   const textY = useTransform(scrollYProgress, [0, 1], [0, -40]);
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const year = new Date().getFullYear();
 
   return (
     <div style={S.page}>
@@ -57,14 +54,14 @@ export default function Home() {
       <section ref={heroRef} style={{ position: 'relative', minHeight: '90vh', display: 'flex', alignItems: 'center', overflow: 'hidden', background: '#F8F5F2' }}>
 
         <motion.div style={{ y: imgY, position: 'absolute', inset: 0 }}>
-          <Image src="/images/hero-light.png" alt="AREVÉ" fill style={{ objectFit: 'cover', objectPosition: 'center' }} priority />
+          <Image src={home.hero.image} alt={settings.storeName} fill style={{ objectFit: 'cover', objectPosition: 'center' }} priority />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(105deg, rgba(248,245,242,0.96) 0%, rgba(248,245,242,0.85) 45%, rgba(248,245,242,0.20) 100%)' }} />
         </motion.div>
 
         <motion.div className="relative z-10 mx-auto w-full px-4 sm:px-6 lg:max-w-[1280px]" style={{ y: textY, opacity, paddingTop: 'calc(var(--container-px) * 2.5)' }}>
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="flex items-center gap-2.5 mb-6">
-            <span className="badge badge-sage">New Collection {new Date().getFullYear()}</span>
+            <span className="badge badge-sage">{home.hero.badgePrefix} {year}</span>
             <span className="text-[#D6C3B3] text-xs sm:text-sm">☀️</span>
           </motion.div>
 
@@ -73,33 +70,32 @@ export default function Home() {
             className="mb-6 font-serif text-4xl font-bold leading-[1.1] text-ink sm:text-6xl lg:text-[88px] lg:max-w-[700px]"
             style={{ fontFamily: "'Playfair Display',serif" }}
           >
-            Handmade with<br />
-            <span className="italic text-gold">warmth</span> &amp;{' '}
-            <span className="italic text-gold">sunlight</span>
+            {home.hero.titleLine1}<br />
+            <span className="italic text-gold">{home.hero.titleGold1}</span> {home.hero.conjunction}{' '}
+            <span className="italic text-gold">{home.hero.titleGold2}</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
             className="mb-10 max-w-[480px] font-sans text-base leading-relaxed text-subtle sm:text-lg sm:leading-loose"
           >
-            Each piece from AREVÉ carries the warmth of hands that care — beaded bags, heartfelt toys, and accessories that tell your story.
+            {home.hero.subtitle}
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.45 }} className="flex flex-wrap gap-3 sm:gap-4">
-            <Link href="/products" className="btn-primary no-underline">
-              Shop Now <ArrowRight size={15} />
+            <Link href={home.hero.primaryCta.href} className="btn-primary no-underline">
+              {home.hero.primaryCta.label} <ArrowRight size={15} />
             </Link>
-            <Link href="/gallery" className="btn-outline no-underline">
-              Explore Collection
+            <Link href={home.hero.secondaryCta.href} className="btn-outline no-underline">
+              {home.hero.secondaryCta.label}
             </Link>
           </motion.div>
 
-          {/* Stats */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.9 }} className="mt-12 flex flex-wrap gap-8 sm:gap-12 lg:mt-16">
-            {[['500+', 'Pieces Crafted'], ['200+', 'Happy Clients'], ['100%', 'Handmade']].map(([n, l]) => (
-              <div key={l}>
-                <p className="font-serif text-3xl font-bold text-ink sm:text-4xl">{n}</p>
-                <p className="mt-1 font-sans text-xs uppercase tracking-widest text-[#AFAFAF]">{l}</p>
+            {home.hero.stats.map(({ value, label }) => (
+              <div key={label}>
+                <p className="font-serif text-3xl font-bold text-ink sm:text-4xl">{value}</p>
+                <p className="mt-1 font-sans text-xs uppercase tracking-widest text-[#AFAFAF]">{label}</p>
               </div>
             ))}
           </motion.div>
@@ -116,9 +112,9 @@ export default function Home() {
 
       <section style={{ ...S.section('#EADFD8'), padding: 'var(--section-padding)' }}>
         <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
-          <SectionHeader eyebrow="Our Collections" title="Made for Every Moment" subtitle="Three collections, one soul — each crafted with the same dedication to beauty and authenticity." centered />
+          <SectionHeader eyebrow={home.collectionsSection.eyebrow} title={home.collectionsSection.title} subtitle={home.collectionsSection.subtitle} centered />
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((cat, i) => (
+            {home.collectionCards.map((cat, i) => (
               <motion.div key={cat.title} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55, delay: i * 0.12 }}>
                 <Link href={cat.href} className="group relative block h-[340px] overflow-hidden rounded-[20px] no-underline">
                   <Image src={cat.img} alt={cat.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
@@ -140,9 +136,9 @@ export default function Home() {
       <section style={{ ...S.section(), padding: 'var(--section-padding)' }}>
         <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
           <div className="flex flex-wrap items-end justify-between gap-4 mb-4 sm:mb-8">
-            <SectionHeader eyebrow="Featured" title="New Collection" />
+            <SectionHeader eyebrow={home.featuredSection.eyebrow} title={home.featuredSection.title} />
             <Link href="/products" className="mb-1 flex items-center gap-1.5 border-b border-mocha pb-0.5 font-sans text-[13px] text-mocha no-underline transition-colors hover:text-gold hover:border-gold">
-              View All <ArrowRight size={13} />
+              {home.featuredSection.viewAllLabel} <ArrowRight size={13} />
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-5 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -151,7 +147,9 @@ export default function Home() {
                 Loading products...
               </div>
             )}
-            {!loading && featuredProducts.slice(0, 6).map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+            {!loading && featuredProducts.slice(0, 6).map((p, i) => (
+              <ProductCard key={String(p.id)} product={p} index={i} />
+            ))}
             {!loading && featuredProducts.length === 0 && (
               <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
                 No products yet.
@@ -165,42 +163,41 @@ export default function Home() {
         <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-12 items-center px-4 sm:px-6 lg:grid-cols-2 lg:gap-16">
           <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.65 }} className="relative">
             <div className="relative h-[400px] overflow-hidden rounded-[24px] sm:h-[500px]">
-              <Image src="/images/about-light.png" alt="Crafting" fill className="object-cover" loading="lazy" />
+              <Image src={home.storySection.image} alt="" fill className="object-cover" loading="lazy" />
             </div>
 
             <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-[20px] border-2 border-gold/30" />
 
             <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 3.5, repeat: Infinity }}
               className="absolute -left-4 bottom-8 rounded-[16px] bg-white p-4 shadow-[0_8px_32px_rgba(180,156,140,0.22)] sm:p-5">
-              <p className="font-serif text-2xl font-bold text-ink sm:text-3xl">40+</p>
-              <p className="font-sans text-[11px] text-[#AFAFAF] sm:text-xs">Hours per bag</p>
+              <p className="font-serif text-2xl font-bold text-ink sm:text-3xl">{home.storySection.floatingStatValue}</p>
+              <p className="font-sans text-[11px] text-[#AFAFAF] sm:text-xs">{home.storySection.floatingStatLabel}</p>
             </motion.div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.65 }}>
-            <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.25em] text-mocha">Our Story</p>
+            <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.25em] text-mocha">{home.storySection.eyebrow}</p>
             <h2 className="mb-4 font-serif text-3xl font-bold leading-tight text-ink sm:text-4xl lg:text-5xl">
-              Born from <span className="italic text-gold">passion,</span><br />made with hands
+              {home.storySection.titleLine1} <span className="italic text-gold">{home.storySection.titleItalic}</span><br />{home.storySection.titleLine2}
             </h2>
             <div className="divider-gold mb-6" />
-            <p className="mb-4 font-sans text-base leading-relaxed text-subtle sm:text-lg">
-              AREVÉ was born from a deep love of handcraft and the belief that everyday objects can carry extraordinary meaning. Every bead we place is an act of love.
-            </p>
-            <p className="mb-8 font-sans text-base leading-relaxed text-subtle sm:text-lg">
-              Our name reflects sunlight — the warmth of creation. We pour that warmth into each piece so you can carry it with you.
-            </p>
+            {home.storySection.paragraphs.map((para, idx) => (
+              <p key={idx} className="mb-4 font-sans text-base leading-relaxed text-subtle sm:text-lg last:mb-8">
+                {para}
+              </p>
+            ))}
 
             <div className="mb-10 grid grid-cols-3 gap-3">
-              {[['✦', 'Handmade'], ['☀️', 'Unique'], ['♡', 'Quality']].map(([ic, lbl]) => (
-                <div key={lbl} className="rounded-[14px] border border-beige bg-white p-4 text-center">
-                  <div className="mb-2 text-xl sm:text-2xl">{ic}</div>
-                  <p className="font-sans text-[11px] font-medium text-ink sm:text-[13px]">{lbl}</p>
+              {home.storySection.pillars.map(({ icon, label }) => (
+                <div key={label} className="rounded-[14px] border border-beige bg-white p-4 text-center">
+                  <div className="mb-2 text-xl sm:text-2xl">{icon}</div>
+                  <p className="font-sans text-[11px] font-medium text-ink sm:text-[13px]">{label}</p>
                 </div>
               ))}
             </div>
 
-            <Link href="/about" className="btn-outline no-underline">
-              Read Our Story <ArrowRight size={14} />
+            <Link href={home.storySection.ctaHref} className="btn-outline no-underline">
+              {home.storySection.ctaLabel} <ArrowRight size={14} />
             </Link>
           </motion.div>
         </div>
@@ -208,14 +205,16 @@ export default function Home() {
 
       <section style={{ ...S.section('#D6C3B3'), padding: 'var(--section-padding)' }}>
         <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
-          <SectionHeader eyebrow="Testimonials" title="Words from Hearts" subtitle="The most meaningful reward is knowing our pieces bring joy." centered />
+          <SectionHeader eyebrow={home.testimonialsSection.eyebrow} title={home.testimonialsSection.title} subtitle={home.testimonialsSection.subtitle} centered />
           <div className="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {loading && (
               <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
                 Loading reviews...
               </div>
             )}
-            {!loading && reviewList.slice(0, 3).map((r, i) => <ReviewCard key={r.id} review={r} index={i} />)}
+            {!loading && reviewList.slice(0, 3).map((r, i) => (
+              <ReviewCard key={String(r.id)} review={r} index={i} />
+            ))}
             {!loading && reviewList.length === 0 && (
               <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
                 No reviews yet.
@@ -224,7 +223,7 @@ export default function Home() {
           </div>
           <div className="text-center">
             <Link href="/reviews" className="btn-outline no-underline" style={{ borderColor: '#BFA6A0' }}>
-              Read All Reviews <ArrowRight size={14} />
+              {home.testimonialsSection.readAllLabel} <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -232,20 +231,30 @@ export default function Home() {
 
       <section style={{ ...S.section(), padding: 'var(--section-padding)' }}>
         <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
-          <SectionHeader eyebrow="@areve.handmade" title="Follow Our Journey" subtitle="Behind the scenes, new arrivals, and stories from our community." centered />
+          <SectionHeader eyebrow={home.instagramSection.eyebrow} title={home.instagramSection.title} subtitle={home.instagramSection.subtitle} centered />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {instagramImages.map((img, i) => (
-              <motion.a key={i} href="https://instagram.com" target="_blank" rel="noopener noreferrer"
+            {!loading && galleryPreview.length === 0 && (
+              <p className="col-span-full py-8 text-center font-sans text-[13px] text-[#AFAFAF]">
+                No gallery images yet. Add them in the admin Gallery to show this grid.
+              </p>
+            )}
+            {galleryPreview.map((item, i) => (
+              <motion.a
+                key={item.id ?? i}
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0, scale: 0.92 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.07 }}
-                className="group relative block aspect-square overflow-hidden rounded-[14px]">
-                <Image src={img} alt={`Gallery ${i + 1}`} fill className="object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+                className="group relative block aspect-square overflow-hidden rounded-[14px]"
+              >
+                <Image src={item.src} alt={item.alt} fill className="object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
                 <div className="absolute inset-0 bg-gold/0 transition-colors group-hover:bg-gold/10" />
               </motion.a>
             ))}
           </div>
           <p className="mt-8 text-center font-sans text-[13px] text-mocha">
-            <a href="https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="border-b border-sand text-mocha no-underline transition-colors hover:text-gold hover:border-gold">
-              View on Instagram →
+            <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="border-b border-sand text-mocha no-underline transition-colors hover:text-gold hover:border-gold">
+              {home.instagramSection.viewLinkLabel}
             </a>
           </p>
         </div>
@@ -253,16 +262,16 @@ export default function Home() {
 
       <section className="border-t border-beige bg-ivory text-center" style={{ padding: 'var(--section-padding)' }}>
         <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="mx-auto max-w-[600px]">
-          <span className="mb-5 block text-[40px]">☀️</span>
+          <span className="mb-5 block text-[40px]">{home.ctaSection.emoji}</span>
           <h2 className="mb-4 font-serif text-3xl font-bold leading-tight text-ink sm:text-4xl lg:text-5xl">
-            Want something{' '}
-            <span className="italic text-gold">uniquely yours?</span>
+            {home.ctaSection.titleLine1}{' '}
+            <span className="italic text-gold">{home.ctaSection.titleItalic}</span>
           </h2>
           <p className="mb-10 font-sans text-base leading-relaxed text-subtle sm:text-lg">
-            We accept custom orders — your colors, your vision, our hands. Let&apos;s create something together.
+            {home.ctaSection.paragraph}
           </p>
-          <Link href="/contact" className="btn-primary no-underline">
-            Request Custom Order <ArrowRight size={15} />
+          <Link href={home.ctaSection.buttonHref} className="btn-primary no-underline">
+            {home.ctaSection.buttonLabel} <ArrowRight size={15} />
           </Link>
         </motion.div>
       </section>

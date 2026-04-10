@@ -7,17 +7,20 @@ import { SlidersHorizontal } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { apiFetch } from '@/lib/api';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 
 type Category = 'all' | 'bags' | 'toys' | 'accessories';
 
-const catLabels: Record<Category, string> = {
-  all: 'All',
-  bags: 'Beaded Bags',
-  toys: 'Handmade Toys',
-  accessories: 'Accessories',
-};
-
 function ProductsContent() {
+  const { settings } = useSiteSettings();
+  const pg = settings.siteContent.pages.shop;
+  const L = settings.siteContent.productCategoryLabels;
+  const catLabels: Record<Category, string> = {
+    all: L.all,
+    bags: L.bags,
+    toys: L.toys,
+    accessories: L.accessories,
+  };
   const sp = useSearchParams();
   const [cat, setCat] = useState<Category>((sp.get('category') as Category) || 'all');
   const [sort, setSort] = useState<'default' | 'price-asc' | 'price-desc'>('default');
@@ -41,7 +44,7 @@ function ProductsContent() {
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
       <div style={{ background: '#EADFD8', padding: 'var(--section-padding)', borderBottom: '1px solid #D6C3B3' }}>
         <div className="mx-auto max-w-[1280px]">
-          <SectionHeader eyebrow="Shop AREVÉ" title="Our Collection" subtitle="Every piece is handmade — no two are exactly the same. Find what speaks to you." centered />
+          <SectionHeader eyebrow={pg.eyebrow} title={pg.title} subtitle={pg.subtitle} centered />
         </div>
       </div>
 
@@ -55,9 +58,8 @@ function ProductsContent() {
           <div className="flex flex-wrap gap-2">
             {(Object.keys(catLabels) as Category[]).map(c => (
               <button key={c} onClick={() => setCat(c)}
-                className={`px-5 py-2 rounded-full font-sans text-[13px] font-medium transition-all cursor-pointer border-none ${
-                    cat === c ? 'bg-gold text-[#5a4a1e] shadow-[0_2px_12px_#E6C97A55]' : 'bg-white text-subtle shadow-[0_1px_4px_rgba(180,156,140,0.12)]'
-                }`}
+                className={`px-5 py-2 rounded-full font-sans text-[13px] font-medium transition-all cursor-pointer border-none ${cat === c ? 'bg-gold text-[#5a4a1e] shadow-[0_2px_12px_#E6C97A55]' : 'bg-white text-subtle shadow-[0_1px_4px_rgba(180,156,140,0.12)]'
+                  }`}
               >
                 {catLabels[c]}
               </button>

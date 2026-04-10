@@ -1,9 +1,32 @@
 import { Request, Response } from "express";
 import { randomUUID } from "crypto";
-import { Contact, Faq, Gallery, Order, OrderItem, Product, Review } from "../models";
+import { Contact, Faq, Gallery, Order, OrderItem, Product, Review, Setting } from "../models";
+import { mergeSiteContent } from "../utils/mergeSiteContent";
 
 export async function getHealth(req: Request, res: Response) {
   return res.json({ status: "ok" });
+}
+
+export async function getPublicSettings(req: Request, res: Response) {
+  const row = await Setting.findByPk(1);
+  if (!row) return res.status(404).json({ message: "Settings not found" });
+  const j = row.toJSON() as Record<string, unknown>;
+  const rawContent = j.siteContent ?? j.site_content;
+  const siteContent = mergeSiteContent(rawContent);
+  return res.json({
+    storeName: j.storeName ?? j.store_name,
+    tagline: j.tagline,
+    footerDescription: j.footerDescription ?? j.footer_description,
+    supportEmail: j.supportEmail ?? j.support_email,
+    businessPhone: j.businessPhone ?? j.business_phone,
+    address: j.address,
+    instagramUrl: j.instagramUrl ?? j.instagram_url,
+    facebookUrl: j.facebookUrl ?? j.facebook_url,
+    whatsappUrl: j.whatsappUrl ?? j.whatsapp_url,
+    tiktokUrl: j.tiktokUrl ?? j.tiktok_url ?? "",
+    youtubeUrl: j.youtubeUrl ?? j.youtube_url ?? "",
+    siteContent,
+  });
 }
 
 export async function getProducts(req: Request, res: Response) {

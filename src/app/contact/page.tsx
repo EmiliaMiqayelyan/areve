@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Mail, MessageCircle, ExternalLink } from 'lucide-react';
 import NextImg from 'next/image';
 import SectionHeader from '@/components/ui/SectionHeader';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 
 const WA = () => (
   <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -36,35 +37,43 @@ const YT_ICON = () => (
 );
 
 export default function ContactPage() {
+  const { settings } = useSiteSettings();
+  const c = settings.siteContent.contact;
+  const { supportEmail, businessPhone, instagramUrl, facebookUrl, whatsappUrl, tiktokUrl, youtubeUrl } = settings;
+
+  const socialRow = [
+    { icon: <IG_ICON />, href: instagramUrl },
+    { icon: <FB_ICON />, href: facebookUrl },
+    { icon: <TT_ICON />, href: tiktokUrl },
+    { icon: <YT_ICON />, href: youtubeUrl },
+  ].filter((s) => s.href.trim().length > 0);
+
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
-      {/* Header Section */}
       <div className="bg-beige border-b border-sand px-[var(--container-px)] py-20 sm:py-24">
         <div className="max-w-[1280px] mx-auto">
-          <SectionHeader 
-            eyebrow="Get in Touch" 
-            title="We'd Love to Hear from You" 
-            subtitle="Connect with us directly for custom orders, product advice, or just to say hello." 
-            centered 
+          <SectionHeader
+            eyebrow={c.hero.eyebrow}
+            title={c.hero.title}
+            subtitle={c.hero.subtitle}
+            centered
           />
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-[1280px] mx-auto px-[var(--container-px)] py-16 sm:py-24">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 items-stretch">
 
-          {/* CARD 1: Contact Details */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            whileInView={{ opacity: 1, y: 0 }} 
-            viewport={{ once: true }} 
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             className="group flex flex-col bg-white rounded-[32px] p-8 sm:p-10 border border-beige shadow-[0_4px_24px_rgba(180,156,140,0.06)] transition-all hover:shadow-[0_12px_40px_rgba(180,156,140,0.12)] hover:-translate-y-1"
           >
             <div className="mb-8">
-              <h3 className="font-serif text-2xl text-ink mb-3 text-center sm:text-left">General Inquiry</h3>
-              <p className="font-sans text-[14px] text-subtle leading-relaxed text-center sm:text-left">For general questions and collaborations.</p>
+              <h3 className="font-serif text-2xl text-ink mb-3 text-center sm:text-left">{c.card1.title}</h3>
+              <p className="font-sans text-[14px] text-subtle leading-relaxed text-center sm:text-left">{c.card1.subtitle}</p>
             </div>
 
             <div className="flex flex-col gap-5 mt-auto">
@@ -73,8 +82,8 @@ export default function ContactPage() {
                   <Mail size={18} strokeWidth={1.5} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-sans text-[10px] uppercase tracking-widest text-muted">Email Us</span>
-                  <span className="font-sans text-[15px] font-medium text-ink">hello@areve.handmade</span>
+                  <span className="font-sans text-[10px] uppercase tracking-widest text-muted">{c.card1.emailLabel}</span>
+                  <span className="font-sans text-[15px] font-medium text-ink">{supportEmail}</span>
                 </div>
               </div>
 
@@ -83,23 +92,18 @@ export default function ContactPage() {
                   <MessageCircle size={18} strokeWidth={1.5} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-sans text-[10px] uppercase tracking-widest text-muted">WhatsApp</span>
-                  <span className="font-sans text-[15px] font-medium text-ink">+374 XX XXX XXXX</span>
+                  <span className="font-sans text-[10px] uppercase tracking-widest text-muted">{c.card1.whatsappLabel}</span>
+                  <span className="font-sans text-[15px] font-medium text-ink">{businessPhone}</span>
                 </div>
               </div>
             </div>
 
             <div className="flex gap-3 mt-10 justify-center sm:justify-start">
-              {[
-                { icon: <IG_ICON />, href: 'https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr' },
-                { icon: <FB_ICON />, href: 'https://facebook.com' },
-                { icon: <TT_ICON />, href: 'https://tiktok.com/@areve.handmade' },
-                { icon: <YT_ICON />, href: 'https://youtube.com/@areve.handmade' }
-              ].map((social, i) => (
-                <a 
-                  key={i} 
-                  href={social.href} 
-                  target="_blank" 
+              {socialRow.map((social, i) => (
+                <a
+                  key={i}
+                  href={social.href}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-white border border-beige flex items-center justify-center text-[#BFA6A0] transition-all hover:bg-[#BFA6A0] hover:text-white hover:border-[#BFA6A0] hover:scale-110"
                 >
@@ -109,79 +113,76 @@ export default function ContactPage() {
             </div>
           </motion.div>
 
-          {/* CARD 2: WhatsApp Card */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            whileInView={{ opacity: 1, y: 0 }} 
-            viewport={{ once: true }} 
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.15 }}
             className="flex flex-col bg-white rounded-[32px] p-8 sm:p-10 border border-beige shadow-[0_4px_24px_rgba(180,156,140,0.06)] text-center transition-all hover:shadow-[0_12px_40px_rgba(180,156,140,0.12)] hover:-translate-y-1"
           >
             <div className="w-16 h-16 rounded-full bg-[#25D36615] text-[#25D366] flex items-center justify-center mx-auto mb-8">
               <WA />
             </div>
-            <h3 className="font-serif text-2xl text-ink mb-3 uppercase tracking-tight">Direct Ordering</h3>
-            <p className="font-sans text-[14px] text-subtle leading-relaxed mb-10">The fastest way to custom order or get product advice in real-time.</p>
-            
+            <h3 className="font-serif text-2xl text-ink mb-3 uppercase tracking-tight">{c.card2.title}</h3>
+            <p className="font-sans text-[14px] text-subtle leading-relaxed mb-10">{c.card2.subtitle}</p>
+
             <div className="mt-auto">
-              <a 
-                href="https://wa.me/1234567890" 
-                target="_blank" 
+              <a
+                href={whatsappUrl}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 py-4 px-6 bg-[#25D366] text-white rounded-2xl no-underline font-sans text-[14px] font-bold tracking-wide transition-transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-[#25D36633]"
               >
-                CHAT ON WHATSAPP <ExternalLink size={16} strokeWidth={2} />
+                {c.card2.buttonLabel} <ExternalLink size={16} strokeWidth={2} />
               </a>
             </div>
           </motion.div>
 
-          {/* CARD 3: Instagram Card */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            whileInView={{ opacity: 1, y: 0 }} 
-            viewport={{ once: true }} 
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col bg-white rounded-[32px] p-8 sm:p-10 border border-beige shadow-[0_4px_24px_rgba(180,156,140,0.06)] text-center transition-all hover:shadow-[0_12px_40_rgba(180,156,140,0.12)] hover:-translate-y-1"
           >
             <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white flex items-center justify-center mx-auto mb-8 shadow-inner">
               <div className="scale-125"><IG_ICON /></div>
             </div>
-            <h3 className="font-serif text-2xl text-ink mb-3 uppercase tracking-tight">Boutique Feed</h3>
-            <p className="font-sans text-[14px] text-subtle leading-relaxed mb-10">Follow us on Instagram for new arrivals, daily stories, and custom requests.</p>
-            
+            <h3 className="font-serif text-2xl text-ink mb-3 uppercase tracking-tight">{c.card3.title}</h3>
+            <p className="font-sans text-[14px] text-subtle leading-relaxed mb-10">{c.card3.subtitle}</p>
+
             <div className="mt-auto">
-              <a 
-                href="https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr" 
-                target="_blank" 
+              <a
+                href={instagramUrl}
+                target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 py-4 px-6 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white rounded-2xl no-underline font-sans text-[14px] font-bold tracking-wide transition-transform hover:scale-[1.02] active:scale-95 shadow-lg shadow-rose/20"
               >
-                VISIT BOUTIQUE <ExternalLink size={16} strokeWidth={2} />
+                {c.card3.buttonLabel} <ExternalLink size={16} strokeWidth={2} />
               </a>
             </div>
           </motion.div>
 
         </div>
 
-        {/* Studio Image Section */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }} 
-          whileInView={{ opacity: 1, scale: 1 }} 
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           className="mt-20 sm:mt-32 rounded-[40px] overflow-hidden min-h-[400px] sm:h-[500px] relative group"
         >
-          <NextImg 
-            src="/images/gallery-light-3.png" 
-            alt="AREVÉ Studio" 
-            fill 
-            className="object-cover transition-transform duration-1000 group-hover:scale-105" 
+          <NextImg
+            src={c.studio.image}
+            alt=""
+            fill
+            className="object-cover transition-transform duration-1000 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
           <div className="absolute inset-0 flex items-center px-8 sm:px-16 lg:px-24">
             <div className="max-w-[500px]">
-              <span className="font-sans text-[10px] uppercase tracking-[0.3em] text-white/70 mb-4 block">At the Studio</span>
+              <span className="font-sans text-[10px] uppercase tracking-[0.3em] text-white/70 mb-4 block">{c.studio.eyebrow}</span>
               <p className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light italic text-white leading-tight mb-8">
-                "Every piece is a tiny sun — made with warmth & sunlight."
+                &ldquo;{c.studio.quote}&rdquo;
               </p>
               <div className="w-12 h-0.5 bg-gold rounded-full" />
             </div>
