@@ -10,14 +10,19 @@ import CartDrawer from '../CartDrawer';
 import areve from "../../../public/areve.png"
 import Image from "next/image";
 import { useSiteSettings } from '@/context/SiteSettingsContext';
+import { useTranslation } from '@/i18n/I18nProvider';
+import type { Locale } from '@/i18n/types';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [introDone, setIntroDone] = useState(false);
   useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { setIntroDone(true); }, []);
   const pathname = usePathname();
   const { settings } = useSiteSettings();
+  const { locale, setLocale, locales, localeLabels } = useTranslation();
   const navLinks = settings.siteContent.nav;
   const { count, toggleCart } = useCartStore();
   const { items: wishlist } = useWishlistStore();
@@ -35,33 +40,34 @@ export default function Header() {
   return (
     <>
       <motion.header
-        initial={{ y: -64 }}
+        initial={introDone ? false : { y: -64 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.55, ease: 'easeOut' }}
+        className="fixed top-0 left-0 right-0 z-50"
         style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
           background: (mounted && scrolled) ? 'rgba(248,245,242,0.95)' : 'rgba(248,245,242,0.80)',
           backdropFilter: 'blur(12px)',
           borderBottom: (mounted && scrolled) ? '1px solid #EADFD8' : '1px solid transparent',
           transition: 'background 0.3s, border-color 0.3s',
         }}
       >
-        <div className="mx-auto flex h-[68px] items-center justify-between px-4 sm:px-6 lg:max-w-[1280px]">
+        <div className="mx-auto flex h-[68px] min-h-[68px] max-h-[68px] items-center justify-between gap-3 px-4 sm:px-6 lg:max-w-[1280px] overflow-hidden">
 
-          <Link href="/" className="flex items-center gap-2 no-underline sm:gap-2.5">
-           <Image src={areve} alt="areve" width="90" height="90" />
+          <Link href="/" className="flex shrink-0 items-center no-underline">
+            <Image src={areve} alt="areve" width={120} height={48} className="h-10 w-auto sm:h-11" priority />
           </Link>
 
-          <nav className="hidden gap-8 items-center lg:flex">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-3 xl:gap-5 lg:flex px-2">
             {navLinks.map(link => (
               <Link
-                key={link.href}
+                key={`${link.href}-${locale}`}
                 href={link.href}
+                className="whitespace-nowrap shrink-0"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 13,
+                  fontSize: locale === 'hy' ? 11 : 12,
                   fontWeight: 500,
-                  letterSpacing: '1.2px',
+                  letterSpacing: locale === 'hy' ? '0.6px' : '1px',
                   textTransform: 'uppercase',
                   textDecoration: 'none',
                   color: pathname === link.href ? '#E6C97A' : '#7A7A7A',
@@ -74,8 +80,7 @@ export default function Header() {
               >
                 {link.label}
                 {pathname === link.href && (
-                  <motion.span
-                    layoutId="nav-underline"
+                  <span
                     style={{ position: 'absolute', bottom: -2, left: 0, right: 0, height: 2, background: '#E6C97A', borderRadius: 1 }}
                   />
                 )}
@@ -83,7 +88,21 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex shrink-0 items-center gap-2.5 sm:gap-3 self-center">
+            <div className="hidden sm:flex h-8 items-center gap-0.5 rounded-full bg-white/80 p-0.5 border border-[#EADFD8]">
+              {locales.map((code) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setLocale(code as Locale)}
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide border-none cursor-pointer transition-colors ${
+                    locale === code ? 'bg-gold text-[#5a4a1e]' : 'bg-transparent text-[#AFAFAF] hover:text-[#2B2B2B]'
+                  }`}
+                >
+                  {localeLabels[code as Locale]}
+                </button>
+              ))}
+            </div>
             <Link href="/products" className="hidden sm:flex relative text-subtle" style={{ color: '#7A7A7A' }}>
               <Heart size={20} strokeWidth={1.6} />
               {mounted && wishlist.length > 0 && (
@@ -120,6 +139,20 @@ export default function Header() {
               style={{ background: '#F8F5F2', borderTop: '1px solid #EADFD8', overflow: 'hidden' }}
             >
               <nav style={{ padding: '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <div className="flex sm:hidden items-center gap-1 rounded-full bg-white/80 p-0.5 border border-[#EADFD8] w-fit mb-2">
+                  {locales.map((code) => (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => setLocale(code as Locale)}
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide border-none cursor-pointer transition-colors ${
+                        locale === code ? 'bg-gold text-[#5a4a1e]' : 'bg-transparent text-[#AFAFAF]'
+                      }`}
+                    >
+                      {localeLabels[code as Locale]}
+                    </button>
+                  ))}
+                </div>
                 {navLinks.map((link, i) => (
                   <motion.div key={link.href} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}>
                     <Link

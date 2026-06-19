@@ -15,7 +15,9 @@ const public_routes_1 = __importDefault(require("./routes/public.routes"));
 const app = (0, express_1.default)();
 app.use((0, helmet_1.default)());
 app.use((0, cors_1.default)({ origin: env_1.env.corsOrigin === "*" ? "*" : env_1.env.corsOrigin.split(","), credentials: true }));
-app.use(express_1.default.json({ limit: "2mb" }));
+// Admin UI sends image data URLs in JSON. Keep limit high enough
+// so uploads don't fail/truncate.
+app.use(express_1.default.json({ limit: "10mb" }));
 app.use((0, morgan_1.default)("dev"));
 app.use("/api", public_routes_1.default);
 app.use("/api", auth_routes_1.default);

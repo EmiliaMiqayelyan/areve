@@ -1,16 +1,17 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 import { apiFetch } from './api';
+import type { LocalizedText } from './localizedText';
 
 // --- Types ---
 export interface Product {
   id: string;
-  name: string;
+  name: LocalizedText | string;
   price: number | string;
   image: string;
   category: 'bags' | 'toys' | 'accessories';
-  badge?: string;
-  description?: string;
+  badge?: LocalizedText | string | null;
+  description?: LocalizedText | string | null;
   status?: 'active' | 'inactive';
 }
 
@@ -18,9 +19,9 @@ export interface Review {
   id: string;
   name: string;
   location?: string;
-  product: string;
+  product: LocalizedText | string;
   rating: number;
-  comment: string;
+  comment: LocalizedText | string;
   status?: 'approved' | 'pending' | 'rejected';
 }
 
@@ -32,20 +33,24 @@ export interface Order {
   date?: string;
   createdAt?: string;
   status: 'pending' | 'shipped' | 'delivered';
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
   items: Array<{ id: string; name: string; quantity: number; price: number }>;
 }
 
 export interface GalleryImage {
   id: string;
   src: string;
-  alt: string;
+  alt: LocalizedText | string;
   cols: number;
 }
 
 export interface FAQ {
   id?: string;
-  question: string;
-  answer: string;
+  question: LocalizedText | string;
+  answer: LocalizedText | string;
 }
 
 interface AdminStore {
@@ -63,7 +68,10 @@ interface AdminStore {
   deleteProduct: (id: string) => Promise<void>;
 
   orders: Order[];
+  createOrder: (order: any) => Promise<void>;
+  updateOrder: (id: string, updates: Partial<Order>) => Promise<void>;
   updateOrderStatus: (id: string, status: Order['status']) => Promise<void>;
+  deleteOrder: (id: string) => Promise<void>;
 
   reviews: Review[];
   addReview: (review: Review) => Promise<void>;
@@ -76,7 +84,10 @@ interface AdminStore {
 
   faqs: FAQ[];
   updateFaq: (index: number, faq: FAQ) => Promise<void>;
+  saveAllFaqs: (faqs: FAQ[]) => Promise<void>;
 }
+
+const LEGACY_STORAGE_KEYS = ['areve-admin-storage-v2', 'areve-admin-storage'];
 
 const safeStorage: StateStorage = {
   getItem: (name) => {
@@ -93,7 +104,23 @@ const safeStorage: StateStorage = {
   },
   setItem: (name, value) => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(name, value);
+    try {
+      window.localStorage.setItem(name, value);
+    } catch (error) {
+      const isQuota =
+        error instanceof DOMException &&
+        (error.name === 'QuotaExceededError' || error.code === 22);
+      if (!isQuota) throw error;
+      // Drop legacy caches that stored full catalogs with base64 images.
+      for (const key of LEGACY_STORAGE_KEYS) {
+        window.localStorage.removeItem(key);
+      }
+      try {
+        window.localStorage.setItem(name, value);
+      } catch {
+        // Auth/session remains in memory; catalog reloads from API on hydrate.
+      }
+    }
   },
   removeItem: (name) => {
     if (typeof window === 'undefined') return;
@@ -101,7 +128,8 @@ const safeStorage: StateStorage = {
   },
 };
 
-const ADMIN_STORAGE_KEY = 'areve-admin-storage-v2';
+/** Only auth is persisted — products/gallery use data URLs and exceed localStorage quota. */
+const ADMIN_STORAGE_KEY = 'areve-admin-storage-v3';
 const isAuthErrorMessage = (message: string) => {
   return message.includes('Invalid or expired token') || message.includes('Missing admin token');
 };
@@ -149,7 +177,17 @@ export const useAdminStore = create<AdminStore>()(
             ...o,
             total: Number(o.total ?? 0),
             date: o.date ?? o.createdAt ?? new Date().toISOString(),
-            items: Array.isArray(o.items) ? o.items : [],
+            address: o.address ?? '',
+            city: o.city ?? '',
+            state: o.state ?? '',
+            zipCode: o.zipCode ?? '',
+            items: Array.isArray(o.items)
+              ? o.items.map((item) => ({
+                  ...item,
+                  price: Number(item.price ?? 0),
+                  quantity: Number(item.quantity ?? 0),
+                }))
+              : [],
           }));
           set({ products: normalizedProducts, orders: normalizedOrders, reviews, gallery, faqs, loading: false });
         } catch {
@@ -160,7 +198,6 @@ export const useAdminStore = create<AdminStore>()(
       // Products
       products: [],
       addProduct: async (product) => {
-        set((state) => ({ products: [product, ...state.products] }));
         if (get().token) {
           try {
             await apiFetch('/admin/products', { method: 'POST', body: JSON.stringify(product) }, get().token || undefined);
@@ -170,6 +207,8 @@ export const useAdminStore = create<AdminStore>()(
             if (isAuthErrorMessage(message)) get().logout();
             throw err;
           }
+        } else {
+          set((state) => ({ products: [product, ...state.products] }));
         }
       },
       updateProduct: async (id, updates) => {
@@ -201,10 +240,48 @@ export const useAdminStore = create<AdminStore>()(
 
       // Orders
       orders: [],
+      createOrder: async (orderData) => {
+        if (get().token) {
+          try {
+            await apiFetch('/admin/orders', { method: 'POST', body: JSON.stringify(orderData) }, get().token || undefined);
+            await get().hydrateFromApi();
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message)) get().logout();
+            throw err;
+          }
+        }
+      },
+      updateOrder: async (id, updates) => {
+        set((state) => ({
+          orders: state.orders.map((o) => (o.id === id ? { ...o, ...updates } : o)),
+        }));
+        if (get().token) {
+          try {
+            await apiFetch(`/admin/orders/${id}`, { method: 'PUT', body: JSON.stringify(updates) }, get().token || undefined);
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message)) get().logout();
+            throw err;
+          }
+        }
+      },
       updateOrderStatus: async (id, status) => {
         set((state) => ({ orders: state.orders.map((o) => (o.id === id ? { ...o, status } : o)) }));
         if (get().token) {
           await apiFetch(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }, get().token || undefined);
+        }
+      },
+      deleteOrder: async (id) => {
+        set((state) => ({ orders: state.orders.filter((o) => o.id !== id) }));
+        if (get().token) {
+          try {
+            await apiFetch(`/admin/orders/${id}`, { method: 'DELETE' }, get().token || undefined);
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message)) get().logout();
+            throw err;
+          }
         }
       },
 
@@ -243,12 +320,45 @@ export const useAdminStore = create<AdminStore>()(
       updateFaq: async (index, faq) => {
         const updated = get().faqs.map((f, i) => (i === index ? faq : f));
         set({ faqs: updated });
-        if (get().token) await apiFetch('/admin/faqs', { method: 'PUT', body: JSON.stringify(updated) }, get().token || undefined);
+        if (get().token) {
+          await apiFetch(
+            '/admin/faqs',
+            {
+              method: 'PUT',
+              body: JSON.stringify(updated.map(({ question, answer }) => ({ question, answer }))),
+            },
+            get().token || undefined
+          );
+        }
+      },
+      saveAllFaqs: async (faqs) => {
+        set({ faqs });
+        if (!get().token) return;
+        await apiFetch(
+          '/admin/faqs',
+          {
+            method: 'PUT',
+            body: JSON.stringify(faqs.map(({ question, answer }) => ({ question, answer }))),
+          },
+          get().token || undefined
+        );
       },
     }),
     {
-      name: ADMIN_STORAGE_KEY, // Change key to invalidate old structure
+      name: ADMIN_STORAGE_KEY,
       storage: createJSONStorage(() => safeStorage),
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+        token: state.token,
+      }),
+      onRehydrateStorage: () => () => {
+        if (typeof window === 'undefined') return;
+        for (const key of LEGACY_STORAGE_KEYS) {
+          window.localStorage.removeItem(key);
+        }
+        const { token, hydrateFromApi } = useAdminStore.getState();
+        if (token) void hydrateFromApi();
+      },
     }
   )
 );

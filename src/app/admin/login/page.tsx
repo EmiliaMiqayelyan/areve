@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminStore } from '@/lib/adminStore';
 import { Lock } from 'lucide-react';
+import { useTranslation } from '@/i18n/I18nProvider';
 
 export default function AdminLogin() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('admin@areve.com');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,7 +20,7 @@ export default function AdminLogin() {
       await loginWithApi(email, password);
       router.push('/admin');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : t('adminLogin.loginFailed'));
     }
   };
 
@@ -28,8 +30,8 @@ export default function AdminLogin() {
         <div className="mx-auto w-16 h-16 bg-beige/50 text-ink rounded-full flex items-center justify-center mb-6">
           <Lock size={28} />
         </div>
-        <h3 className=" font-serif text-ink mb-2">Admin Access</h3>
-        <p className="text-subtle font-sans text-sm mb-6">Enter the password to manage your site content.</p>
+        <h3 className=" font-serif text-ink mb-2">{t('adminLogin.title')}</h3>
+        <p className="text-subtle font-sans text-sm mb-6">{t('adminLogin.subtitle')}</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
@@ -51,7 +53,7 @@ export default function AdminLogin() {
           </div>
           {error && <p className="text-[#c97a7a] text-sm font-sans">{error}</p>}
           <button type="submit" className="btn-primary w-full justify-center">
-            Log In
+            {t('adminLogin.logIn')}
           </button>
         </form>
       </div>

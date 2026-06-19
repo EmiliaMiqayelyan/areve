@@ -3,6 +3,7 @@
 import { Save, Info, Link as LinkIcon, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
+import { SOCIAL_URLS } from '@/lib/socialDefaults';
 import { useAdminStore } from '@/lib/adminStore';
 import { toast, modal } from '@/lib/uiStore';
 
@@ -16,11 +17,11 @@ export default function AdminSettingsPage() {
     supportEmail: 'care@areve.com',
     businessPhone: '+1 (555) 123-4567',
     address: '123 Artisan Maker Way, Creative District, NY 10012',
-    instagramUrl: 'https://instagram.com/areve_brand',
-    facebookUrl: 'https://facebook.com/areve.brand',
+    instagramUrl: SOCIAL_URLS.instagram,
+    facebookUrl: SOCIAL_URLS.facebook,
     whatsappUrl: 'https://wa.me/message/xyz',
-    tiktokUrl: '',
-    youtubeUrl: '',
+    tiktokUrl: SOCIAL_URLS.tiktok,
+    youtubeUrl: SOCIAL_URLS.youtube,
   });
 
   useEffect(() => {
@@ -29,15 +30,17 @@ export default function AdminSettingsPage() {
       .then((result) => {
         if (!result) return;
         setSettings({
-          storeName: result.store_name,
+          storeName: result.store_name ?? result.storeName,
           tagline: result.tagline,
-          footerDescription: result.footer_description,
-          supportEmail: result.support_email,
-          businessPhone: result.business_phone,
+          footerDescription: result.footer_description ?? result.footerDescription,
+          supportEmail: result.support_email ?? result.supportEmail,
+          businessPhone: result.business_phone ?? result.businessPhone,
           address: result.address,
-          instagramUrl: result.instagram_url,
-          facebookUrl: result.facebook_url,
-          whatsappUrl: result.whatsapp_url,
+          instagramUrl: result.instagram_url ?? result.instagramUrl,
+          facebookUrl: result.facebook_url ?? result.facebookUrl,
+          whatsappUrl: result.whatsapp_url ?? result.whatsappUrl,
+          tiktokUrl: result.tiktok_url ?? result.tiktokUrl ?? '',
+          youtubeUrl: result.youtube_url ?? result.youtubeUrl ?? '',
         });
       })
       .catch(() => {});

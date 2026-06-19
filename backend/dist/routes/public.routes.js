@@ -7,6 +7,7 @@ const validate_1 = require("../middlewares/validate");
 const schemas_1 = require("../validators/schemas");
 const router = (0, express_1.Router)();
 router.get("/health", (0, asyncHandler_1.asyncHandler)(public_controller_1.getHealth));
+router.get("/settings", (0, asyncHandler_1.asyncHandler)(public_controller_1.getPublicSettings));
 router.get("/products", (0, asyncHandler_1.asyncHandler)(public_controller_1.getProducts));
 router.get("/products/:id", (0, asyncHandler_1.asyncHandler)(public_controller_1.getProductById));
 router.get("/reviews", (0, asyncHandler_1.asyncHandler)(public_controller_1.getReviews));

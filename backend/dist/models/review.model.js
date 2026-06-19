@@ -10,8 +10,8 @@ Review.init({
     id: { type: sequelize_1.DataTypes.STRING(64), primaryKey: true },
     name: { type: sequelize_1.DataTypes.STRING(120), allowNull: false },
     location: { type: sequelize_1.DataTypes.STRING(120), allowNull: true },
-    product: { type: sequelize_1.DataTypes.STRING(120), allowNull: false },
+    product: { type: sequelize_1.DataTypes.JSON, allowNull: false },
     rating: { type: sequelize_1.DataTypes.TINYINT, allowNull: false },
-    comment: { type: sequelize_1.DataTypes.TEXT, allowNull: false },
+    comment: { type: sequelize_1.DataTypes.JSON, allowNull: false },
     status: { type: sequelize_1.DataTypes.ENUM("approved", "pending", "rejected"), allowNull: false, defaultValue: "pending" },
 }, { sequelize: sequelize_2.sequelize, tableName: "reviews", underscored: true, timestamps: true, updatedAt: false });

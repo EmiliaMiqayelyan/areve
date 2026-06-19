@@ -6,6 +6,8 @@ import { useAdminStore } from '@/lib/adminStore';
 import { ArrowLeft, UploadCloud, Save } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import BilingualField from '@/components/admin/BilingualField';
+import { emptyLocalized, parseLocalized, type LocalizedText } from '@/lib/localizedText';
 
 async function fileToDataUrl(file: File): Promise<string> {
   return await new Promise((resolve, reject) => {
@@ -22,20 +24,20 @@ export default function EditProductPage() {
   const { products, updateProduct } = useAdminStore();
   const product = products.find(p => p.id === id);
 
-  const [name, setName] = useState('');
+  const [name, setName] = useState<LocalizedText>(emptyLocalized());
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState<'bags' | 'toys' | 'accessories'>('bags');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState<LocalizedText>(emptyLocalized());
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (product) {
-      setName(product.name);
+      setName(parseLocalized(product.name));
       setPrice(product.price.toString());
       setCategory(product.category);
-      setDescription(product.description || '');
+      setDescription(product.description ? parseLocalized(product.description) : emptyLocalized());
       setStatus(product.status || 'active');
       setImagePreview(product.image);
     }
@@ -43,7 +45,7 @@ export default function EditProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!product || !name || !price) return;
+    if (!product || !name.hy.trim() || !price) return;
 
     try {
       setError('');
@@ -53,10 +55,12 @@ export default function EditProductPage() {
         return;
       }
       await updateProduct(product.id, {
-        name,
+        name: { hy: name.hy.trim(), en: (name.en || name.hy).trim() },
         price: parseFloat(price),
         category,
-        description,
+        description: description.hy || description.en
+          ? { hy: description.hy.trim(), en: (description.en || description.hy).trim() }
+          : null,
         status,
         image: nextImage,
       });
@@ -87,7 +91,6 @@ export default function EditProductPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-      {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/admin/products" className="p-2 text-[#AFAFAF] hover:text-[#2B2B2B] hover:bg-white rounded-xl transition-colors shrink-0">
           <ArrowLeft size={20} />
@@ -100,7 +103,6 @@ export default function EditProductPage() {
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Main Info */}
         <div className="lg:col-span-2 space-y-6">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-4 text-[13px]">
@@ -109,23 +111,10 @@ export default function EditProductPage() {
           )}
           <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm space-y-5">
             <h3 className="text-[15px] font-bold text-[#2B2B2B] border-b border-[#EADFD8] pb-4">Basic Information</h3>
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Product Name *</label>
-              <input
-                required
-                type="text"
-                value={name} onChange={e => setName(e.target.value)}
-                className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Description</label>
-              <textarea
-                value={description} onChange={e => setDescription(e.target.value)}
-                rows={4}
-                className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-3 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow resize-none"
-              />
-            </div>
+
+            <BilingualField label="Product Name *" value={name} onChange={setName} required />
+
+            <BilingualField label="Description" value={description} onChange={setDescription} multiline />
           </div>
 
           <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm space-y-5">
@@ -158,7 +147,6 @@ export default function EditProductPage() {
           </div>
         </div>
 
-        {/* Sidebar settings */}
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm space-y-5">
             <h3 className="text-[15px] font-bold text-[#2B2B2B] border-b border-[#EADFD8] pb-4">Publishing</h3>
@@ -197,7 +185,7 @@ export default function EditProductPage() {
             <div className="space-y-1.5">
               <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Category</label>
               <select
-                value={category} onChange={e => setCategory(e.target.value as any)}
+                value={category} onChange={e => setCategory(e.target.value as 'bags' | 'toys' | 'accessories')}
                 className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow cursor-pointer appearance-none"
               >
                 <option value="bags">Beaded Bags</option>
@@ -208,7 +196,6 @@ export default function EditProductPage() {
           </div>
         </div>
 
-        {/* Footer actions */}
         <div className="lg:col-span-3 flex justify-end gap-3 pt-4 mb-10">
           <Link href="/admin/products" className="px-6 py-2.5 rounded-xl border border-[#EADFD8] font-bold text-[13px] text-[#7A7A7A] hover:bg-white hover:text-[#2B2B2B] transition-colors bg-[#F8F5F2]">
             Cancel

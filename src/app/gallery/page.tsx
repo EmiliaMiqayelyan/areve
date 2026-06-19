@@ -5,10 +5,14 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import SectionHeader from '@/components/ui/SectionHeader';
-import { apiFetch } from '@/lib/api';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
+import { useTranslation } from '@/i18n/I18nProvider';
+import { useLocaleApiFetch } from '@/lib/useLocaleApi';
+import { pickLocalized } from '@/lib/localizedText';
 
 export default function GalleryPage() {
+  const { t, locale } = useTranslation();
+  const localeFetch = useLocaleApiFetch();
   const { settings } = useSiteSettings();
   const pg = settings.siteContent.pages.gallery;
   const [lightbox, setLightbox] = useState<string | null>(null);
@@ -16,10 +20,10 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    void apiFetch<any[]>('/gallery')
+    void localeFetch<any[]>('/gallery')
       .then(setGalleryItems)
       .finally(() => setLoading(false));
-  }, []);
+  }, [locale, localeFetch]);
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
@@ -32,12 +36,14 @@ export default function GalleryPage() {
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
         {loading && (
           <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: "'DM Sans',sans-serif", color: '#AFAFAF' }}>
-            Loading gallery...
+            {t('common.loadingGallery')}
           </div>
         )}
         {/* Masonry-like grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, gridAutoRows: '220px' }}>
-          {galleryItems.map((img, i) => (
+          {galleryItems.map((img, i) => {
+            const altText = pickLocalized(img.alt, locale);
+            return (
             <motion.div key={i}
               initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: (i % 6) * 0.06 }}
               onClick={() => setLightbox(img.src)}
@@ -45,7 +51,7 @@ export default function GalleryPage() {
             >
               <Image
                 src={String(img.src).startsWith('blob:') ? '/images/gallery-light-1.png' : img.src}
-                alt={img.alt}
+                alt={altText}
                 fill
                 style={{ objectFit: 'cover', transition: 'transform 0.5s' }}
                 loading="lazy"
@@ -55,11 +61,11 @@ export default function GalleryPage() {
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,245,242,0)'; }}>
                 <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12, color: '#2B2B2B', background: 'rgba(248,245,242,0.88)', padding: '4px 10px', borderRadius: 99, opacity: 0, transition: 'opacity 0.3s' }}
                   className="img-caption">
-                  {img.alt}
+                  {altText}
                 </p>
               </div>
             </motion.div>
-          ))}
+          );})}
         </div>
 
         {!loading && galleryItems.length === 0 && (

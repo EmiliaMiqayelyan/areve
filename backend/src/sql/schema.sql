@@ -95,14 +95,14 @@ CREATE TABLE IF NOT EXISTS settings (
 INSERT IGNORE INTO settings (
   id, store_name, tagline, footer_description, support_email, business_phone, address, instagram_url, facebook_url, whatsapp_url, tiktok_url, youtube_url, site_content
 ) VALUES (
-  1, 'AREVE', 'Handcrafted · Unique · Made with Love',
-  'Every piece is a tiny sun — made with warmth, patience, and the kind of love only hands can give.',
+  1, 'AREVÉ', 'Ձեռագործ · Եզակի · Սիրով ստեղծված',
+  'Յուրաքանչյուր կտոր փոքրիկ արև է — ստեղծված ջերմությամբ, համբերությամբ և միայն ձեռքերով տրվող սիրով։',
   'care@areve.com', '+1 (555) 123-4567',
   '123 Artisan Maker Way, Creative District, NY 10012',
-  'https://instagram.com/areve_brand',
-  'https://facebook.com/areve.brand',
+  'https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr',
+  'https://www.facebook.com/share/18mdNprAXw/?mibextid=wwXIfr',
   'https://wa.me/message/xyz',
-  '',
-  '',
+  'https://www.tiktok.com/@areve_collections?_r=1&_t=ZS-9791ZS0NSEu',
+  'https://youtube.com/@areve_collections?si=XM4HvU8cfXMTbN5I',
   NULL
 );

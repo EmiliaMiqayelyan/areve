@@ -8,8 +8,11 @@ import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
 import ReviewCard from '@/components/ui/ReviewCard';
 import SectionHeader from '@/components/ui/SectionHeader';
-import { apiFetch } from '@/lib/api';
+import type { Product } from '@/lib/store';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
+import { useTranslation } from '@/i18n/I18nProvider';
+import { useLocaleApiFetch } from '@/lib/useLocaleApi';
+import { pickLocalized } from '@/lib/localizedText';
 
 const S = {
   page: { minHeight: '100vh' },
@@ -18,20 +21,24 @@ const S = {
 };
 
 export default function Home() {
+  const { t, locale } = useTranslation();
+  const localeFetch = useLocaleApiFetch();
   const { settings } = useSiteSettings();
   const { siteContent: sc, instagramUrl } = settings;
   const home = sc.home;
 
-  const [featuredProducts, setFeaturedProducts] = useState<Array<Record<string, unknown>>>([]);
-  const [reviewList, setReviewList] = useState<Array<Record<string, unknown>>>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [reviewList, setReviewList] = useState<Array<{ id: string; name: string; location?: string; product?: string; comment: string; rating: number }>>([]);
   const [galleryPreview, setGalleryPreview] = useState<Array<{ id?: string; src: string; alt: string }>>([]);
   const [loading, setLoading] = useState(true);
+  const [heroReady, setHeroReady] = useState(false);
+  useEffect(() => { setHeroReady(true); }, []);
 
   useEffect(() => {
     void Promise.all([
-      apiFetch<Array<Record<string, unknown>>>('/products?active=true'),
-      apiFetch<Array<Record<string, unknown>>>('/reviews'),
-      apiFetch<Array<{ id?: string; src: string; alt: string }>>('/gallery'),
+      localeFetch<Product[]>('/products?active=true'),
+      localeFetch<Array<{ id: string; name: string; location?: string; product?: string; comment: string; rating: number }>>('/reviews'),
+      localeFetch<Array<{ id?: string; src: string; alt: string }>>('/gallery'),
     ])
       .then(([p, r, g]) => {
         setFeaturedProducts(p);
@@ -39,7 +46,7 @@ export default function Home() {
         setGalleryPreview(Array.isArray(g) ? g.slice(0, 6) : []);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [locale, localeFetch]);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
@@ -51,7 +58,7 @@ export default function Home() {
   return (
     <div style={S.page}>
 
-      <section ref={heroRef} style={{ position: 'relative', minHeight: '90vh', display: 'flex', alignItems: 'center', overflow: 'hidden', background: '#F8F5F2' }}>
+      <section ref={heroRef} style={{ position: 'relative', minHeight: '90vh', display: 'flex', alignItems: 'center', overflow: 'hidden', background: '#F8F5F2', paddingTop: 68 }}>
 
         <motion.div style={{ y: imgY, position: 'absolute', inset: 0 }}>
           <Image src={home.hero.image} alt={settings.storeName} fill style={{ objectFit: 'cover', objectPosition: 'center' }} priority />
@@ -60,13 +67,13 @@ export default function Home() {
 
         <motion.div className="relative z-10 mx-auto w-full px-4 sm:px-6 lg:max-w-[1280px]" style={{ y: textY, opacity, paddingTop: 'calc(var(--container-px) * 2.5)' }}>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="flex items-center gap-2.5 mb-6">
+          <motion.div initial={heroReady ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="flex items-center gap-2.5 mb-6">
             <span className="badge badge-sage">{home.hero.badgePrefix} {year}</span>
             <span className="text-[#D6C3B3] text-xs sm:text-sm">☀️</span>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
+            initial={heroReady ? false : { opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: heroReady ? 0 : 0.15, ease: 'easeOut' }}
             className="mb-6 font-serif text-4xl font-bold leading-[1.1] text-ink sm:text-6xl lg:text-[88px] lg:max-w-[700px]"
             style={{ fontFamily: "'Playfair Display',serif" }}
           >
@@ -76,13 +83,13 @@ export default function Home() {
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
+            initial={heroReady ? false : { opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: heroReady ? 0 : 0.3 }}
             className="mb-10 max-w-[480px] font-sans text-base leading-relaxed text-subtle sm:text-lg sm:leading-loose"
           >
             {home.hero.subtitle}
           </motion.p>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.45 }} className="flex flex-wrap gap-3 sm:gap-4">
+          <motion.div initial={heroReady ? false : { opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: heroReady ? 0 : 0.45 }} className="flex flex-wrap gap-3 sm:gap-4">
             <Link href={home.hero.primaryCta.href} className="btn-primary no-underline">
               {home.hero.primaryCta.label} <ArrowRight size={15} />
             </Link>
@@ -91,7 +98,7 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: 0.9 }} className="mt-12 flex flex-wrap gap-8 sm:gap-12 lg:mt-16">
+          <motion.div initial={heroReady ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1, delay: heroReady ? 0 : 0.9 }} className="mt-12 flex flex-wrap gap-8 sm:gap-12 lg:mt-16">
             {home.hero.stats.map(({ value, label }) => (
               <div key={label}>
                 <p className="font-serif text-3xl font-bold text-ink sm:text-4xl">{value}</p>
@@ -101,9 +108,9 @@ export default function Home() {
           </motion.div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
+        <motion.div initial={heroReady ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: heroReady ? 0 : 1.5 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 hidden sm:flex">
-          <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-[#AFAFAF]">Scroll</p>
+          <p className="font-sans text-[10px] uppercase tracking-[0.25em] text-[#AFAFAF]">{t('common.scroll')}</p>
           <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.6, repeat: Infinity }}
             className="h-10 w-[1px]" style={{ background: 'linear-gradient(#E6C97A, transparent)' }} />
         </motion.div>
@@ -123,7 +130,7 @@ export default function Home() {
                     <h3 className="mb-1.5 font-serif text-xl font-bold text-white sm:text-2xl">{cat.title}</h3>
                     <p className="mb-4 font-sans text-[13px] leading-relaxed text-white/80">{cat.desc}</p>
                     <span className="flex items-center gap-1.5 font-sans text-xs font-semibold uppercase tracking-widest text-[#F4D58D]">
-                      Explore <ArrowRight size={12} />
+                      {t('common.explore')} <ArrowRight size={12} />
                     </span>
                   </div>
                 </Link>
@@ -144,7 +151,7 @@ export default function Home() {
           <div className="grid grid-cols-1 gap-5 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {loading && (
               <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
-                Loading products...
+                {t('common.loadingProducts')}
               </div>
             )}
             {!loading && featuredProducts.slice(0, 6).map((p, i) => (
@@ -152,7 +159,7 @@ export default function Home() {
             ))}
             {!loading && featuredProducts.length === 0 && (
               <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
-                No products yet.
+                {t('common.noProducts')}
               </div>
             )}
           </div>
@@ -209,15 +216,15 @@ export default function Home() {
           <div className="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {loading && (
               <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
-                Loading reviews...
+                {t('common.loadingReviews')}
               </div>
             )}
             {!loading && reviewList.slice(0, 3).map((r, i) => (
-              <ReviewCard key={String(r.id)} review={r} index={i} />
+              <ReviewCard key={String(r.id)} review={{ ...r, location: r.location ?? '' }} index={i} />
             ))}
             {!loading && reviewList.length === 0 && (
               <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
-                No reviews yet.
+                {t('common.noReviews')}
               </div>
             )}
           </div>
@@ -235,7 +242,7 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {!loading && galleryPreview.length === 0 && (
               <p className="col-span-full py-8 text-center font-sans text-[13px] text-[#AFAFAF]">
-                No gallery images yet. Add them in the admin Gallery to show this grid.
+                {t('common.noGalleryAdmin')}
               </p>
             )}
             {galleryPreview.map((item, i) => (
@@ -247,7 +254,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.92 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.07 }}
                 className="group relative block aspect-square overflow-hidden rounded-[14px]"
               >
-                <Image src={item.src} alt={item.alt} fill className="object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+                <Image src={item.src} alt={pickLocalized(item.alt, locale)} fill className="object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
                 <div className="absolute inset-0 bg-gold/0 transition-colors group-hover:bg-gold/10" />
               </motion.a>
             ))}

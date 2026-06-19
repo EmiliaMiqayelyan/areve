@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
+import { useTranslation } from '@/i18n/I18nProvider';
+import { pickLocalized } from '@/lib/localizedText';
 
 interface Review {
   id: string; name: string; location: string;
@@ -9,6 +11,9 @@ interface Review {
 }
 
 export default function ReviewCard({ review, index = 0 }: { review: Review; index?: number }) {
+  const { locale } = useTranslation();
+  const comment = pickLocalized(review.comment, locale);
+  const productLabel = review.product ? pickLocalized(review.product, locale) : '';
   return (
     <motion.div
       initial={{ opacity: 0, y: 28 }}
@@ -26,13 +31,13 @@ export default function ReviewCard({ review, index = 0 }: { review: Review; inde
 
       {/* Comment */}
       <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, color: '#2B2B2B', lineHeight: 1.75, fontStyle: 'italic', flex: 1 }}>
-        &ldquo;{review.comment}&rdquo;
+        &ldquo;{comment}&rdquo;
       </p>
 
       {/* Product tag */}
-      {review.product && (
+      {productLabel && (
         <span style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 11, color: '#BFA6A0', letterSpacing: '1px', textTransform: 'uppercase' }}>
-          {review.product}
+          {productLabel}
         </span>
       )}
 

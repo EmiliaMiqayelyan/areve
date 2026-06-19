@@ -2,17 +2,23 @@ import { Request, Response } from "express";
 import { randomUUID } from "crypto";
 import { Contact, Faq, Gallery, Order, OrderItem, Product, Review, Setting } from "../models";
 import { mergeSiteContent } from "../utils/mergeSiteContent";
+import {
+  formatFaq,
+  formatGalleryItem,
+  formatProduct,
+  formatReview,
+  resolveRequestLocale,
+} from "../utils/serializers";
 
-export async function getHealth(req: Request, res: Response) {
+export async function getHealth(_req: Request, res: Response) {
   return res.json({ status: "ok" });
 }
 
-export async function getPublicSettings(req: Request, res: Response) {
+export async function getPublicSettings(_req: Request, res: Response) {
   const row = await Setting.findByPk(1);
   if (!row) return res.status(404).json({ message: "Settings not found" });
   const j = row.toJSON() as Record<string, unknown>;
-  const rawContent = j.siteContent ?? j.site_content;
-  const siteContent = mergeSiteContent(rawContent);
+  const siteContent = mergeSiteContent(j.siteContent ?? j.site_content);
   return res.json({
     storeName: j.storeName ?? j.store_name,
     tagline: j.tagline,
@@ -30,31 +36,39 @@ export async function getPublicSettings(req: Request, res: Response) {
 }
 
 export async function getProducts(req: Request, res: Response) {
+  const locale = resolveRequestLocale(req);
   const where = req.query.active === "true" ? { status: "active" } : undefined;
   const rows = await Product.findAll({ where, order: [["createdAt", "DESC"]] });
-  return res.json(rows);
+  return res.json(rows.map((row) => formatProduct(row, { locale })));
 }
 
 export async function getProductById(req: Request, res: Response) {
+  const locale = resolveRequestLocale(req);
   const id = String(req.params.id);
   const row = await Product.findByPk(id);
   if (!row) return res.status(404).json({ message: "Product not found" });
-  return res.json(row);
+  return res.json(formatProduct(row, { locale }));
 }
 
 export async function getReviews(req: Request, res: Response) {
-  const rows = await Review.findAll({ where: { status: "approved" }, order: [["createdAt", "DESC"]] });
-  return res.json(rows);
+  const locale = resolveRequestLocale(req);
+  const rows = await Review.findAll({
+    where: { status: "approved" },
+    order: [["createdAt", "DESC"]],
+  });
+  return res.json(rows.map((row) => formatReview(row, { locale })));
 }
 
 export async function getFaqs(req: Request, res: Response) {
+  const locale = resolveRequestLocale(req);
   const rows = await Faq.findAll({ order: [["sortOrder", "ASC"], ["id", "ASC"]] });
-  return res.json(rows);
+  return res.json(rows.map((row) => formatFaq(row.toJSON() as Record<string, unknown>, { locale })));
 }
 
 export async function getGallery(req: Request, res: Response) {
+  const locale = resolveRequestLocale(req);
   const rows = await Gallery.findAll({ order: [["createdAt", "DESC"]] });
-  return res.json(rows);
+  return res.json(rows.map((row) => formatGalleryItem(row, { locale })));
 }
 
 export async function createContact(req: Request, res: Response) {
@@ -67,7 +81,11 @@ export async function createOrder(req: Request, res: Response) {
   const body = req.body;
   const id = `ORD-${Date.now()}`;
   const fullName = `${body.firstName} ${body.lastName}`.trim();
-  const total = body.items.reduce((sum: number, item: { price: number; quantity: number }) => sum + item.price * item.quantity, 0);
+  const total = body.items.reduce(
+    (sum: number, item: { price: number; quantity: number }) =>
+      sum + Number(item.price) * Number(item.quantity),
+    0
+  );
 
   await Order.create({
     id,

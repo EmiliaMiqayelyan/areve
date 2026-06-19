@@ -88,5 +88,5 @@ npm run dev
 ## 8) Notes
 
 - Frontend includes fallback mock data if backend is temporarily unavailable.
-- Contact and checkout now submit to backend APIs.
+- Contact form submits to the backend API; cart orders are sent via WhatsApp or Telegram.
 - Admin panel login and core content management are backed by MySQL APIs.

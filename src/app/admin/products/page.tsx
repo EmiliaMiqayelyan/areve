@@ -6,6 +6,7 @@ import { Plus, Search, Filter, Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useMemo } from 'react';
+import { pickLocalized } from '@/lib/localizedText';
 
 const FALLBACK_PRODUCT_IMAGE = '/images/prod-bag-a.png';
 
@@ -29,7 +30,8 @@ export default function AdminProductsPage() {
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const label = `${pickLocalized(p.name, 'hy')} ${pickLocalized(p.name, 'en')}`.toLowerCase();
+      const matchSearch = label.includes(searchTerm.toLowerCase());
       const matchCategory = categoryFilter === 'All' || p.category.toLowerCase() === categoryFilter.toLowerCase();
       return matchSearch && matchCategory;
     });
@@ -110,7 +112,7 @@ export default function AdminProductsPage() {
                         {String(product.image ?? '').startsWith('data:image/') ? (
                           <img
                             src={brokenImageIds[product.id] ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-                            alt={product.name}
+                            alt={pickLocalized(product.name, 'hy')}
                             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                             className="group-hover:scale-105"
                             onError={() => {
@@ -120,7 +122,7 @@ export default function AdminProductsPage() {
                         ) : (
                           <Image
                             src={brokenImageIds[product.id] ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-                            alt={product.name}
+                            alt={pickLocalized(product.name, 'hy')}
                             fill
                             className="object-cover"
                             onError={() => {
@@ -130,7 +132,8 @@ export default function AdminProductsPage() {
                         )}
                       </div>
                       <div>
-                        <p className="text-[14px] font-bold text-[#2B2B2B]">{product.name}</p>
+                        <p className="text-[14px] font-bold text-[#2B2B2B]">{pickLocalized(product.name, 'hy')}</p>
+                        <p className="text-[11px] text-[#AFAFAF]">{pickLocalized(product.name, 'en')}</p>
                         <p className="text-[12px] text-[#AFAFAF] mt-0.5">ID: {product.id}</p>
                       </div>
                     </div>
@@ -159,7 +162,7 @@ export default function AdminProductsPage() {
                         <Edit size={16} />
                       </Link>
                       <button 
-                        onClick={() => handleDelete(product.id, product.name)}
+                        onClick={() => handleDelete(product.id, pickLocalized(product.name, 'hy'))}
                         className="p-2 text-[#AFAFAF] hover:text-[#ef4444] hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <Trash2 size={16} />

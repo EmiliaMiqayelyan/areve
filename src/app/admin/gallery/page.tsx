@@ -1,10 +1,13 @@
 'use client';
 
-import { useAdminStore, GalleryImage } from '@/lib/adminStore';
+import { useAdminStore } from '@/lib/adminStore';
 import { modal } from '@/lib/uiStore';
 import { UploadCloud, Trash2, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
+import BilingualField from '@/components/admin/BilingualField';
+import { emptyLocalized, pickLocalized } from '@/lib/localizedText';
+import type { LocalizedText } from '@/lib/localizedText';
 
 const FALLBACK_GALLERY_IMAGE = '/images/gallery-light-1.png';
 
@@ -32,18 +35,24 @@ async function fileToDataUrl(file: File): Promise<string> {
 export default function AdminGalleryPage() {
   const { gallery, addGalleryImage, deleteGalleryImage } = useAdminStore();
   const [cols, setCols] = useState<1 | 2>(1);
+  const [alt, setAlt] = useState<LocalizedText>(emptyLocalized());
   const [brokenImageIds, setBrokenImageIds] = useState<Record<string, true>>({});
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       void fileToDataUrl(file).then((dataUrl) => {
+        if (!alt.hy.trim()) {
+          modal.alert('Please enter Armenian alt text before uploading.', 'Alt text required');
+          return;
+        }
         addGalleryImage({
           id: 'gal-' + Math.random().toString(36).substring(2, 9),
           src: dataUrl,
-          alt: 'User uploaded gallery image',
+          alt: { hy: alt.hy.trim(), en: (alt.en || alt.hy).trim() },
           cols,
         });
+        setAlt(emptyLocalized());
       });
     }
   };
@@ -75,6 +84,14 @@ export default function AdminGalleryPage() {
             </h3>
             
             <div className="space-y-4">
+              <BilingualField
+                label="Image Alt Text *"
+                value={alt}
+                onChange={setAlt}
+                required
+                hyPlaceholder="Պատկերի նկարագրություն"
+                enPlaceholder="Describe the image for accessibility"
+              />
               <div className="space-y-1.5">
                 <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Image Layout Span</label>
                 <div className="flex gap-2">
@@ -129,7 +146,7 @@ export default function AdminGalleryPage() {
               >
                 <Image
                   src={brokenImageIds[img.id] ? FALLBACK_GALLERY_IMAGE : resolveGalleryImageSrc(img.src)}
-                  alt={img.alt}
+                  alt={pickLocalized(img.alt, 'hy')}
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                   onError={() => setBrokenImageIds((prev) => ({ ...prev, [img.id]: true }))}

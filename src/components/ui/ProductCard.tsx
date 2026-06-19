@@ -6,6 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { Product, useCartStore, useWishlistStore } from '@/lib/store';
+import { useTranslation } from '@/i18n/I18nProvider';
+import { pickLocalized } from '@/lib/localizedText';
 
 const FALLBACK_PRODUCT_IMAGE = '/images/prod-bag-a.png';
 
@@ -34,6 +36,7 @@ const badgeColors: Record<string, { bg: string; color: string }> = {
 };
 
 export default function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+  const { t, locale } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const [imgFailed, setImgFailed] = useState(false);
   useEffect(() => { setMounted(true); }, []);
@@ -61,7 +64,7 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
         {String(product.image ?? '').startsWith('data:image/') ? (
           <img
             src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-            alt={product.name}
+            alt={pickLocalized(product.name, locale)}
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s' }}
             className="group-hover:scale-105"
             loading="lazy"
@@ -70,7 +73,7 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
         ) : (
           <Image
             src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-            alt={product.name}
+            alt={pickLocalized(product.name, locale)}
             fill
             style={{ objectFit: 'cover', transition: 'transform 0.6s' }}
             className="group-hover:scale-105"
@@ -84,7 +87,7 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
         {/* Badge */}
         {badge && product.badge && (
           <span style={{ position: 'absolute', top: 12, left: 12, ...badge, fontFamily: "'DM Sans',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: '1.5px', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 99 }}>
-            {product.badge}
+            {t(`product.badge_${product.badge}` as 'product.badge_New') || product.badge}
           </span>
         )}
 
@@ -109,13 +112,13 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
           className="quick-add"
         >
           <button
-            onClick={() => addItem(product)}
+            onClick={() => addItem({ ...product, name: pickLocalized(product.name, locale) })}
             style={{ width: '100%', padding: '10px', background: '#E6C97A', border: 'none', borderRadius: 99, fontFamily: "'DM Sans',sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: '1.2px', textTransform: 'uppercase', color: '#5a4a1e', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#F4D58D')}
             onMouseLeave={e => (e.currentTarget.style.background = '#E6C97A')}
           >
             <ShoppingBag size={13} strokeWidth={2} />
-            Add to Bag
+            {t('product.addToBag')}
           </button>
         </motion.div>
       </div>
@@ -126,7 +129,7 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
           {product.category}
         </p>
         <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, color: '#2B2B2B', marginBottom: 10, lineHeight: 1.3 }}>
-          {product.name}
+          {pickLocalized(product.name, locale)}
         </h3>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
           <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, color: '#2B2B2B' }}>${product.price}</span>
@@ -136,7 +139,7 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#E6C97A'; (e.currentTarget as HTMLElement).style.borderColor = '#E6C97A'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#BFA6A0'; (e.currentTarget as HTMLElement).style.borderColor = '#BFA6A0'; }}
           >
-            View Details
+            {t('product.viewDetails')}
           </Link>
         </div>
       </div>

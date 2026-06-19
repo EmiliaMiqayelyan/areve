@@ -1,23 +1,53 @@
 'use client';
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useI18n } from '@/i18n/I18nProvider';
+import { hasArmenianScript } from '@/i18n/localeContent';
+import { mergeSiteContentForLocale } from '@/i18n/mergeSiteContent';
+import { getMessages } from '@/i18n/messages';
+import type { Locale } from '@/i18n/types';
 import { apiFetch } from '@/lib/api';
-import { DEFAULT_SITE_CONTENT, type PublicSettings, type SiteContent } from '@/lib/siteContentDefaults';
+import type { PublicSettings, SiteContent } from '@/lib/siteContentDefaults';
+import { SOCIAL_URLS } from '@/lib/socialDefaults';
 
-function fallbackPublicSettings(): PublicSettings {
+const MOJIBAKE_RE = /[ÕÔÃ][±°´€³]|Ã©|â€|AREVÃ/;
+
+function looksCorrupted(value?: string | null): boolean {
+  return Boolean(value && MOJIBAKE_RE.test(value));
+}
+
+function buildSettings(locale: Locale, data?: Partial<PublicSettings> | null): PublicSettings {
+  const m = getMessages(locale);
+  const siteContent = mergeSiteContentForLocale(locale, data?.siteContent) as SiteContent;
   return {
-    storeName: 'AREVÉ',
-    tagline: 'Handcrafted · Unique · Made with Love',
-    footerDescription: DEFAULT_SITE_CONTENT.metadata.description,
-    supportEmail: '',
-    businessPhone: '',
-    address: '',
-    instagramUrl: 'https://instagram.com',
-    facebookUrl: 'https://facebook.com',
-    whatsappUrl: 'https://wa.me/',
-    tiktokUrl: '',
-    youtubeUrl: '',
-    siteContent: JSON.parse(JSON.stringify(DEFAULT_SITE_CONTENT)) as SiteContent,
+    storeName: data?.storeName ?? 'AREVÉ',
+    tagline:
+      locale === 'hy'
+        ? hasArmenianScript(data?.tagline) && !looksCorrupted(data?.tagline)
+          ? data!.tagline!
+          : m.settings.taglineHy
+        : !hasArmenianScript(data?.tagline) && data?.tagline && !looksCorrupted(data.tagline)
+          ? data.tagline
+          : m.settings.taglineHy,
+    footerDescription:
+      locale === 'hy'
+        ? hasArmenianScript(data?.footerDescription) && !looksCorrupted(data?.footerDescription)
+          ? data!.footerDescription!
+          : m.settings.footerHy
+        : !hasArmenianScript(data?.footerDescription) &&
+            data?.footerDescription &&
+            !looksCorrupted(data.footerDescription)
+          ? data.footerDescription
+          : m.settings.footerHy,
+    supportEmail: data?.supportEmail ?? '',
+    businessPhone: data?.businessPhone ?? '',
+    address: data?.address ?? '',
+    instagramUrl: data?.instagramUrl ?? SOCIAL_URLS.instagram,
+    facebookUrl: data?.facebookUrl ?? SOCIAL_URLS.facebook,
+    whatsappUrl: data?.whatsappUrl ?? 'https://wa.me/',
+    tiktokUrl: data?.tiktokUrl ?? SOCIAL_URLS.tiktok,
+    youtubeUrl: data?.youtubeUrl ?? SOCIAL_URLS.youtube,
+    siteContent,
   };
 }
 
@@ -30,25 +60,26 @@ type SiteSettingsContextValue = {
 const SiteSettingsContext = createContext<SiteSettingsContextValue | null>(null);
 
 export function SiteSettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<PublicSettings>(fallbackPublicSettings);
+  const { locale } = useI18n();
+  const [raw, setRaw] = useState<Partial<PublicSettings> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     void apiFetch<PublicSettings>('/settings')
       .then((data) => {
-        setSettings({
-          ...data,
-          siteContent: data.siteContent ?? (JSON.parse(JSON.stringify(DEFAULT_SITE_CONTENT)) as SiteContent),
-        });
+        setRaw(data);
         setError(false);
       })
       .catch(() => {
+        setRaw(null);
         setError(true);
-        setSettings(fallbackPublicSettings());
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const settings = useMemo(() => buildSettings(locale, raw), [locale, raw]);
 
   const value = useMemo(
     () => ({

@@ -8,11 +8,13 @@ class Product extends sequelize_1.Model {
 exports.Product = Product;
 Product.init({
     id: { type: sequelize_1.DataTypes.STRING(64), primaryKey: true },
-    name: { type: sequelize_1.DataTypes.STRING(120), allowNull: false },
+    name: { type: sequelize_1.DataTypes.JSON, allowNull: false },
     price: { type: sequelize_1.DataTypes.DECIMAL(10, 2), allowNull: false },
-    image: { type: sequelize_1.DataTypes.STRING(500), allowNull: false },
+    // Stores data URLs from the current admin upload UI.
+    // Must be large enough; otherwise the data URL is truncated and images won't render.
+    image: { type: sequelize_1.DataTypes.TEXT('medium'), allowNull: false },
     category: { type: sequelize_1.DataTypes.ENUM("bags", "toys", "accessories"), allowNull: false },
-    badge: { type: sequelize_1.DataTypes.STRING(40), allowNull: true },
-    description: { type: sequelize_1.DataTypes.TEXT, allowNull: true },
+    badge: { type: sequelize_1.DataTypes.JSON, allowNull: true },
+    description: { type: sequelize_1.DataTypes.JSON, allowNull: true },
     status: { type: sequelize_1.DataTypes.ENUM("active", "inactive"), allowNull: false, defaultValue: "active" },
 }, { sequelize: sequelize_2.sequelize, tableName: "products", underscored: true, timestamps: true, updatedAt: false });

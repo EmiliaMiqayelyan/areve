@@ -1,33 +1,73 @@
 import { z } from "zod";
+import { normalizeLocalizedInput } from "../utils/localizedText";
+
+const optionalUrlOrEmpty = z.union([z.string().url(), z.literal("")]).optional();
+
+const localizedTextSchema = z
+  .union([
+    z.string().min(1).max(5000),
+    z.object({
+      hy: z.string().min(1).max(5000),
+      en: z.string().max(5000).optional(),
+    }),
+  ])
+  .transform(normalizeLocalizedInput);
+
+const optionalLocalizedTextSchema = z
+  .union([
+    z.string().max(5000),
+    z.object({
+      hy: z.string().max(5000).optional(),
+      en: z.string().max(5000).optional(),
+    }),
+    z.null(),
+  ])
+  .optional()
+  .nullable()
+  .transform((value) => {
+    if (value == null || value === "") return null;
+    const normalized = normalizeLocalizedInput(value);
+    if (!normalized.hy && !normalized.en) return null;
+    return normalized;
+  });
 
 export const productSchema = z.object({
-  name: z.string().min(2).max(120),
-  price: z.number().positive(),
+  name: localizedTextSchema,
+  price: z.coerce.number().positive(),
   image: z.string().min(1),
   category: z.enum(["bags", "toys", "accessories"]),
-  badge: z.string().max(40).optional().nullable(),
-  description: z.string().max(5000).optional().nullable(),
+  badge: optionalLocalizedTextSchema,
+  description: optionalLocalizedTextSchema,
   status: z.enum(["active", "inactive"]).default("active"),
+});
+
+export const productCreateSchema = productSchema.extend({
+  id: z.string().min(1).max(64).optional(),
 });
 
 export const reviewSchema = z.object({
   name: z.string().min(2).max(120),
   location: z.string().max(120).optional().nullable(),
-  product: z.string().min(2).max(120),
-  rating: z.number().int().min(1).max(5),
-  comment: z.string().min(5).max(1500),
+  product: localizedTextSchema,
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: localizedTextSchema,
   status: z.enum(["approved", "pending", "rejected"]).default("pending"),
 });
 
+export const reviewCreateSchema = reviewSchema.extend({
+  id: z.string().min(1).max(64).optional(),
+});
+
 export const faqSchema = z.object({
-  question: z.string().min(5).max(400),
-  answer: z.string().min(5).max(3000),
+  question: localizedTextSchema,
+  answer: localizedTextSchema,
 });
 
 export const gallerySchema = z.object({
+  id: z.string().min(1).max(64).optional(),
   src: z.string().min(1),
-  alt: z.string().min(2).max(180),
-  cols: z.number().int().min(1).max(2),
+  alt: localizedTextSchema,
+  cols: z.coerce.number().int().min(1).max(2),
 });
 
 export const contactSchema = z.object({
@@ -65,6 +105,39 @@ export const orderStatusSchema = z.object({
   status: z.enum(["pending", "shipped", "delivered"]),
 });
 
+/** Admin dashboard order edits (customer/shipping fields). */
+export const adminOrderUpdateSchema = z.object({
+  customerName: z.string().min(1).max(160).optional(),
+  customerEmail: z.string().email().optional(),
+  address: z.string().min(1).max(255).optional(),
+  city: z.string().min(1).max(100).optional(),
+  state: z.string().min(1).max(100).optional(),
+  zipCode: z.string().min(1).max(30).optional(),
+  status: z.enum(["pending", "shipped", "delivered"]).optional(),
+  total: z.coerce.number().nonnegative().optional(),
+  items: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        productId: z.string().optional(),
+        name: z.string().min(1).max(120).optional(),
+        productName: z.string().min(1).max(120).optional(),
+        quantity: z.coerce.number().int().min(1),
+        price: z.coerce.number().positive().optional(),
+        unitPrice: z.coerce.number().positive().optional(),
+      })
+    )
+    .optional(),
+});
+
+export const faqReplaceSchema = z.array(
+  z.object({
+    id: z.string().optional(),
+    question: localizedTextSchema,
+    answer: localizedTextSchema,
+  })
+);
+
 export const settingsSchema = z.object({
   storeName: z.string().min(1).max(120),
   tagline: z.string().max(240),
@@ -75,7 +148,7 @@ export const settingsSchema = z.object({
   instagramUrl: z.string().url(),
   facebookUrl: z.string().url(),
   whatsappUrl: z.string().url(),
-  tiktokUrl: z.string().max(255).optional(),
-  youtubeUrl: z.string().max(255).optional(),
+  tiktokUrl: optionalUrlOrEmpty,
+  youtubeUrl: optionalUrlOrEmpty,
   siteContent: z.any().optional(),
 });

@@ -1,0 +1,77 @@
+'use client';
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
+import { getMessages, translate, type Messages } from './messages';
+import type { Locale } from './types';
+import { LOCALE_LABELS, LOCALES } from './types';
+
+const LOCALE_STORAGE_KEY = 'areve-locale';
+
+type I18nContextValue = {
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
+  t: (path: string, params?: Record<string, string | number>) => string;
+  messages: Messages;
+};
+
+const I18nContext = createContext<I18nContextValue | null>(null);
+
+function readStoredLocale(): Locale {
+  if (typeof window === 'undefined') return 'hy';
+  const saved = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+  return saved === 'en' ? 'en' : 'hy';
+}
+
+export function I18nProvider({ children }: { children: ReactNode }) {
+  const [locale, setLocaleState] = useState<Locale>('hy');
+
+  useEffect(() => {
+    setLocaleState(readStoredLocale());
+  }, []);
+
+  const setLocale = useCallback((next: Locale) => {
+    setLocaleState(next);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
+      document.documentElement.lang = next === 'hy' ? 'hy' : 'en';
+      window.dispatchEvent(new CustomEvent('areve-locale-change', { detail: next }));
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = locale === 'hy' ? 'hy' : 'en';
+  }, [locale]);
+
+  const messages = useMemo(() => getMessages(locale), [locale]);
+
+  const t = useCallback(
+    (path: string, params?: Record<string, string | number>) => translate(messages, path, params),
+    [messages]
+  );
+
+  const value = useMemo(
+    () => ({ locale, setLocale, t, messages }),
+    [locale, setLocale, t, messages]
+  );
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+}
+
+export function useI18n() {
+  const ctx = useContext(I18nContext);
+  if (!ctx) throw new Error('useI18n must be used within I18nProvider');
+  return ctx;
+}
+
+export function useTranslation() {
+  const { t, locale, setLocale } = useI18n();
+  return { t, locale, setLocale, locales: LOCALES, localeLabels: LOCALE_LABELS };
+}

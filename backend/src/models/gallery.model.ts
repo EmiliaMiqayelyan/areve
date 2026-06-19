@@ -9,7 +9,7 @@ Gallery.init(
     // Stores data URLs from the current admin gallery upload UI.
     // Must be large enough; otherwise the data URL is truncated and images won't render.
     src: { type: DataTypes.TEXT('medium'), allowNull: false },
-    alt: { type: DataTypes.STRING(180), allowNull: false },
+    alt: { type: DataTypes.JSON, allowNull: false },
     cols: { type: DataTypes.TINYINT, allowNull: false, defaultValue: 1 },
   },
   { sequelize, tableName: "gallery", underscored: true, timestamps: true, updatedAt: false }

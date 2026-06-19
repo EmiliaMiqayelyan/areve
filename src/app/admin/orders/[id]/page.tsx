@@ -1,6 +1,7 @@
 'use client';
 
 import { useAdminStore } from '@/lib/adminStore';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Package, User, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
@@ -8,8 +9,34 @@ import { useRouter, useParams } from 'next/navigation';
 export default function OrderDetailsPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  const { orders, updateOrderStatus } = useAdminStore();
+  const { orders, updateOrderStatus, updateOrder } = useAdminStore();
   const order = orders.find(o => o.id === id);
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState<any>(null);
+
+  useEffect(() => {
+    if (order && !formData) {
+      setFormData({
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        address: order.address || '',
+        city: order.city || '',
+        state: order.state || '',
+        zipCode: order.zipCode || ''
+      });
+    }
+  }, [order, formData]);
+
+  const handleSave = async () => {
+    if (!order) return;
+    try {
+      await updateOrder(order.id, formData);
+      setIsEditing(false);
+    } catch (err) {
+      alert('Failed to update order');
+    }
+  };
 
   if (!order) {
     return (
@@ -47,6 +74,22 @@ export default function OrderDetailsPage() {
         </div>
         
         <div className="flex items-center gap-3">
+          <button 
+            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+            className={`px-4 py-2 rounded-xl text-[13px] font-medium transition-colors ${
+              isEditing ? 'bg-[#E6C97A] text-[#5a4a1e]' : 'bg-white border border-[#EADFD8] text-[#2B2B2B] hover:bg-[#F8F5F2]'
+            }`}
+          >
+            {isEditing ? 'Save Changes' : 'Edit Details'}
+          </button>
+          {isEditing && (
+            <button 
+              onClick={() => setIsEditing(false)}
+              className="px-4 py-2 rounded-xl text-[13px] font-medium bg-white border border-red-100 text-red-500 hover:bg-red-50"
+            >
+              Cancel
+            </button>
+          )}
           <select 
             value={order.status}
             onChange={(e) => updateOrderStatus(order.id, e.target.value as any)}
@@ -106,11 +149,29 @@ export default function OrderDetailsPage() {
             <div className="space-y-3">
               <div>
                 <p className="text-[11px] font-bold text-[#7A7A7A] uppercase tracking-wider">Name</p>
-                <p className="text-[14px] text-[#2B2B2B] font-medium mt-0.5">{order.customerName}</p>
+                {isEditing ? (
+                  <input 
+                    type="text" 
+                    value={formData.customerName}
+                    onChange={e => setFormData({...formData, customerName: e.target.value})}
+                    className="w-full mt-1 px-3 py-1.5 bg-[#F8F5F2] border-none rounded-lg text-[14px] focus:ring-1 focus:ring-[#E6C97A]"
+                  />
+                ) : (
+                  <p className="text-[14px] text-[#2B2B2B] font-medium mt-0.5">{order.customerName}</p>
+                )}
               </div>
               <div>
                 <p className="text-[11px] font-bold text-[#7A7A7A] uppercase tracking-wider">Contact</p>
-                <a href={`mailto:${order.customerEmail}`} className="text-[14px] text-[#E6C97A] hover:underline mt-0.5 block">{order.customerEmail}</a>
+                {isEditing ? (
+                  <input 
+                    type="email" 
+                    value={formData.customerEmail}
+                    onChange={e => setFormData({...formData, customerEmail: e.target.value})}
+                    className="w-full mt-1 px-3 py-1.5 bg-[#F8F5F2] border-none rounded-lg text-[14px] focus:ring-1 focus:ring-[#E6C97A]"
+                  />
+                ) : (
+                  <a href={`mailto:${order.customerEmail}`} className="text-[14px] text-[#E6C97A] hover:underline mt-0.5 block">{order.customerEmail}</a>
+                )}
               </div>
             </div>
           </div>
@@ -119,12 +180,47 @@ export default function OrderDetailsPage() {
             <h3 className="text-[15px] font-bold text-[#2B2B2B] flex items-center gap-2 mb-4 border-b border-[#EADFD8] pb-4">
               <MapPin size={18} className="text-[#AFAFAF]" /> Shipping Address
             </h3>
-            <div className="text-[14px] text-[#2B2B2B] leading-relaxed space-y-1">
-              <p className="font-medium">{order.customerName}</p>
-              <p>123 Artisan Maker Way</p>
-              <p>Apt 4B</p>
-              <p>New York, NY 10012</p>
-              <p>United States</p>
+            <div className="text-[14px] text-[#2B2B2B] leading-relaxed space-y-2">
+              {isEditing ? (
+                <>
+                  <input 
+                    type="text" 
+                    placeholder="Address"
+                    value={formData.address}
+                    onChange={e => setFormData({...formData, address: e.target.value})}
+                    className="w-full px-3 py-1.5 bg-[#F8F5F2] border-none rounded-lg text-[14px] focus:ring-1 focus:ring-[#E6C97A]"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="City"
+                      value={formData.city}
+                      onChange={e => setFormData({...formData, city: e.target.value})}
+                      className="w-full px-3 py-1.5 bg-[#F8F5F2] border-none rounded-lg text-[14px] focus:ring-1 focus:ring-[#E6C97A]"
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="State"
+                      value={formData.state}
+                      onChange={e => setFormData({...formData, state: e.target.value})}
+                      className="w-full px-3 py-1.5 bg-[#F8F5F2] border-none rounded-lg text-[14px] focus:ring-1 focus:ring-[#E6C97A]"
+                    />
+                  </div>
+                  <input 
+                    type="text" 
+                    placeholder="Zip Code"
+                    value={formData.zipCode}
+                    onChange={e => setFormData({...formData, zipCode: e.target.value})}
+                    className="w-full px-3 py-1.5 bg-[#F8F5F2] border-none rounded-lg text-[14px] focus:ring-1 focus:ring-[#E6C97A]"
+                  />
+                </>
+              ) : (
+                <>
+                  <p className="font-medium">{order.customerName}</p>
+                  <p>{order.address}</p>
+                  <p>{order.city}, {order.state} {order.zipCode}</p>
+                </>
+              )}
             </div>
           </div>
 

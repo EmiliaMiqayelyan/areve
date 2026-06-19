@@ -1,27 +1,18 @@
 import app from "./app";
 import { env } from "./config/env";
 import { sequelize } from "./config/sequelize";
+import { ensureSchemaColumns } from "./utils/ensureSchema";
+import { migrateLocalizedColumns } from "./utils/migrateLocalizedColumns";
+import { repairCorruptedSettings } from "./utils/repairCorruptedSettings";
+import { syncDefaultSocialUrls } from "./utils/syncDefaultSocialUrls";
 import "./models";
-
-async function ensureImageColumns() {
-  // Some dev databases may have the old VARCHAR(500) schema.
-  // If we don't widen it, uploaded data URLs get truncated and will not render.
-  try {
-    await sequelize.query(`ALTER TABLE products MODIFY image MEDIUMTEXT NOT NULL;`);
-  } catch (e) {
-    console.warn("ensureImageColumns: products.image alter failed (may be already correct).", e);
-  }
-
-  try {
-    await sequelize.query(`ALTER TABLE gallery MODIFY src MEDIUMTEXT NOT NULL;`);
-  } catch (e) {
-    console.warn("ensureImageColumns: gallery.src alter failed (may be already correct).", e);
-  }
-}
 
 async function bootstrap() {
   await sequelize.authenticate();
-  await ensureImageColumns();
+  await ensureSchemaColumns();
+  await migrateLocalizedColumns();
+  await repairCorruptedSettings();
+  await syncDefaultSocialUrls();
   app.listen(env.port, () => {
     console.log(`Backend running on http://localhost:${env.port}`);
   });

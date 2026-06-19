@@ -1,12 +1,12 @@
 'use client';
 
 import { useAdminStore } from '@/lib/adminStore';
-import { Search, Filter, Eye } from 'lucide-react';
+import { Search, Filter, Eye, Trash2, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
 
 export default function AdminOrdersPage() {
-  const { orders, updateOrderStatus } = useAdminStore();
+  const { orders, updateOrderStatus, deleteOrder } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
@@ -28,6 +28,9 @@ export default function AdminOrdersPage() {
           <h1 className="text-2xl font-serif font-bold text-[#2B2B2B]">Orders</h1>
           <p className="text-[14px] text-[#7A7A7A] mt-1">Check the status of recent transactions and manage fulfillments.</p>
         </div>
+        <Link href="/admin/orders/new" className="btn-primary flex items-center gap-2 px-6">
+          <Plus size={18} /> New Order
+        </Link>
       </div>
 
       {/* Filters Toolbar */}
@@ -111,6 +114,16 @@ export default function AdminOrdersPage() {
                       <Link href={`/admin/orders/${order.id}`} className="p-2 text-[#AFAFAF] hover:text-[#2B2B2B] hover:bg-[#F8F5F2] rounded-lg transition-colors flex items-center gap-2 text-[12px] font-medium tracking-wide">
                         <Eye size={16} /> Edit
                       </Link>
+                      <button 
+                        onClick={() => {
+                          if (confirm('Are you sure you want to delete this order?')) {
+                            deleteOrder(order.id);
+                          }
+                        }}
+                        className="p-2 text-[#AFAFAF] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </td>
                 </tr>

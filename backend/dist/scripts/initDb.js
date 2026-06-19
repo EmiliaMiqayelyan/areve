@@ -22,10 +22,36 @@ async function run() {
     const schemaPath = path_1.default.join(__dirname, "..", "sql", "schema.sql");
     const sql = fs_1.default.readFileSync(schemaPath, "utf8");
     await connection.query(sql);
+    // Ensure image columns are large enough for admin uploads (data URLs).
+    // Existing installs may already have VARCHAR(500) columns; without this, uploads get truncated.
+    await connection.query(`
+    ALTER TABLE products MODIFY image MEDIUMTEXT NOT NULL;
+  `);
+    await connection.query(`
+    ALTER TABLE gallery MODIFY src MEDIUMTEXT NOT NULL;
+  `);
+    const migrations = [
+        `ALTER TABLE settings ADD COLUMN tiktok_url VARCHAR(255) NOT NULL DEFAULT ''`,
+        `ALTER TABLE settings ADD COLUMN youtube_url VARCHAR(255) NOT NULL DEFAULT ''`,
+        `ALTER TABLE settings ADD COLUMN site_content JSON NULL`,
+    ];
+    for (const sql of migrations) {
+        try {
+            await connection.query(sql);
+        }
+        catch {
+            // Column may already exist on re-run.
+        }
+    }
     const hash = await bcryptjs_1.default.hash(env_1.env.adminPassword, 10);
-    await connection.query(`INSERT INTO admins (id, name, email, password_hash, role)
-     VALUES (?, 'Admin User', ?, ?, 'super_admin')
-     ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)`, [(0, crypto_1.randomUUID)(), env_1.env.adminEmail, hash]);
+    const [existingRows] = await connection.query(`SELECT id FROM admins WHERE email = ? LIMIT 1`, [env_1.env.adminEmail]);
+    const existing = existingRows;
+    if (existing.length > 0) {
+        await connection.query(`UPDATE admins SET password_hash = ? WHERE email = ?`, [hash, env_1.env.adminEmail]);
+    }
+    else {
+        await connection.query(`INSERT INTO admins (id, name, email, password_hash, role) VALUES (?, 'Admin User', ?, ?, 'super_admin')`, [(0, crypto_1.randomUUID)(), env_1.env.adminEmail, hash]);
+    }
     await connection.end();
     console.log(`Database initialized: ${env_1.env.dbName}`);
 }

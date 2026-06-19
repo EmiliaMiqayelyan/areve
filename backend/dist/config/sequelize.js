@@ -8,4 +8,11 @@ exports.sequelize = new sequelize_1.Sequelize(env_1.env.dbName, env_1.env.dbUser
     port: env_1.env.dbPort,
     dialect: "mysql",
     logging: false,
+    dialectOptions: {
+        charset: "utf8mb4",
+    },
+    define: {
+        charset: "utf8mb4",
+        collate: "utf8mb4_unicode_ci",
+    },
 });

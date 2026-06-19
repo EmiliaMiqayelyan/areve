@@ -6,12 +6,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SlidersHorizontal } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
 import SectionHeader from '@/components/ui/SectionHeader';
-import { apiFetch } from '@/lib/api';
+import SortDropdown from '@/components/ui/SortDropdown';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
+import { useTranslation } from '@/i18n/I18nProvider';
+import { useLocaleApiFetch } from '@/lib/useLocaleApi';
 
 type Category = 'all' | 'bags' | 'toys' | 'accessories';
 
 function ProductsContent() {
+  const { t, locale } = useTranslation();
+  const localeFetch = useLocaleApiFetch();
   const { settings } = useSiteSettings();
   const pg = settings.siteContent.pages.shop;
   const L = settings.siteContent.productCategoryLabels;
@@ -28,10 +32,10 @@ function ProductsContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    void apiFetch<any[]>('/products?active=true')
+    void localeFetch<any[]>('/products?active=true')
       .then(setProductList)
       .finally(() => setLoading(false));
-  }, []);
+  }, [locale, localeFetch]);
 
   const filtered = useMemo(() => {
     let list = cat === 'all' ? productList : productList.filter(p => p.category === cat);
@@ -51,7 +55,7 @@ function ProductsContent() {
       <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
         {loading && (
           <div className="py-10 text-center font-sans text-[#AFAFAF]">
-            Loading products...
+            {t('common.loadingProducts')}
           </div>
         )}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
@@ -65,20 +69,22 @@ function ProductsContent() {
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal size={14} className="text-[#AFAFAF]" />
-            <select value={sort} onChange={e => setSort(e.target.value as typeof sort)}
-              className="appearance-none bg-white font-sans text-[13px] text-subtle border-[1.5px] border-beige rounded-xl py-2 px-3 outline-none cursor-pointer"
-            >
-              <option value="default">Featured</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-            </select>
+          <div className="flex items-center gap-2.5">
+            <SlidersHorizontal size={15} className="text-[#AFAFAF]" />
+            <SortDropdown
+              value={sort}
+              onChange={setSort}
+              options={[
+                { value: 'default', label: t('shop.sortFeatured') },
+                { value: 'price-asc', label: t('shop.sortPriceAsc') },
+                { value: 'price-desc', label: t('shop.sortPriceDesc') },
+              ]}
+            />
           </div>
         </div>
 
         <p className="mb-8 font-sans text-[13px] text-[#AFAFAF]">
-          {filtered.length} {filtered.length === 1 ? 'product' : 'products'}{cat !== 'all' ? ` in ${catLabels[cat]}` : ''}
+          {filtered.length} {filtered.length === 1 ? t('common.product') : t('common.products')}{cat !== 'all' ? ` ${t('common.in')} ${catLabels[cat]}` : ''}
         </p>
 
         <AnimatePresence mode="wait">
@@ -90,7 +96,7 @@ function ProductsContent() {
 
         {!loading && filtered.length === 0 && (
           <div className="py-10 text-center font-sans text-[#AFAFAF]">
-            No products found.
+            {t('common.noProductsFound')}
           </div>
         )}
       </div>

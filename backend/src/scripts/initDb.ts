@@ -29,13 +29,33 @@ async function run() {
     ALTER TABLE gallery MODIFY src MEDIUMTEXT NOT NULL;
   `);
 
+  const migrations = [
+    `ALTER TABLE settings ADD COLUMN tiktok_url VARCHAR(255) NOT NULL DEFAULT ''`,
+    `ALTER TABLE settings ADD COLUMN youtube_url VARCHAR(255) NOT NULL DEFAULT ''`,
+    `ALTER TABLE settings ADD COLUMN site_content JSON NULL`,
+  ];
+  for (const sql of migrations) {
+    try {
+      await connection.query(sql);
+    } catch {
+      // Column may already exist on re-run.
+    }
+  }
+
   const hash = await bcrypt.hash(env.adminPassword, 10);
-  await connection.query(
-    `INSERT INTO admins (id, name, email, password_hash, role)
-     VALUES (?, 'Admin User', ?, ?, 'super_admin')
-     ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)`,
-    [randomUUID(), env.adminEmail, hash]
+  const [existingRows] = await connection.query(
+    `SELECT id FROM admins WHERE email = ? LIMIT 1`,
+    [env.adminEmail]
   );
+  const existing = existingRows as Array<{ id: string }>;
+  if (existing.length > 0) {
+    await connection.query(`UPDATE admins SET password_hash = ? WHERE email = ?`, [hash, env.adminEmail]);
+  } else {
+    await connection.query(
+      `INSERT INTO admins (id, name, email, password_hash, role) VALUES (?, 'Admin User', ?, ?, 'super_admin')`,
+      [randomUUID(), env.adminEmail, hash]
+    );
+  }
 
   await connection.end();
   console.log(`Database initialized: ${env.dbName}`);

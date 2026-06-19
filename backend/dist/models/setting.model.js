@@ -17,4 +17,7 @@ Setting.init({
     instagramUrl: { type: sequelize_1.DataTypes.STRING(255), allowNull: false, field: "instagram_url" },
     facebookUrl: { type: sequelize_1.DataTypes.STRING(255), allowNull: false, field: "facebook_url" },
     whatsappUrl: { type: sequelize_1.DataTypes.STRING(255), allowNull: false, field: "whatsapp_url" },
+    tiktokUrl: { type: sequelize_1.DataTypes.STRING(255), allowNull: false, defaultValue: "", field: "tiktok_url" },
+    youtubeUrl: { type: sequelize_1.DataTypes.STRING(255), allowNull: false, defaultValue: "", field: "youtube_url" },
+    siteContent: { type: sequelize_1.DataTypes.JSON, allowNull: true, field: "site_content" },
 }, { sequelize: sequelize_2.sequelize, tableName: "settings", underscored: true, timestamps: false });

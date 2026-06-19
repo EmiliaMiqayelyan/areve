@@ -7,13 +7,20 @@ export function getApiBaseUrl() {
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
-  token?: string
+  token?: string,
+  locale?: string
 ): Promise<T> {
   const headers = new Headers(options.headers || {});
   headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  let url = `${API_BASE_URL}${path}`;
+  if (locale && (locale === 'hy' || locale === 'en')) {
+    const sep = path.includes('?') ? '&' : '?';
+    url = `${API_BASE_URL}${path}${sep}locale=${locale}`;
+  }
+
+  const response = await fetch(url, {
     ...options,
     headers,
   });

@@ -3,6 +3,7 @@
 import { useAdminStore } from '@/lib/adminStore';
 import { Search, Filter, Check, X, Trash2, Star } from 'lucide-react';
 import { useState, useMemo } from 'react';
+import { pickLocalized } from '@/lib/localizedText';
 
 export default function AdminReviewsPage() {
   const { reviews, updateReview, deleteReview } = useAdminStore();
@@ -11,9 +12,8 @@ export default function AdminReviewsPage() {
 
   const filteredReviews = useMemo(() => {
     return reviews.filter(r => {
-      const matchSearch = r.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          r.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          r.comment.toLowerCase().includes(searchTerm.toLowerCase());
+      const haystack = `${r.name} ${pickLocalized(r.product, 'hy')} ${pickLocalized(r.product, 'en')} ${pickLocalized(r.comment, 'hy')} ${pickLocalized(r.comment, 'en')}`.toLowerCase();
+      const matchSearch = haystack.includes(searchTerm.toLowerCase());
       const matchStatus = statusFilter === 'All' || r.status === statusFilter.toLowerCase();
       return matchSearch && matchStatus;
     });
@@ -74,7 +74,7 @@ export default function AdminReviewsPage() {
                 <tr key={review.id} className="hover:bg-[#F8F5F2]/50 transition-colors group">
                   <td className="py-4 px-6 align-top">
                     <p className="text-[14px] font-bold text-[#2B2B2B]">{review.name}</p>
-                    <p className="text-[12px] text-[#AFAFAF] mt-0.5">{review.product}</p>
+                    <p className="text-[12px] text-[#AFAFAF] mt-0.5">{pickLocalized(review.product, 'hy')}</p>
                   </td>
                   <td className="py-4 px-6 align-top">
                     <div className="flex items-center gap-1 text-[#E6C97A]">
@@ -84,7 +84,7 @@ export default function AdminReviewsPage() {
                     </div>
                   </td>
                   <td className="py-4 px-6 align-top">
-                    <p className="text-[14px] text-[#2B2B2B] leading-relaxed line-clamp-3 italic">"{review.comment}"</p>
+                    <p className="text-[14px] text-[#2B2B2B] leading-relaxed line-clamp-3 italic">&quot;{pickLocalized(review.comment, 'hy')}&quot;</p>
                   </td>
                   <td className="py-4 px-6 align-top">
                     <span className={`text-[12px] font-bold uppercase tracking-wide px-3 py-1 rounded-full border ${
