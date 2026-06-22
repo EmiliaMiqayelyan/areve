@@ -7,22 +7,38 @@ import { SOCIAL_URLS } from '@/lib/socialDefaults';
 import { useAdminStore } from '@/lib/adminStore';
 import { toast, modal } from '@/lib/uiStore';
 
+type StoreSettingsForm = {
+  storeName: string;
+  tagline: string;
+  footerDescription: string;
+  supportEmail: string;
+  businessPhone: string;
+  address: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  whatsappUrl: string;
+  tiktokUrl: string;
+  youtubeUrl: string;
+};
+
+const defaultSettings: StoreSettingsForm = {
+  storeName: 'AREVÉ',
+  tagline: 'Handcrafted · Unique · Made with Love',
+  footerDescription: 'Every piece is a tiny sun — made with warmth, patience, and the kind of love only hands can give.',
+  supportEmail: 'care@areve.com',
+  businessPhone: '+1 (555) 123-4567',
+  address: '123 Artisan Maker Way, Creative District, NY 10012',
+  instagramUrl: SOCIAL_URLS.instagram,
+  facebookUrl: SOCIAL_URLS.facebook,
+  whatsappUrl: 'https://wa.me/message/xyz',
+  tiktokUrl: SOCIAL_URLS.tiktok,
+  youtubeUrl: SOCIAL_URLS.youtube,
+};
+
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(false);
   const { token } = useAdminStore();
-  const [settings, setSettings] = useState({
-    storeName: 'AREVÉ',
-    tagline: 'Handcrafted · Unique · Made with Love',
-    footerDescription: 'Every piece is a tiny sun — made with warmth, patience, and the kind of love only hands can give.',
-    supportEmail: 'care@areve.com',
-    businessPhone: '+1 (555) 123-4567',
-    address: '123 Artisan Maker Way, Creative District, NY 10012',
-    instagramUrl: SOCIAL_URLS.instagram,
-    facebookUrl: SOCIAL_URLS.facebook,
-    whatsappUrl: 'https://wa.me/message/xyz',
-    tiktokUrl: SOCIAL_URLS.tiktok,
-    youtubeUrl: SOCIAL_URLS.youtube,
-  });
+  const [settings, setSettings] = useState<StoreSettingsForm>(defaultSettings);
 
   useEffect(() => {
     if (!token) return;

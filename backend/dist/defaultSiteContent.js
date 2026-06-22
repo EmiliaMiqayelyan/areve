@@ -12,7 +12,7 @@ exports.DEFAULT_SITE_CONTENT = {
         { href: '/products', label: 'Ապրանքներ' },
         { href: '/gallery', label: 'Պատկերասրահ' },
         { href: '/about', label: 'Մեր մասին' },
-        { href: '/reviews', label: 'Գնահատականներ' },
+        { href: '/reviews', label: 'Կարծիքներ' },
         { href: '/faq', label: 'ՀՏՀ' },
         { href: '/contact', label: 'Կապ' },
     ],
