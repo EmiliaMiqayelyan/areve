@@ -46,6 +46,10 @@ export default function ProductDetailPage() {
         setRelatedPool(items);
         setProduct(items.find((p) => p.id === id) || null);
       })
+      .catch(() => {
+        setRelatedPool([]);
+        setProduct(null);
+      })
       .finally(() => setLoading(false));
   }, [id, locale, localeFetch]);
 

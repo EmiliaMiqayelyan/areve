@@ -30,10 +30,17 @@ function ProductsContent() {
   const [sort, setSort] = useState<'default' | 'price-asc' | 'price-desc'>('default');
   const [productList, setProductList] = useState<Array<any>>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
+    setLoadError(false);
     void localeFetch<any[]>('/products?active=true')
       .then(setProductList)
+      .catch(() => {
+        setProductList([]);
+        setLoadError(true);
+      })
       .finally(() => setLoading(false));
   }, [locale, localeFetch]);
 
@@ -53,6 +60,11 @@ function ProductsContent() {
       </div>
 
       <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
+        {loadError && !loading && (
+          <div className="mb-6 rounded-xl border border-rose/60 bg-rose/30 px-4 py-3 text-center font-sans text-sm text-ink">
+            {t('common.apiUnavailable')}
+          </div>
+        )}
         {loading && (
           <div className="py-10 text-center font-sans text-[#AFAFAF]">
             {t('common.loadingProducts')}

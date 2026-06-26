@@ -23,6 +23,7 @@ export default function FAQPage() {
   useEffect(() => {
     void localeFetch<any[]>('/faqs')
       .then(setFaqList)
+      .catch(() => setFaqList([]))
       .finally(() => setLoading(false));
   }, [locale, localeFetch]);
 

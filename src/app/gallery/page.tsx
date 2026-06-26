@@ -22,6 +22,7 @@ export default function GalleryPage() {
   useEffect(() => {
     void localeFetch<any[]>('/gallery')
       .then(setGalleryItems)
+      .catch(() => setGalleryItems([]))
       .finally(() => setLoading(false));
   }, [locale, localeFetch]);
 

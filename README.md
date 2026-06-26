@@ -57,12 +57,38 @@ This creates tables and seeds starter data.
 
 ## 5) Run locally
 
-### Start backend
+First-time setup (database):
 
 ```bash
-cd backend
+npm run setup
+```
+
+### Option A — one command (frontend + backend)
+
+```bash
+npm run dev:all
+```
+
+### Option B — two terminals
+
+**Terminal 1 — frontend**
+
+```bash
 npm run dev
 ```
+
+**Terminal 2 — backend** (required for products, reviews, gallery, settings)
+
+```bash
+npm run dev:backend
+```
+
+- Frontend: [http://localhost:3000](http://localhost:3000)
+- Backend API: [http://localhost:4000/api](http://localhost:4000/api)
+
+The frontend proxies `/api/*` to the backend automatically in development.
+
+**If products do not load:** MySQL must be running on port 3306, then run `npm run setup` and restart the backend.
 ## 7) Available API groups
 
 - Public:

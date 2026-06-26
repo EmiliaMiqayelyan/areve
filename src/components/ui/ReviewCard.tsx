@@ -20,7 +20,7 @@ export default function ReviewCard({ review, index = 0 }: { review: Review; inde
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.09 }}
-      style={{ background: '#fff', borderRadius: 20, padding: '28px 28px 24px', border: '1px solid #EADFD8', display: 'flex', flexDirection: 'column', gap: 14, boxShadow: '0 2px 16px rgba(180,156,140,0.08)' }}
+      style={{ background: '#fff', borderRadius: 20, padding: '28px 28px 24px', border: '1px solid #E8DDD6', display: 'flex', flexDirection: 'column', gap: 14, boxShadow: '0 2px 16px rgba(180,156,140,0.06)' }}
     >
       {/* Stars */}
       <div style={{ display: 'flex', gap: 3 }}>
@@ -42,7 +42,7 @@ export default function ReviewCard({ review, index = 0 }: { review: Review; inde
       )}
 
       {/* Author */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 12, borderTop: '1px solid #EADFD8' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 12, borderTop: '1px solid #E8DDD6' }}>
         <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #E6C97A, #E8CFCB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 15, fontWeight: 700, color: '#5a4a1e' }}>{review.name[0]}</span>
         </div>

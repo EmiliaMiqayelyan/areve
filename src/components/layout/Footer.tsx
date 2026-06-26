@@ -21,7 +21,7 @@ export default function Footer() {
   if (pathname.startsWith('/admin')) return null;
 
   return (
-    <footer style={{ background: '#EADFD8', borderTop: '1px solid #D6C3B3', padding: 'var(--section-padding)' }}>
+    <footer style={{ background: '#F5F0EC', borderTop: '1px solid #E8DDD6', padding: 'var(--section-padding)' }}>
       <div className="mx-auto" style={{ maxWidth: 1280, padding: '0 var(--container-px)' }}>
         <div className="flex flex-col lg:flex-row justify-between gap-12 lg:gap-24 mb-12">
 
@@ -68,7 +68,7 @@ export default function Footer() {
 
         </div>
 
-        <div className="border-t border-[#D6C3B3] pt-6 flex flex-wrap gap-4 items-center justify-between">
+        <div className="border-t border-[#E5D9D2] pt-6 flex flex-wrap gap-4 items-center justify-between">
           <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 13, color: '#AFAFAF' }}>
             © {new Date().getFullYear()} {storeName}. {siteContent.footer.copyrightSuffix}
           </p>

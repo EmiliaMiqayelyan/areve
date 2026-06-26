@@ -20,6 +20,7 @@ export default function ReviewsPage() {
   useEffect(() => {
     void localeFetch<any[]>('/reviews')
       .then(setReviewList)
+      .catch(() => setReviewList([]))
       .finally(() => setLoading(false));
   }, [locale, localeFetch]);
 

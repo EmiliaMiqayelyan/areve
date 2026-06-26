@@ -13,6 +13,7 @@ export const messagesEn = {
     explore: 'Explore',
     scroll: 'Scroll',
     total: 'Total',
+    apiUnavailable: 'Could not load data. Make sure the backend is running.',
     product: 'product',
     products: 'products',
     in: 'in',

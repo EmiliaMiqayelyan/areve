@@ -20,5 +20,10 @@ async function bootstrap() {
 
 bootstrap().catch((error) => {
   console.error("Failed to start backend", error);
+  if (String(error).includes("ECONNREFUSED") || error?.name === "SequelizeConnectionRefusedError") {
+    console.error(
+      "\nMySQL is not reachable. Ensure MySQL is running, then run:\n  npm run db:init\n  npm run db:seed\n"
+    );
+  }
   process.exit(1);
 });

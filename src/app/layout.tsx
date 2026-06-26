@@ -3,12 +3,11 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Providers from "@/components/Providers";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000/api";
+import { getApiBaseUrl } from "@/lib/api";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const res = await fetch(`${API_BASE}/settings`, { next: { revalidate: 120 } });
+    const res = await fetch(`${getApiBaseUrl()}/settings`, { next: { revalidate: 120 } });
     if (!res.ok) throw new Error("unavailable");
     const data = await res.json();
     const title = data.siteContent?.metadata?.title as string | undefined;

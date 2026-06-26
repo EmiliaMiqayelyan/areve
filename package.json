@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev --webpack",
     "dev:backend": "npm --prefix backend run dev",
+    "dev:all": "npx --yes concurrently -n frontend,backend -c cyan,magenta \"npm run dev\" \"npm run dev:backend\"",
+    "setup": "npm run db:init && npm run db:seed",
     "db:init": "npm --prefix backend run db:init",
     "db:seed": "npm --prefix backend run db:seed",
     "docker:up": "docker compose up --build -d",
