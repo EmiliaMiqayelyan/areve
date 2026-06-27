@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAdminStore } from '@/lib/adminStore';
-import { Lock } from 'lucide-react';
 import { useTranslation } from '@/i18n/I18nProvider';
+import areveMark from '../../icon.png';
 
 export default function AdminLogin() {
   const { t } = useTranslation();
@@ -27,8 +28,8 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen bg-ivory flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-[0_8px_40px_rgba(180,156,140,0.15)] text-center">
-        <div className="mx-auto w-16 h-16 bg-beige/50 text-ink rounded-full flex items-center justify-center mb-6">
-          <Lock size={28} />
+        <div className="mx-auto mb-6 flex justify-center">
+          <Image src={areveMark} alt="AREVÉ" width={72} height={72} className="h-16 w-16 object-contain" priority />
         </div>
         <h3 className=" font-serif text-ink mb-2">{t('adminLogin.title')}</h3>
         <p className="text-subtle font-sans text-sm mb-6">{t('adminLogin.subtitle')}</p>

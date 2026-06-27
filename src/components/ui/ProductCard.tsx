@@ -86,7 +86,7 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
 
         {/* Badge */}
         {badge && product.badge && (
-          <span style={{ position: 'absolute', top: 12, left: 12, ...badge, fontFamily: "'DM Sans',sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: '1.5px', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 99 }}>
+          <span style={{ position: 'absolute', top: 12, left: 12, ...badge, fontFamily: 'var(--font-sans)', fontSize: 10, fontWeight: 600, letterSpacing: '1.5px', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 99 }}>
             {t(`product.badge_${product.badge}` as 'product.badge_New') || product.badge}
           </span>
         )}
@@ -113,7 +113,7 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
         >
           <button
             onClick={() => addItem({ ...product, name: pickLocalized(product.name, locale) })}
-            style={{ width: '100%', padding: '10px', background: '#E6C97A', border: 'none', borderRadius: 99, fontFamily: "'DM Sans',sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: '1.2px', textTransform: 'uppercase', color: '#5a4a1e', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background 0.2s' }}
+            style={{ width: '100%', padding: '10px', background: '#E6C97A', border: 'none', borderRadius: 99, fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, letterSpacing: '1.2px', textTransform: 'uppercase', color: '#5a4a1e', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#F4D58D')}
             onMouseLeave={e => (e.currentTarget.style.background = '#E6C97A')}
           >
@@ -125,17 +125,17 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
 
       {/* Content */}
       <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 11, color: '#AFAFAF', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 6 }}>
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: '#AFAFAF', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 6 }}>
           {product.category}
         </p>
-        <h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 17, color: '#2B2B2B', marginBottom: 10, lineHeight: 1.3 }}>
+        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 17, color: '#2B2B2B', marginBottom: 10, lineHeight: 1.3 }}>
           {pickLocalized(product.name, locale)}
         </h3>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-          <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 20, color: '#2B2B2B' }}>${product.price}</span>
+          <span style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: '#2B2B2B' }}>${product.price}</span>
           <Link
             href={`/products/${product.id}`}
-            style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12, color: '#BFA6A0', textDecoration: 'none', borderBottom: '1px solid #BFA6A0', paddingBottom: 1, transition: 'color 0.2s, border-color 0.2s' }}
+            style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: '#BFA6A0', textDecoration: 'none', borderBottom: '1px solid #BFA6A0', paddingBottom: 1, transition: 'color 0.2s, border-color 0.2s' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#E6C97A'; (e.currentTarget as HTMLElement).style.borderColor = '#E6C97A'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#BFA6A0'; (e.currentTarget as HTMLElement).style.borderColor = '#BFA6A0'; }}
           >

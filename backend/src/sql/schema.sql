@@ -97,11 +97,11 @@ INSERT IGNORE INTO settings (
 ) VALUES (
   1, 'AREVÉ', 'Ձեռագործ · Եզակի · Սիրով ստեղծված',
   'Յուրաքանչյուր կտոր փոքրիկ արև է — ստեղծված ջերմությամբ, համբերությամբ և միայն ձեռքերով տրվող սիրով։',
-  'care@areve.com', '+1 (555) 123-4567',
+  'care@areve.com', '+374 41 83 21 22',
   '123 Artisan Maker Way, Creative District, NY 10012',
   'https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr',
   'https://www.facebook.com/share/18mdNprAXw/?mibextid=wwXIfr',
-  'https://wa.me/message/xyz',
+  'https://wa.me/37441832122',
   'https://www.tiktok.com/@areve_collections?_r=1&_t=ZS-9791ZS0NSEu',
   'https://youtube.com/@areve_collections?si=XM4HvU8cfXMTbN5I',
   NULL

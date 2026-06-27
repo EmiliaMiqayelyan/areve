@@ -158,7 +158,7 @@ export default function CartDrawer() {
                 <ShoppingBag size={18} color="#E6C97A" strokeWidth={1.8} />
                 <span
                   style={{
-                    fontFamily: "'Playfair Display',serif",
+                    fontFamily: 'var(--font-serif)',
                     fontSize: 18,
                     color: '#2B2B2B',
                   }}
@@ -168,7 +168,7 @@ export default function CartDrawer() {
                 {step === 'review' && items.length > 0 && (
                   <span
                     style={{
-                      fontFamily: "'DM Sans',sans-serif",
+                      fontFamily: 'var(--font-sans)',
                       fontSize: 13,
                       color: '#AFAFAF',
                     }}
@@ -223,7 +223,7 @@ export default function CartDrawer() {
                       <ShoppingBag size={48} color="#D6C3B3" strokeWidth={1.2} />
                       <p
                         style={{
-                          fontFamily: "'Playfair Display',serif",
+                          fontFamily: 'var(--font-serif)',
                           fontSize: 20,
                           color: '#2B2B2B',
                         }}
@@ -232,7 +232,7 @@ export default function CartDrawer() {
                       </p>
                       <p
                         style={{
-                          fontFamily: "'DM Sans',sans-serif",
+                          fontFamily: 'var(--font-sans)',
                           fontSize: 14,
                           color: '#AFAFAF',
                         }}
@@ -285,7 +285,7 @@ export default function CartDrawer() {
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p
                             style={{
-                              fontFamily: "'DM Sans',sans-serif",
+                              fontFamily: 'var(--font-sans)',
                               fontSize: 14,
                               fontWeight: 500,
                               color: '#2B2B2B',
@@ -298,7 +298,7 @@ export default function CartDrawer() {
                           </p>
                           <p
                             style={{
-                              fontFamily: "'Playfair Display',serif",
+                              fontFamily: 'var(--font-serif)',
                               fontSize: 16,
                               color: '#E6C97A',
                               marginTop: 2,
@@ -334,7 +334,7 @@ export default function CartDrawer() {
                               </button>
                               <span
                                 style={{
-                                  fontFamily: "'DM Sans',sans-serif",
+                                  fontFamily: 'var(--font-sans)',
                                   fontSize: 13,
                                   color: '#2B2B2B',
                                 }}
@@ -361,7 +361,7 @@ export default function CartDrawer() {
                             </div>
                             <span
                               style={{
-                                fontFamily: "'DM Sans',sans-serif",
+                                fontFamily: 'var(--font-sans)',
                                 fontSize: 13,
                                 fontWeight: 500,
                                 color: '#2B2B2B',
@@ -408,7 +408,7 @@ export default function CartDrawer() {
                     >
                       <span
                         style={{
-                          fontFamily: "'DM Sans',sans-serif",
+                          fontFamily: 'var(--font-sans)',
                           fontSize: 14,
                           color: '#7A7A7A',
                         }}
@@ -417,7 +417,7 @@ export default function CartDrawer() {
                       </span>
                       <span
                         style={{
-                          fontFamily: "'Playfair Display',serif",
+                          fontFamily: 'var(--font-serif)',
                           fontSize: 24,
                           color: '#2B2B2B',
                         }}
@@ -457,7 +457,7 @@ export default function CartDrawer() {
                 >
                   <p
                     style={{
-                      fontFamily: "'DM Sans',sans-serif",
+                      fontFamily: 'var(--font-sans)',
                       fontSize: 14,
                       color: '#7A7A7A',
                       marginBottom: 4,
@@ -490,7 +490,7 @@ export default function CartDrawer() {
                   >
                     <p
                       style={{
-                        fontFamily: "'DM Sans',sans-serif",
+                        fontFamily: 'var(--font-sans)',
                         fontSize: 12,
                         color: '#AFAFAF',
                         marginBottom: 8,
@@ -502,7 +502,7 @@ export default function CartDrawer() {
                     </p>
                     <p
                       style={{
-                        fontFamily: "'Playfair Display',serif",
+                        fontFamily: 'var(--font-serif)',
                         fontSize: 22,
                         color: '#2B2B2B',
                       }}
@@ -511,7 +511,7 @@ export default function CartDrawer() {
                     </p>
                     <p
                       style={{
-                        fontFamily: "'DM Sans',sans-serif",
+                        fontFamily: 'var(--font-sans)',
                         fontSize: 13,
                         color: '#7A7A7A',
                         marginTop: 4,
@@ -524,7 +524,7 @@ export default function CartDrawer() {
                   {sendError && (
                     <p
                       style={{
-                        fontFamily: "'DM Sans',sans-serif",
+                        fontFamily: 'var(--font-sans)',
                         fontSize: 13,
                         color: '#c0392b',
                       }}
@@ -629,7 +629,7 @@ function MessengerOption({
       </span>
       <span
         style={{
-          fontFamily: "'DM Sans',sans-serif",
+          fontFamily: 'var(--font-sans)',
           fontSize: 15,
           fontWeight: 500,
           color: '#2B2B2B',

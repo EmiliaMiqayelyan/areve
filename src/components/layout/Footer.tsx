@@ -9,8 +9,8 @@ import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
 
 const col: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 12 };
-const linkStyle: React.CSSProperties = { fontFamily: "'DM Sans',sans-serif", fontSize: 14, color: '#7A7A7A', textDecoration: 'none', transition: 'color 0.2s' };
-const headStyle: React.CSSProperties = { fontFamily: "'Playfair Display',serif", fontSize: 18, fontWeight: 600, color: '#2B2B2B', marginBottom: 16 };
+const linkStyle: React.CSSProperties = { fontFamily: 'var(--font-sans)', fontSize: 14, color: '#7A7A7A', textDecoration: 'none', transition: 'color 0.2s' };
+const headStyle: React.CSSProperties = { fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 600, color: '#2B2B2B', marginBottom: 16 };
 
 export default function Footer() {
   const pathname = usePathname();
@@ -30,7 +30,7 @@ export default function Footer() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <Image src={areve} alt={storeName} width="90" height="90" />
             </div>
-            <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 14, color: '#7A7A7A', lineHeight: 1.7 }}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: '#7A7A7A', lineHeight: 1.7 }}>
               {footerDescription}
             </p>
             <SocialLinks
@@ -69,10 +69,10 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-[#E5D9D2] pt-6 flex flex-wrap gap-4 items-center justify-between">
-          <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 13, color: '#AFAFAF' }}>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#AFAFAF' }}>
             © {new Date().getFullYear()} {storeName}. {siteContent.footer.copyrightSuffix}
           </p>
-          <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 13, color: '#AFAFAF' }} className="hidden sm:block">
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#AFAFAF' }} className="hidden sm:block">
             {tagline}
           </p>
         </div>

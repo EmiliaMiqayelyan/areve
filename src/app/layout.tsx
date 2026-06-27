@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Providers from "@/components/Providers";
 import { getApiBaseUrl } from "@/lib/api";
+import { fontVariables } from "@/lib/fonts";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -27,8 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="hy" suppressHydrationWarning>
-      <body style={{ fontFamily: "'DM Sans', system-ui, sans-serif", background: '#F8F5F2', color: '#2B2B2B' }}>
+    <html lang="hy" className={`${fontVariables} locale-hy`} suppressHydrationWarning>
+      <body style={{ background: '#F8F5F2', color: '#2B2B2B' }}>
         <Providers>
           <Header />
           <main>{children}</main>

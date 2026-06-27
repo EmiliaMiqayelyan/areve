@@ -19,16 +19,16 @@ export default function SectionHeader({ eyebrow, title, subtitle, centered = fal
       style={{ marginBottom: 48, textAlign: centered ? 'center' : 'left' }}
     >
       {eyebrow && (
-        <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', color: '#BFA6A0', marginBottom: 12 }}>
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', color: '#BFA6A0', marginBottom: 12 }}>
           {eyebrow}
         </p>
       )}
-      <h2 style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(28px,4vw,46px)', color: '#2B2B2B', fontWeight: 700, lineHeight: 1.2, marginBottom: 16 }}>
+      <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(28px,4vw,46px)', color: '#2B2B2B', fontWeight: 700, lineHeight: 1.2, marginBottom: 16 }}>
         {title}
       </h2>
       <div className={centered ? 'divider-gold-center' : 'divider-gold'} />
       {subtitle && (
-        <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 16, color: '#7A7A7A', lineHeight: 1.75, maxWidth: 560, marginTop: 16, marginLeft: centered ? 'auto' : 0, marginRight: centered ? 'auto' : 0 }}>
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 16, color: '#7A7A7A', lineHeight: 1.75, maxWidth: 560, marginTop: 16, marginLeft: centered ? 'auto' : 0, marginRight: centered ? 'auto' : 0 }}>
           {subtitle}
         </p>
       )}

@@ -56,16 +56,16 @@ export default function ReviewsPage() {
       <div className="bg-ivory border-b border-beige px-[var(--container-px)] py-16 sm:py-20 text-center">
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
           <p style={{ fontSize: 36, marginBottom: 16 }}>❝</p>
-          <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(18px,2.5vw,26px)', color: '#2B2B2B', fontStyle: 'italic', lineHeight: 1.65 }}>
+          <p style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(18px,2.5vw,26px)', color: '#2B2B2B', fontStyle: 'italic', lineHeight: 1.65 }}>
             {pg.featuredQuote}
           </p>
-          <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 13, color: '#BFA6A0', marginTop: 16, letterSpacing: '1px' }}>{pg.featuredAuthor}</p>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#BFA6A0', marginTop: 16, letterSpacing: '1px' }}>{pg.featuredAuthor}</p>
         </div>
       </div>
 
       <div className="max-w-[1280px] mx-auto px-[var(--container-px)] py-14 sm:py-16">
         {loading && (
-          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: "'DM Sans',sans-serif", color: '#AFAFAF' }}>
+          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>
             {t('common.loadingReviews')}
           </div>
         )}
@@ -74,7 +74,7 @@ export default function ReviewsPage() {
         </div>
 
         {!loading && reviewList.length === 0 && (
-          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: "'DM Sans',sans-serif", color: '#AFAFAF' }}>
+          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>
             {t('common.noReviews')}
           </div>
         )}

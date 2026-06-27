@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Package, ShoppingCart, Tags,
@@ -13,6 +14,7 @@ import { useTranslation } from '@/i18n/I18nProvider';
 
 import { ToastContainer } from '@/components/ui/Toast';
 import { AppModal } from '@/components/ui/AppModal';
+import areveMark from '../icon.png';
 
 const links = [
   { href: '/admin', labelKey: 'admin.nav.dashboard', icon: LayoutDashboard },
@@ -133,7 +135,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         <div className="h-14 flex items-center justify-between px-4 border-b border-[#EADFD8] sm:px-6">
           <Link href="/" className="flex items-center gap-2 text-ink no-underline min-w-0">
-            <span className="text-lg shrink-0">☀️</span>
+            <Image src={areveMark} alt="AREVÉ" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
             <span className="font-serif text-lg font-bold tracking-wide text-[#2B2B2B] truncate">AREVÉ</span>
             <span className="hidden sm:inline ml-1 text-[9px] font-bold tracking-wider text-[#AFAFAF] uppercase bg-[#F8F5F2] px-2 py-0.5 rounded-full shrink-0">
               {t('admin.badge')}
@@ -203,8 +205,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <p className="text-[12px] font-medium text-[#2B2B2B] group-hover:text-[#E6C97A] transition-colors">Admin User</p>
                 <p className="text-[10px] text-[#AFAFAF]">Store Manager</p>
               </div>
-              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-sm shrink-0">
-                ☀️
+              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0">
+                <Image src={areveMark} alt="AREVÉ" width={32} height={32} className="h-full w-full object-contain" />
               </div>
             </div>
           </div>

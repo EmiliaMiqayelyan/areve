@@ -37,18 +37,24 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setLocaleState(readStoredLocale());
   }, []);
 
+  const applyLocaleToDocument = useCallback((next: Locale) => {
+    document.documentElement.lang = next === 'hy' ? 'hy' : 'en';
+    document.documentElement.classList.remove('locale-hy', 'locale-en');
+    document.documentElement.classList.add(next === 'hy' ? 'locale-hy' : 'locale-en');
+  }, []);
+
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
-      document.documentElement.lang = next === 'hy' ? 'hy' : 'en';
+      applyLocaleToDocument(next);
       window.dispatchEvent(new CustomEvent('areve-locale-change', { detail: next }));
     }
-  }, []);
+  }, [applyLocaleToDocument]);
 
   useEffect(() => {
-    document.documentElement.lang = locale === 'hy' ? 'hy' : 'en';
-  }, [locale]);
+    applyLocaleToDocument(locale);
+  }, [locale, applyLocaleToDocument]);
 
   const messages = useMemo(() => getMessages(locale), [locale]);
 

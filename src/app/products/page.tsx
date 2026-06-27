@@ -118,7 +118,7 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', paddingTop: 100, textAlign: 'center', fontFamily: "'DM Sans',sans-serif", color: '#AFAFAF' }}>Loading...</div>}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', paddingTop: 100, textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>Loading...</div>}>
       <ProductsContent />
     </Suspense>
   );

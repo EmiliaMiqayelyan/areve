@@ -26,11 +26,11 @@ const defaultSettings: StoreSettingsForm = {
   tagline: 'Handcrafted · Unique · Made with Love',
   footerDescription: 'Every piece is a tiny sun — made with warmth, patience, and the kind of love only hands can give.',
   supportEmail: 'care@areve.com',
-  businessPhone: '+1 (555) 123-4567',
+  businessPhone: '+374 41 83 21 22',
   address: '123 Artisan Maker Way, Creative District, NY 10012',
   instagramUrl: SOCIAL_URLS.instagram,
   facebookUrl: SOCIAL_URLS.facebook,
-  whatsappUrl: 'https://wa.me/message/xyz',
+  whatsappUrl: 'https://wa.me/37441832122',
   tiktokUrl: SOCIAL_URLS.tiktok,
   youtubeUrl: SOCIAL_URLS.youtube,
 };

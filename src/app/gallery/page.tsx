@@ -36,7 +36,7 @@ export default function GalleryPage() {
 
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
         {loading && (
-          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: "'DM Sans',sans-serif", color: '#AFAFAF' }}>
+          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>
             {t('common.loadingGallery')}
           </div>
         )}
@@ -60,7 +60,7 @@ export default function GalleryPage() {
               <div style={{ position: 'absolute', inset: 0, background: 'rgba(248,245,242,0)', transition: 'background 0.3s', display: 'flex', alignItems: 'flex-end', padding: 14 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(230,201,122,0.15)'; }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,245,242,0)'; }}>
-                <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 12, color: '#2B2B2B', background: 'rgba(248,245,242,0.88)', padding: '4px 10px', borderRadius: 99, opacity: 0, transition: 'opacity 0.3s' }}
+                <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: '#2B2B2B', background: 'rgba(248,245,242,0.88)', padding: '4px 10px', borderRadius: 99, opacity: 0, transition: 'opacity 0.3s' }}
                   className="img-caption">
                   {altText}
                 </p>
@@ -70,7 +70,7 @@ export default function GalleryPage() {
         </div>
 
         {!loading && galleryItems.length === 0 && (
-          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: "'DM Sans',sans-serif", color: '#AFAFAF' }}>
+          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>
             Gallery is empty.
           </div>
         )}

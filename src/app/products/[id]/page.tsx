@@ -55,7 +55,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', paddingTop: 120, textAlign: 'center', fontFamily: "'DM Sans',sans-serif", color: '#AFAFAF' }}>
+      <div style={{ minHeight: '100vh', paddingTop: 120, textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>
         {t('product.loading')}
       </div>
     );
@@ -63,7 +63,7 @@ export default function ProductDetailPage() {
 
   if (!product) return (
     <div style={{ minHeight: '100vh', paddingTop: 120, textAlign: 'center' }}>
-      <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 22, color: '#2B2B2B' }}>{t('product.notFound')}</p>
+      <p style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: '#2B2B2B' }}>{t('product.notFound')}</p>
       <Link href="/products" style={{ color: '#E6C97A', textDecoration: 'none', marginTop: 12, display: 'inline-block' }}>← {t('product.backToProducts')}</Link>
     </div>
   );

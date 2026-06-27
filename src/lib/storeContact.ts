@@ -1,5 +1,5 @@
 /** WhatsApp number in international format (digits only), e.g. 37499123456 */
-export const STORE_WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_STORE_WHATSAPP_NUMBER ?? '';
+export const STORE_WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_STORE_WHATSAPP_NUMBER ?? '37441832122';
 
 /** Telegram username without @, used for optional direct links */
 export const STORE_TELEGRAM_USERNAME = process.env.NEXT_PUBLIC_STORE_TELEGRAM_USERNAME ?? '';

@@ -64,7 +64,7 @@ export default function Header() {
                 href={link.href}
                 className="whitespace-nowrap shrink-0"
                 style={{
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: 'var(--font-sans)',
                   fontSize: locale === 'hy' ? 11 : 12,
                   fontWeight: 500,
                   letterSpacing: locale === 'hy' ? '0.6px' : '1px',
@@ -160,7 +160,7 @@ export default function Header() {
                       style={{
                         display: 'block',
                         padding: '12px 16px',
-                        fontFamily: "'DM Sans', sans-serif",
+                        fontFamily: 'var(--font-sans)',
                         fontSize: 14,
                         fontWeight: 500,
                         letterSpacing: '1px',
