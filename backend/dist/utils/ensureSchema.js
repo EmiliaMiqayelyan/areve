@@ -5,9 +5,12 @@ const sequelize_1 = require("../config/sequelize");
 const STATEMENTS = [
     `ALTER TABLE products MODIFY image MEDIUMTEXT NOT NULL`,
     `ALTER TABLE gallery MODIFY src MEDIUMTEXT NOT NULL`,
+    `ALTER TABLE settings ADD COLUMN telegram_url VARCHAR(255) NOT NULL DEFAULT ''`,
     `ALTER TABLE settings ADD COLUMN tiktok_url VARCHAR(255) NOT NULL DEFAULT ''`,
     `ALTER TABLE settings ADD COLUMN youtube_url VARCHAR(255) NOT NULL DEFAULT ''`,
     `ALTER TABLE settings ADD COLUMN site_content JSON NULL`,
+    `ALTER TABLE products ADD COLUMN cost DECIMAL(10,2) NOT NULL DEFAULT 0`,
+    `ALTER TABLE order_items ADD COLUMN unit_cost DECIMAL(10,2) NOT NULL DEFAULT 0`,
 ];
 /** Idempotent schema adjustments for dev DBs created before newer columns. */
 async function ensureSchemaColumns() {

@@ -12,6 +12,7 @@ router.get("/products", (0, asyncHandler_1.asyncHandler)(public_controller_1.get
 router.get("/products/:id", (0, asyncHandler_1.asyncHandler)(public_controller_1.getProductById));
 router.get("/reviews", (0, asyncHandler_1.asyncHandler)(public_controller_1.getReviews));
 router.get("/faqs", (0, asyncHandler_1.asyncHandler)(public_controller_1.getFaqs));
+router.get("/categories", (0, asyncHandler_1.asyncHandler)(public_controller_1.getCategories));
 router.get("/gallery", (0, asyncHandler_1.asyncHandler)(public_controller_1.getGallery));
 router.post("/contact", (0, validate_1.validateBody)(schemas_1.contactSchema), (0, asyncHandler_1.asyncHandler)(public_controller_1.createContact));
 router.post("/orders", (0, validate_1.validateBody)(schemas_1.orderSchema), (0, asyncHandler_1.asyncHandler)(public_controller_1.createOrder));

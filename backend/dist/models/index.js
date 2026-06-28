@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Setting = exports.Review = exports.Product = exports.OrderItem = exports.Order = exports.Gallery = exports.Faq = exports.Contact = exports.Admin = void 0;
+exports.Setting = exports.Review = exports.Product = exports.OrderItem = exports.Order = exports.Gallery = exports.Faq = exports.Contact = exports.Category = exports.Admin = void 0;
 const admin_model_1 = require("./admin.model");
 Object.defineProperty(exports, "Admin", { enumerable: true, get: function () { return admin_model_1.Admin; } });
+const category_model_1 = require("./category.model");
+Object.defineProperty(exports, "Category", { enumerable: true, get: function () { return category_model_1.Category; } });
 const contact_model_1 = require("./contact.model");
 Object.defineProperty(exports, "Contact", { enumerable: true, get: function () { return contact_model_1.Contact; } });
 const faq_model_1 = require("./faq.model");

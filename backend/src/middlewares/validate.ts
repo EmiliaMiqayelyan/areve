@@ -8,8 +8,9 @@ export function validateBody(schema: ZodTypeAny) {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
+        const details = error.issues.map((issue) => issue.message).filter(Boolean);
         return res.status(400).json({
-          message: "Validation failed",
+          message: details[0] || "Validation failed",
           errors: error.issues.map((issue) => ({
             path: issue.path.join("."),
             message: issue.message,

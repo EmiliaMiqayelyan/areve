@@ -2,12 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const admin_controller_1 = require("../controllers/admin.controller");
+const auth_controller_1 = require("../controllers/auth.controller");
 const auth_1 = require("../middlewares/auth");
 const validate_1 = require("../middlewares/validate");
 const asyncHandler_1 = require("../utils/asyncHandler");
 const schemas_1 = require("../validators/schemas");
 const router = (0, express_1.Router)();
 router.use(auth_1.requireAdminAuth);
+router.get("/admin/account", (0, asyncHandler_1.asyncHandler)(auth_controller_1.getAdminAccount));
+router.put("/admin/account/credentials", (0, validate_1.validateBody)(schemas_1.adminCredentialsUpdateSchema), (0, asyncHandler_1.asyncHandler)(auth_controller_1.updateAdminCredentials));
 router.get("/admin/products", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminProducts));
 router.post("/admin/products", (0, validate_1.validateBody)(schemas_1.productCreateSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminProduct));
 router.put("/admin/products/:id", (0, validate_1.validateBody)(schemas_1.productSchema.partial()), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminProduct));
@@ -17,7 +20,7 @@ router.post("/admin/reviews", (0, validate_1.validateBody)(schemas_1.reviewCreat
 router.put("/admin/reviews/:id", (0, validate_1.validateBody)(schemas_1.reviewSchema.partial()), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminReview));
 router.delete("/admin/reviews/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.deleteAdminReview));
 router.get("/admin/orders", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminOrders));
-router.post("/admin/orders", (0, validate_1.validateBody)(schemas_1.orderSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminOrder));
+router.post("/admin/orders", (0, validate_1.validateBody)(schemas_1.adminOrderCreateSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminOrder));
 router.get("/admin/orders/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminOrderById));
 router.put("/admin/orders/:id", (0, validate_1.validateBody)(schemas_1.adminOrderUpdateSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminOrder));
 router.patch("/admin/orders/:id/status", (0, validate_1.validateBody)(schemas_1.orderStatusSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminOrderStatus));
@@ -27,6 +30,10 @@ router.put("/admin/faqs", (0, validate_1.validateBody)(schemas_1.faqReplaceSchem
 router.get("/admin/gallery", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminGallery));
 router.post("/admin/gallery", (0, validate_1.validateBody)(schemas_1.gallerySchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminGallery));
 router.delete("/admin/gallery/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.deleteAdminGallery));
+router.get("/admin/categories", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminCategories));
+router.post("/admin/categories", (0, validate_1.validateBody)(schemas_1.categoryCreateSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminCategory));
+router.put("/admin/categories/:id", (0, validate_1.validateBody)(schemas_1.categoryUpdateSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminCategory));
+router.delete("/admin/categories/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.deleteAdminCategory));
 router.get("/admin/settings", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminSettings));
 router.put("/admin/settings", (0, validate_1.validateBody)(schemas_1.settingsSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminSettings));
 router.get("/admin/users", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminUsers));

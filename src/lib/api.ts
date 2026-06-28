@@ -53,7 +53,13 @@ export async function apiFetch<T>(
     let message = 'Request failed';
     try {
       const body = await response.json();
-      message = body.message || message;
+      if (Array.isArray(body.errors) && body.errors.length > 0) {
+        message = body.errors
+          .map((issue: { message?: string }) => issue.message)
+          .filter(Boolean)
+          .join('. ');
+      }
+      if (body.message) message = body.message;
     } catch {
       // ignore
     }

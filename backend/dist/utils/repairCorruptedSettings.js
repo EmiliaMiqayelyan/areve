@@ -3,8 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.repairCorruptedSettings = repairCorruptedSettings;
 const models_1 = require("../models");
 const MOJIBAKE_RE = /[ÕÔÃ][±°´€³]|Ã©|â€|AREVÃ/;
-const ARMENIAN_TAGLINE = "Ձեռագործ · Եզակի · Սիրով ստեղծված";
-const ARMENIAN_FOOTER = "Յուրաքանչյուր կտոր փոքրիկ արև է — ստեղծված ջերմությամբ, համբերությամբ և միայն ձեռքերով տրվող սիրով։";
+const ARMENIAN_TAGLINE = "Արև՝ քո առօրյայում";
+const ARMENIAN_FOOTER = "Ստեղծված ձեռքերով՝ ջերմությամբ, համբերությամբ և սիրով";
 function hasMojibake(value) {
     if (value == null)
         return false;

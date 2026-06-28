@@ -13,7 +13,8 @@ Product.init({
     // Stores data URLs from the current admin upload UI.
     // Must be large enough; otherwise the data URL is truncated and images won't render.
     image: { type: sequelize_1.DataTypes.TEXT('medium'), allowNull: false },
-    category: { type: sequelize_1.DataTypes.ENUM("bags", "toys", "accessories"), allowNull: false },
+    category: { type: sequelize_1.DataTypes.STRING(64), allowNull: false },
+    cost: { type: sequelize_1.DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0 },
     badge: { type: sequelize_1.DataTypes.JSON, allowNull: true },
     description: { type: sequelize_1.DataTypes.JSON, allowNull: true },
     status: { type: sequelize_1.DataTypes.ENUM("active", "inactive"), allowNull: false, defaultValue: "active" },

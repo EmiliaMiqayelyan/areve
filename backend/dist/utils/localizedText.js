@@ -16,11 +16,11 @@ function parseJsonLocalizedString(value) {
         const parsed = JSON.parse(trimmed);
         if (!isLocalizedObject(parsed))
             return null;
-        const hy = String(parsed.hy ?? parsed.en ?? "").trim();
-        const en = String(parsed.en ?? parsed.hy ?? "").trim();
+        const hy = String(parsed.hy ?? "").trim();
+        const en = String(parsed.en ?? "").trim();
         if (!hy && !en)
             return null;
-        return { hy, en: en || hy };
+        return { hy, en };
     }
     catch {
         return null;
@@ -35,9 +35,10 @@ function normalizeLocalizedInput(value) {
         return { hy: trimmed, en: trimmed };
     }
     if (isLocalizedObject(value)) {
-        const hy = String(value.hy ?? value.en ?? "").trim();
-        const en = String(value.en ?? value.hy ?? "").trim();
-        return { hy, en: en || hy };
+        return {
+            hy: String(value.hy ?? "").trim(),
+            en: String(value.en ?? "").trim(),
+        };
     }
     return { hy: "", en: "" };
 }

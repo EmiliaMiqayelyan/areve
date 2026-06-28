@@ -1,9 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.settingsSchema = exports.faqReplaceSchema = exports.adminOrderUpdateSchema = exports.orderStatusSchema = exports.loginSchema = exports.orderSchema = exports.contactSchema = exports.gallerySchema = exports.faqSchema = exports.reviewCreateSchema = exports.reviewSchema = exports.productCreateSchema = exports.productSchema = void 0;
+exports.settingsSchema = exports.categoryUpdateSchema = exports.categoryCreateSchema = exports.faqReplaceSchema = exports.adminOrderUpdateSchema = exports.adminOrderCreateSchema = exports.orderStatusSchema = exports.adminCredentialsUpdateSchema = exports.loginSchema = exports.orderSchema = exports.contactSchema = exports.gallerySchema = exports.faqSchema = exports.reviewCreateSchema = exports.reviewSchema = exports.productCreateSchema = exports.productSchema = void 0;
 const zod_1 = require("zod");
 const localizedText_1 = require("../utils/localizedText");
 const optionalUrlOrEmpty = zod_1.z.union([zod_1.z.string().url(), zod_1.z.literal("")]).optional();
+const telegramContactOrEmpty = zod_1.z.union([
+    zod_1.z.string().url(),
+    zod_1.z.string().regex(/^@?[A-Za-z0-9_]{5,32}$/),
+    zod_1.z.literal(""),
+]).optional();
 const localizedTextSchema = zod_1.z
     .union([
     zod_1.z.string().min(1).max(5000),
@@ -36,7 +41,8 @@ exports.productSchema = zod_1.z.object({
     name: localizedTextSchema,
     price: zod_1.z.coerce.number().positive(),
     image: zod_1.z.string().min(1),
-    category: zod_1.z.enum(["bags", "toys", "accessories"]),
+    category: zod_1.z.string().min(1).max(64),
+    cost: zod_1.z.coerce.number().nonnegative().optional(),
     badge: optionalLocalizedTextSchema,
     description: optionalLocalizedTextSchema,
     status: zod_1.z.enum(["active", "inactive"]).default("active"),
@@ -91,8 +97,37 @@ exports.loginSchema = zod_1.z.object({
     email: zod_1.z.string().email(),
     password: zod_1.z.string().min(6).max(100),
 });
+exports.adminCredentialsUpdateSchema = zod_1.z
+    .object({
+    currentPassword: zod_1.z.string().min(6).max(100),
+    newEmail: zod_1.z.string().email().optional(),
+    newPassword: zod_1.z.string().min(6).max(100).optional(),
+    confirmPassword: zod_1.z.string().min(6).max(100).optional(),
+})
+    .refine((data) => !data.newPassword || data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+})
+    .refine((data) => Boolean(data.newEmail || data.newPassword), {
+    message: "Provide a new email and/or new password",
+});
 exports.orderStatusSchema = zod_1.z.object({
     status: zod_1.z.enum(["pending", "shipped", "delivered"]),
+});
+exports.adminOrderCreateSchema = zod_1.z.object({
+    customerName: zod_1.z.string().min(1).max(160),
+    delivery: zod_1.z.string().max(100).optional(),
+    packaging: zod_1.z.string().max(100).optional(),
+    soldAt: zod_1.z.string().min(1).optional(),
+    items: zod_1.z
+        .array(zod_1.z.object({
+        id: zod_1.z.string().min(1),
+        name: zod_1.z.string().min(1).max(120),
+        quantity: zod_1.z.coerce.number().int().min(1),
+        price: zod_1.z.coerce.number().nonnegative(),
+        unitCost: zod_1.z.coerce.number().nonnegative().optional(),
+    }))
+        .min(1),
 });
 /** Admin dashboard order edits (customer/shipping fields). */
 exports.adminOrderUpdateSchema = zod_1.z.object({
@@ -121,6 +156,20 @@ exports.faqReplaceSchema = zod_1.z.array(zod_1.z.object({
     question: localizedTextSchema,
     answer: localizedTextSchema,
 }));
+const categorySlugSchema = zod_1.z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only");
+exports.categoryCreateSchema = zod_1.z.object({
+    id: categorySlugSchema,
+    name: localizedTextSchema,
+    sortOrder: zod_1.z.coerce.number().int().min(0).optional(),
+});
+exports.categoryUpdateSchema = zod_1.z.object({
+    name: localizedTextSchema.optional(),
+    sortOrder: zod_1.z.coerce.number().int().min(0).optional(),
+});
 exports.settingsSchema = zod_1.z.object({
     storeName: zod_1.z.string().min(1).max(120),
     tagline: zod_1.z.string().max(240),
@@ -131,6 +180,7 @@ exports.settingsSchema = zod_1.z.object({
     instagramUrl: zod_1.z.string().url(),
     facebookUrl: zod_1.z.string().url(),
     whatsappUrl: zod_1.z.string().url(),
+    telegramUrl: telegramContactOrEmpty,
     tiktokUrl: optionalUrlOrEmpty,
     youtubeUrl: optionalUrlOrEmpty,
     siteContent: zod_1.z.any().optional(),

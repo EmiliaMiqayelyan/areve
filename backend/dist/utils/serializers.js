@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatProduct = formatProduct;
 exports.formatReview = formatReview;
 exports.formatFaq = formatFaq;
+exports.formatCategory = formatCategory;
 exports.formatGalleryItem = formatGalleryItem;
 exports.formatOrderItem = formatOrderItem;
 exports.formatOrder = formatOrder;
@@ -28,6 +29,7 @@ function formatProduct(product, opts) {
         id: j.id,
         name: formatLocalizedField(j.name, opts),
         price: Number(j.price ?? 0),
+        cost: Number(j.cost ?? 0),
         image: j.image,
         category: j.category,
         badge: j.badge != null ? formatLocalizedField(j.badge, opts) : null,
@@ -59,6 +61,13 @@ function formatFaq(faq, opts) {
         sortOrder: faq.sortOrder ?? faq.sort_order ?? 0,
     };
 }
+function formatCategory(category, opts) {
+    return {
+        id: category.id,
+        name: formatLocalizedField(category.name, opts),
+        sortOrder: category.sortOrder ?? category.sort_order ?? 0,
+    };
+}
 function formatGalleryItem(item, opts) {
     const j = typeof item.toJSON === "function"
         ? item.toJSON()
@@ -80,6 +89,7 @@ function formatOrderItem(item) {
         name: String(j.productName ?? j.product_name ?? ""),
         quantity: Number(j.quantity ?? 0),
         price: Number(j.unitPrice ?? j.unit_price ?? 0),
+        unitCost: Number(j.unitCost ?? j.unit_cost ?? 0),
     };
 }
 function formatOrder(order) {
@@ -115,6 +125,7 @@ function formatSettings(row) {
         instagramUrl: row.instagramUrl ?? row.instagram_url,
         facebookUrl: row.facebookUrl ?? row.facebook_url,
         whatsappUrl: row.whatsappUrl ?? row.whatsapp_url,
+        telegramUrl: row.telegramUrl ?? row.telegram_url ?? "",
         tiktokUrl: row.tiktokUrl ?? row.tiktok_url ?? "",
         youtubeUrl: row.youtubeUrl ?? row.youtube_url ?? "",
         siteContent: rawContent,

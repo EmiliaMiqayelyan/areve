@@ -4,7 +4,24 @@ import { useEffect, useState } from 'react';
 import { Shield, Save, Mail, KeyRound, Lock } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { useAdminStore } from '@/lib/adminStore';
-import { modal } from '@/lib/uiStore';
+import { toast } from '@/lib/uiStore';
+
+function translateSecurityError(message: string): string {
+  const map: Record<string, string> = {
+    'Current password is incorrect': 'Ներկայիս գաղտնաբառը սխալ է',
+    'Email is already in use': 'Այս email-ը արդեն օգտագործվում է',
+    'Nothing to update': 'Փոխեք email-ը կամ գաղտնաբառը',
+    'Provide a new email and/or new password': 'Մուտքագրեք նոր email կամ նոր գաղտնաբառ',
+    'Passwords do not match': 'Գաղտնաբառերը չեն համընկնում',
+    'Admin not found': 'Admin հաշիվը չի գտնվել',
+    'Unauthorized': 'Նորից մուտք գործեք',
+    'Invalid or expired token': 'Նորից մուտք գործեք',
+    'Missing admin token': 'Նորից մուտք գործեք',
+    'Request failed': 'Սերվերի սխալ — backend-ը restart արեք',
+    'Validation failed': 'Ստուգեք մուտքագրված տվյալները',
+  };
+  return map[message] ?? message;
+}
 
 type AdminAccount = {
   id: string;
@@ -32,7 +49,7 @@ export default function AdminSecurityPage() {
         setAccount(data);
         setNewEmail(data.email);
       })
-      .catch(() => setError('Չհաջողվեց բեռնել հաշվի տվյալները'))
+      .catch(() => setError('Չհաջողվեց բեռնել հաշվի տվյալները։ Backend-ը restart արեք։'))
       .finally(() => setLoading(false));
   }, [token]);
 
@@ -44,8 +61,8 @@ export default function AdminSecurityPage() {
     e.preventDefault();
     setError('');
 
-    const emailChanged = account && newEmail.trim() !== account.email;
-    const passwordChanged = Boolean(newPassword || confirmPassword);
+    const emailChanged = Boolean(account && newEmail.trim() !== account.email);
+    const passwordChanged = newPassword.trim().length > 0;
 
     if (!currentPassword.trim()) {
       setError('Մուտքագրեք ներկայիս գաղտնաբառը');
@@ -81,10 +98,10 @@ export default function AdminSecurityPage() {
       if (account) {
         setAccount({ ...account, email: newEmail.trim() });
       }
-      await modal.alert('Հաշվի տվյալները հաջողությամբ թարմացվեցին', 'Security');
+      toast.success('Հաշվի տվյալները հաջողությամբ թարմացվեցին');
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message);
+      setError(translateSecurityError(message));
     } finally {
       setSaving(false);
     }
@@ -184,7 +201,7 @@ export default function AdminSecurityPage() {
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={saving || loading}
+            disabled={saving || loading || !account}
             className="flex items-center gap-2 bg-[#E6C97A] text-[#5a4a1e] px-6 py-2.5 rounded-xl font-medium text-[13px] hover:bg-[#D5B86A] transition-colors shadow-sm cursor-pointer disabled:opacity-60"
           >
             <Save size={16} /> {saving ? 'Պահպանվում է...' : 'Պահպանել'}
