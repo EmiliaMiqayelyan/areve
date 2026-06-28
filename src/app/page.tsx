@@ -305,7 +305,14 @@ export default function Home() {
           <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.65 }}>
             <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.25em] text-mocha">{home.storySection.eyebrow}</p>
             <h2 className="mb-4 font-serif text-3xl font-bold leading-tight text-ink sm:text-4xl lg:text-5xl">
-              {home.storySection.titleLine1} <span className="italic text-gold">{home.storySection.titleItalic}</span><br />{home.storySection.titleLine2}
+              {home.storySection.titleLine1}{' '}
+              <span className="italic text-gold">{home.storySection.titleItalic}</span>
+              {home.storySection.titleLine2 ? (
+                <>
+                  <br />
+                  {home.storySection.titleLine2}
+                </>
+              ) : null}
             </h2>
             <div className="divider-gold mb-6" />
             {home.storySection.paragraphs.map((para, idx) => (

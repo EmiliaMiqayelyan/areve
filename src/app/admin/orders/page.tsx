@@ -1,9 +1,23 @@
 'use client';
 
 import { useAdminStore } from '@/lib/adminStore';
-import { Search, Filter, Eye, Trash2, Plus } from 'lucide-react';
+import { Search, Filter, Eye, Trash2, BarChart3, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
+import AdminSelect from '@/components/admin/AdminSelect';
+
+const STATUS_FILTER_OPTIONS = [
+  { value: 'All', label: 'All Statuses' },
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Shipped', label: 'Shipped' },
+  { value: 'Delivered', label: 'Delivered' },
+];
+
+const ORDER_STATUS_OPTIONS = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'shipped', label: 'Shipped' },
+  { value: 'delivered', label: 'Delivered' },
+];
 
 export default function AdminOrdersPage() {
   const { orders, updateOrderStatus, deleteOrder } = useAdminStore();
@@ -28,35 +42,38 @@ export default function AdminOrdersPage() {
           <h1 className="text-2xl font-serif font-bold text-[#2B2B2B]">Orders</h1>
           <p className="text-[14px] text-[#7A7A7A] mt-1">Check the status of recent transactions and manage fulfillments.</p>
         </div>
-        <Link href="/admin/orders/new" className="btn-primary flex items-center gap-2 px-6">
-          <Plus size={18} /> New Order
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link href="/admin/orders/new" className="btn-primary flex items-center gap-2 px-6 justify-center">
+            <Plus size={18} /> New Sale
+          </Link>
+          <Link href="/admin/orders/report" className="btn-outline flex items-center gap-2 px-6 justify-center">
+            <BarChart3 size={18} /> Sales Report
+          </Link>
+        </div>
       </div>
 
       {/* Filters Toolbar */}
-      <div className="bg-white p-4 rounded-2xl border border-[#EADFD8] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#AFAFAF]" size={16} />
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#EADFD8] shadow-sm flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="relative w-full sm:max-w-md">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#AFAFAF]" size={16} />
           <input 
             type="text" 
             placeholder="Search by ID or customer..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#F8F5F2] border-none rounded-full py-2 pl-10 pr-4 text-[13px] text-[#2B2B2B] placeholder-[#AFAFAF] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/30 transition-shadow"
+            className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 pl-10 pr-4 text-[13px] text-[#2B2B2B] placeholder-[#AFAFAF] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/40 transition-shadow"
           />
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Filter size={16} className="text-[#AFAFAF] hidden sm:block" />
-          <select 
+        <div className="flex items-end gap-3 w-full sm:w-auto">
+          <Filter size={16} className="text-[#AFAFAF] hidden sm:block mb-3" />
+          <AdminSelect
+            label="Status"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-[#F8F5F2] border-none text-[13px] text-[#7A7A7A] py-2 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/30 w-full sm:w-auto cursor-pointer"
-          >
-            <option value="All">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Delivered">Delivered</option>
-          </select>
+            onChange={setStatusFilter}
+            options={STATUS_FILTER_OPTIONS}
+            className="w-full sm:w-[240px]"
+            menuAlign="left"
+          />
         </div>
       </div>
 
@@ -95,19 +112,14 @@ export default function AdminOrdersPage() {
                     </p>
                   </td>
                   <td className="py-4 px-6">
-                    <select 
+                    <AdminSelect
                       value={order.status}
-                      onChange={(e) => updateOrderStatus(order.id, e.target.value as any)}
-                      className={`text-[12px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full border border-[#EADFD8] focus:outline-none cursor-pointer appearance-none ${
-                        order.status === 'delivered' ? 'bg-green-50 text-green-700' :
-                        order.status === 'shipped' ? 'bg-yellow-50 text-yellow-700' :
-                        'bg-[#F8F5F2] text-[#7A7A7A]'
-                      }`}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                    </select>
+                      onChange={(next) => updateOrderStatus(order.id, next as 'pending' | 'shipped' | 'delivered')}
+                      options={ORDER_STATUS_OPTIONS}
+                      compact
+                      menuAlign="left"
+                      className="w-[148px]"
+                    />
                   </td>
                   <td className="py-4 px-6 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -6,7 +6,8 @@ export interface Product {
   name: string;
   price: number;
   image: string;
-  category: 'bags' | 'toys' | 'accessories';
+  category: string;
+  cost?: number;
   badge?: string;
   description?: string;
 }

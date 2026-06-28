@@ -15,6 +15,7 @@ export type PublicSettings = {
   instagramUrl: string;
   facebookUrl: string;
   whatsappUrl: string;
+  telegramUrl: string;
   tiktokUrl: string;
   youtubeUrl: string;
   siteContent: SiteContent;

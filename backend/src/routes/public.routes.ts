@@ -4,6 +4,7 @@ import {
   createContact,
   createOrder,
   getFaqs,
+  getCategories,
   getGallery,
   getHealth,
   getProductById,
@@ -22,6 +23,7 @@ router.get("/products", asyncHandler(getProducts));
 router.get("/products/:id", asyncHandler(getProductById));
 router.get("/reviews", asyncHandler(getReviews));
 router.get("/faqs", asyncHandler(getFaqs));
+router.get("/categories", asyncHandler(getCategories));
 router.get("/gallery", asyncHandler(getGallery));
 router.post("/contact", validateBody(contactSchema), asyncHandler(createContact));
 router.post("/orders", validateBody(orderSchema), asyncHandler(createOrder));

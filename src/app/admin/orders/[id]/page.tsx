@@ -5,6 +5,13 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Package, User, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
+import AdminSelect from '@/components/admin/AdminSelect';
+
+const ORDER_STATUS_OPTIONS = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'shipped', label: 'Shipped' },
+  { value: 'delivered', label: 'Delivered' },
+];
 
 export default function OrderDetailsPage() {
   const router = useRouter();
@@ -90,15 +97,13 @@ export default function OrderDetailsPage() {
               Cancel
             </button>
           )}
-          <select 
+          <AdminSelect
             value={order.status}
-            onChange={(e) => updateOrderStatus(order.id, e.target.value as any)}
-            className="bg-white border border-[#EADFD8] text-[13px] font-medium text-[#2B2B2B] py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 cursor-pointer shadow-sm"
-          >
-            <option value="pending">Mark as Pending</option>
-            <option value="shipped">Mark as Shipped</option>
-            <option value="delivered">Mark as Delivered</option>
-          </select>
+            onChange={(next) => updateOrderStatus(order.id, next as 'pending' | 'shipped' | 'delivered')}
+            options={ORDER_STATUS_OPTIONS}
+            className="w-[180px]"
+            menuAlign="left"
+          />
         </div>
       </div>
 

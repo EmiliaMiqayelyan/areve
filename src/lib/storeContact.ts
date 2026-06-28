@@ -21,14 +21,26 @@ export function resolveStoreWhatsAppNumber(options?: {
   return '';
 }
 
-export function resolveStoreTelegramUsername(): string {
-  return STORE_TELEGRAM_USERNAME.replace(/^@/, '');
+export function resolveStoreTelegramUsername(options?: { telegramUrl?: string }): string {
+  const fromEnv = STORE_TELEGRAM_USERNAME.replace(/^@/, '').trim();
+  if (fromEnv) return fromEnv;
+
+  const raw = (options?.telegramUrl ?? '').trim();
+  if (!raw) return '';
+
+  const withoutAt = raw.replace(/^@/, '');
+  const fromTme = withoutAt.match(/(?:t\.me|telegram\.me)\/([A-Za-z0-9_]+)/i)?.[1];
+  if (fromTme) return fromTme;
+
+  if (/^[A-Za-z0-9_]{5,32}$/.test(withoutAt)) return withoutAt;
+  return '';
 }
 
 export function buildWhatsAppOrderUrl(phoneDigits: string, message: string): string {
   return `https://wa.me/${phoneDigits}?text=${encodeURIComponent(message)}`;
 }
 
-export function buildTelegramOrderUrl(message: string): string {
-  return `https://t.me/share/url?text=${encodeURIComponent(message)}`;
+export function buildTelegramOrderUrl(username: string, message: string): string {
+  const handle = username.replace(/^@/, '');
+  return `https://t.me/${handle}?text=${encodeURIComponent(message)}`;
 }

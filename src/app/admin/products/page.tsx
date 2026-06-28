@@ -1,12 +1,13 @@
 'use client';
 
 import { useAdminStore } from '@/lib/adminStore';
-import { toast, modal } from '@/lib/uiStore';
-import { Plus, Search, Filter, Edit, Trash2 } from 'lucide-react';
+import { modal } from '@/lib/uiStore';
+import { Plus, Search, Edit, Trash2, Filter } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useMemo } from 'react';
 import { pickLocalized } from '@/lib/localizedText';
+import AdminSelect from '@/components/admin/AdminSelect';
 
 const FALLBACK_PRODUCT_IMAGE = '/images/prod-bag-a.png';
 
@@ -23,7 +24,7 @@ function resolveProductImageSrc(image?: string): string {
 }
 
 export default function AdminProductsPage() {
-  const { products, deleteProduct, updateProduct } = useAdminStore();
+  const { products, deleteProduct, updateProduct, categories } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [brokenImageIds, setBrokenImageIds] = useState<Record<string, true>>({});
@@ -32,10 +33,26 @@ export default function AdminProductsPage() {
     return products.filter(p => {
       const label = `${pickLocalized(p.name, 'hy')} ${pickLocalized(p.name, 'en')}`.toLowerCase();
       const matchSearch = label.includes(searchTerm.toLowerCase());
-      const matchCategory = categoryFilter === 'All' || p.category.toLowerCase() === categoryFilter.toLowerCase();
+      const matchCategory = categoryFilter === 'All' || p.category === categoryFilter;
       return matchSearch && matchCategory;
     });
   }, [products, searchTerm, categoryFilter]);
+
+  const categoryLabel = (id: string) => {
+    const item = categories.find((c) => c.id === id);
+    return item ? pickLocalized(item.name, 'hy') : id;
+  };
+
+  const categoryOptions = useMemo(
+    () => [
+      { id: 'All', label: 'All Categories' },
+      ...categories.map((item) => ({
+        id: item.id,
+        label: pickLocalized(item.name, 'hy'),
+      })),
+    ],
+    [categories]
+  );
 
   const handleDelete = async (id: string, name: string) => {
     if (await modal.confirm(`Are you sure you want to delete "${name}"?`, 'Confirm Deletion')) {
@@ -63,30 +80,31 @@ export default function AdminProductsPage() {
         </Link>
       </div>
 
-      {/* Filters Toolbar */}
-      <div className="bg-white p-4 rounded-2xl border border-[#EADFD8] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#AFAFAF]" size={16} />
-          <input 
-            type="text" 
-            placeholder="Search products..." 
+      {/* Filters */}
+      <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#EADFD8] shadow-sm flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="relative w-full sm:max-w-md">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#AFAFAF]" size={16} />
+          <input
+            type="text"
+            placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#F8F5F2] border-none rounded-full py-2 pl-10 pr-4 text-[13px] text-[#2B2B2B] placeholder-[#AFAFAF] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/30 transition-shadow"
+            className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 pl-10 pr-4 text-[13px] text-[#2B2B2B] placeholder-[#AFAFAF] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/40 transition-shadow"
           />
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Filter size={16} className="text-[#AFAFAF] hidden sm:block" />
-          <select 
+
+        <div className="flex items-end gap-3 w-full sm:w-auto">
+          <Filter size={16} className="text-[#AFAFAF] hidden sm:block mb-3" />
+          <AdminSelect
+            label="Category"
             value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-[#F8F5F2] border-none text-[13px] text-[#7A7A7A] py-2 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/30 w-full sm:w-auto cursor-pointer"
-          >
-            <option value="All">All Categories</option>
-            <option value="Bags">Beaded Bags</option>
-            <option value="Toys">Handmade Toys</option>
-            <option value="Accessories">Accessories</option>
-          </select>
+            onChange={setCategoryFilter}
+            options={categoryOptions.map((option) => ({
+              value: option.id,
+              label: option.label,
+            }))}
+            className="w-full sm:w-[260px]"
+          />
         </div>
       </div>
 
@@ -139,25 +157,33 @@ export default function AdminProductsPage() {
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className="text-[12px] font-medium bg-[#F8F5F2] text-[#7A7A7A] px-3 py-1 rounded-full uppercase tracking-wide border border-[#EADFD8]">
-                      {product.category}
+                    <span className="inline-flex text-[12px] font-medium bg-[#F8F5F2] text-[#5a4a1e] px-3 py-1.5 rounded-full border border-[#EADFD8]">
+                      {categoryLabel(product.category)}
                     </span>
                   </td>
                   <td className="py-4 px-6">
                     <p className="text-[14px] font-bold text-[#2B2B2B]">${Number(product.price ?? 0).toFixed(2)}</p>
                   </td>
-                  <td className="py-4 px-6 text-center">
-                    <button 
+                  <td className="py-4 px-6">
+                    <button
+                      type="button"
                       onClick={() => toggleStatus(product.id, product.status)}
-                      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 ${product.status === 'inactive' ? 'bg-[#D6C3B3]' : 'bg-[#16a34a]'}`}
+                      className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                        product.status === 'inactive'
+                          ? 'bg-[#F8F5F2] text-[#AFAFAF] border border-[#EADFD8] hover:border-[#D6C3B3]'
+                          : 'bg-[#E8F5EC] text-[#166534] border border-[#BBF7D0] hover:bg-[#DCFCE7]'
+                      }`}
                     >
-                      <span className="sr-only">Toggle Status</span>
-                      <span aria-hidden="true" className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${product.status === 'inactive' ? 'translate-x-0' : 'translate-x-4'}`} />
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          product.status === 'inactive' ? 'bg-[#D6C3B3]' : 'bg-[#22c55e]'
+                        }`}
+                      />
+                      {product.status === 'inactive' ? 'Inactive' : 'Active'}
                     </button>
-                    <p className="text-[11px] text-[#AFAFAF] uppercase tracking-wider mt-1">{product.status === 'inactive' ? 'Inactive' : 'Active'}</p>
                   </td>
                   <td className="py-4 px-6 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <Link href={`/admin/products/${product.id}/edit`} className="p-2 text-[#AFAFAF] hover:text-[#2B2B2B] hover:bg-[#F8F5F2] rounded-lg transition-colors">
                         <Edit size={16} />
                       </Link>

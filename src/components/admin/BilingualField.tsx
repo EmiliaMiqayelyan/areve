@@ -24,7 +24,10 @@ export default function BilingualField({
   enPlaceholder,
   rows = 4,
 }: Props) {
-  const v = parseLocalized(value);
+  const v =
+    value && typeof value === 'object' && 'hy' in value && 'en' in value
+      ? { hy: String(value.hy ?? ''), en: String(value.en ?? '') }
+      : parseLocalized(value);
 
   const update = (locale: 'hy' | 'en', text: string) => {
     onChange({ ...v, [locale]: text });

@@ -1,0 +1,11 @@
+export function makeCategorySlug(text: string, fallback = 'category'): string {
+  const slug = text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48);
+
+  return slug || fallback;
+}

@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminStore } from '@/lib/adminStore';
 import { ArrowLeft, UploadCloud, Save } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import BilingualField from '@/components/admin/BilingualField';
-import { emptyLocalized, type LocalizedText } from '@/lib/localizedText';
+import AdminSelect from '@/components/admin/AdminSelect';
+import { emptyLocalized, pickLocalized, type LocalizedText } from '@/lib/localizedText';
 
 async function fileToDataUrl(file: File): Promise<string> {
   return await new Promise((resolve, reject) => {
@@ -20,19 +21,26 @@ async function fileToDataUrl(file: File): Promise<string> {
 
 export default function AddProductPage() {
   const router = useRouter();
-  const { addProduct } = useAdminStore();
+  const { addProduct, categories } = useAdminStore();
 
   const [name, setName] = useState<LocalizedText>(emptyLocalized());
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState<'bags' | 'toys' | 'accessories'>('bags');
+  const [cost, setCost] = useState('');
+  const [category, setCategory] = useState('');
   const [description, setDescription] = useState<LocalizedText>(emptyLocalized());
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    if (!category && categories.length > 0) {
+      setCategory(categories[0].id);
+    }
+  }, [categories, category]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.hy.trim() || !price) return;
+    if (!name.hy.trim() || !price || !category) return;
 
     try {
       setError('');
@@ -44,11 +52,12 @@ export default function AddProductPage() {
       const slugBase = (name.hy || name.en).toLowerCase().replace(/\s+/g, '-').slice(0, 15);
       await addProduct({
         id: slugBase + '-' + Math.floor(Math.random() * 1000),
-        name: { hy: name.hy.trim(), en: (name.en || name.hy).trim() },
+        name: { hy: name.hy.trim(), en: name.en.trim() },
         price: parseFloat(price),
+        cost: cost ? parseFloat(cost) : 0,
         category,
         description: description.hy || description.en
-          ? { hy: description.hy.trim(), en: (description.en || description.hy).trim() }
+          ? { hy: description.hy.trim(), en: description.en.trim() }
           : null,
         status,
         image: nextImage,
@@ -183,16 +192,33 @@ export default function AddProductPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Category</label>
-              <select
-                value={category} onChange={e => setCategory(e.target.value as 'bags' | 'toys' | 'accessories')}
-                className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow cursor-pointer appearance-none"
-              >
-                <option value="bags">Beaded Bags</option>
-                <option value="toys">Handmade Toys</option>
-                <option value="accessories">Accessories</option>
-              </select>
+              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Product Cost (USD)</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#AFAFAF] font-bold">$</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={cost}
+                  onChange={(e) => setCost(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 pl-8 pr-4 text-[14px] text-[#2B2B2B] placeholder-[#AFAFAF] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow"
+                />
+              </div>
+              <p className="text-[11px] text-[#AFAFAF]">Materials and labor cost per item for sales reporting.</p>
             </div>
+
+            <AdminSelect
+              label="Category"
+              value={category}
+              onChange={setCategory}
+              placeholder={categories.length === 0 ? 'Create a category first' : 'Select category'}
+              options={categories.map((item) => ({
+                value: item.id,
+                label: `${pickLocalized(item.name, 'hy')}${pickLocalized(item.name, 'en') ? ` / ${pickLocalized(item.name, 'en')}` : ''}`,
+              }))}
+              className="w-full"
+            />
           </div>
         </div>
 

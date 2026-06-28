@@ -1,9 +1,21 @@
+CREATE TABLE IF NOT EXISTS categories (
+  id VARCHAR(64) PRIMARY KEY,
+  name JSON NOT NULL,
+  sort_order INT NOT NULL DEFAULT 0
+);
+
+INSERT IGNORE INTO categories (id, name, sort_order) VALUES
+  ('bags', '{"hy":"Բիջակապարց տոպրակներ","en":"Beaded Bags"}', 1),
+  ('toys', '{"hy":"Ձեռագործ խաղալիքներ","en":"Handmade Toys"}', 2),
+  ('accessories', '{"hy":"Աքսեսուարներ","en":"Accessories"}', 3);
+
 CREATE TABLE IF NOT EXISTS products (
   id VARCHAR(64) PRIMARY KEY,
   name VARCHAR(120) NOT NULL,
   price DECIMAL(10,2) NOT NULL,
   image MEDIUMTEXT NOT NULL,
-  category ENUM('bags','toys','accessories') NOT NULL,
+  category VARCHAR(64) NOT NULL,
+  cost DECIMAL(10,2) NOT NULL DEFAULT 0,
   badge VARCHAR(40) NULL,
   description TEXT NULL,
   status ENUM('active','inactive') NOT NULL DEFAULT 'active',
@@ -64,6 +76,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   product_name VARCHAR(120) NOT NULL,
   quantity INT NOT NULL,
   unit_price DECIMAL(10,2) NOT NULL,
+  unit_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 
@@ -87,16 +100,17 @@ CREATE TABLE IF NOT EXISTS settings (
   instagram_url VARCHAR(255) NOT NULL,
   facebook_url VARCHAR(255) NOT NULL,
   whatsapp_url VARCHAR(255) NOT NULL,
+  telegram_url VARCHAR(255) NOT NULL DEFAULT '',
   tiktok_url VARCHAR(255) NOT NULL DEFAULT '',
   youtube_url VARCHAR(255) NOT NULL DEFAULT '',
   site_content JSON NULL
 );
 
 INSERT IGNORE INTO settings (
-  id, store_name, tagline, footer_description, support_email, business_phone, address, instagram_url, facebook_url, whatsapp_url, tiktok_url, youtube_url, site_content
+  id, store_name, tagline, footer_description, support_email, business_phone, address, instagram_url, facebook_url, whatsapp_url, telegram_url, tiktok_url, youtube_url, site_content
 ) VALUES (
-  1, 'AREVÉ', 'Ձեռագործ · Եզակի · Սիրով ստեղծված',
-  'Յուրաքանչյուր կտոր փոքրիկ արև է — ստեղծված ջերմությամբ, համբերությամբ և միայն ձեռքերով տրվող սիրով։',
+  1, 'AREVÉ', 'Արև՝ քո առօրյայում',
+  'Ստեղծված ձեռքերով՝ ջերմությամբ, համբերությամբ և սիրով',
   'care@areve.com', '+374 41 83 21 22',
   '123 Artisan Maker Way, Creative District, NY 10012',
   'https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr',

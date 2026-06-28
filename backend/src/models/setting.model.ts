@@ -15,6 +15,7 @@ Setting.init(
     instagramUrl: { type: DataTypes.STRING(255), allowNull: false, field: "instagram_url" },
     facebookUrl: { type: DataTypes.STRING(255), allowNull: false, field: "facebook_url" },
     whatsappUrl: { type: DataTypes.STRING(255), allowNull: false, field: "whatsapp_url" },
+    telegramUrl: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "", field: "telegram_url" },
     tiktokUrl: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "", field: "tiktok_url" },
     youtubeUrl: { type: DataTypes.STRING(255), allowNull: false, defaultValue: "", field: "youtube_url" },
     siteContent: { type: DataTypes.JSON, allowNull: true, field: "site_content" },

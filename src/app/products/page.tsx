@@ -10,8 +10,10 @@ import SortDropdown from '@/components/ui/SortDropdown';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { useLocaleApiFetch } from '@/lib/useLocaleApi';
+import { pickLocalized } from '@/lib/localizedText';
+import type { Product } from '@/lib/store';
 
-type Category = 'all' | 'bags' | 'toys' | 'accessories';
+type CategoryOption = { id: string; label: string };
 
 function ProductsContent() {
   const { t, locale } = useTranslation();
@@ -19,33 +21,48 @@ function ProductsContent() {
   const { settings } = useSiteSettings();
   const pg = settings.siteContent.pages.shop;
   const L = settings.siteContent.productCategoryLabels;
-  const catLabels: Record<Category, string> = {
-    all: L.all,
-    bags: L.bags,
-    toys: L.toys,
-    accessories: L.accessories,
-  };
   const sp = useSearchParams();
-  const [cat, setCat] = useState<Category>((sp.get('category') as Category) || 'all');
+  const initialCategory = sp.get('category') || 'all';
+  const [cat, setCat] = useState(initialCategory);
   const [sort, setSort] = useState<'default' | 'price-asc' | 'price-desc'>('default');
-  const [productList, setProductList] = useState<Array<any>>([]);
+  const [productList, setProductList] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     setLoadError(false);
-    void localeFetch<any[]>('/products?active=true')
-      .then(setProductList)
+    void Promise.all([
+      localeFetch<Product[]>('/products?active=true'),
+      localeFetch<Array<{ id: string; name: string }>>('/categories'),
+    ])
+      .then(([products, categoryRows]) => {
+        setProductList(products);
+        setCategories(
+          categoryRows.map((row) => ({
+            id: row.id,
+            label: typeof row.name === 'string' ? row.name : pickLocalized(row.name, locale),
+          }))
+        );
+      })
       .catch(() => {
         setProductList([]);
+        setCategories([]);
         setLoadError(true);
       })
       .finally(() => setLoading(false));
   }, [locale, localeFetch]);
 
+  const catOptions = useMemo<CategoryOption[]>(
+    () => [{ id: 'all', label: L.all }, ...categories],
+    [categories, L.all]
+  );
+
+  const activeCategoryLabel = catOptions.find((item) => item.id === cat)?.label ?? cat;
+
   const filtered = useMemo(() => {
-    let list = cat === 'all' ? productList : productList.filter(p => p.category === cat);
+    let list = cat === 'all' ? productList : productList.filter((p) => p.category === cat);
     if (sort === 'price-asc') list = [...list].sort((a, b) => a.price - b.price);
     if (sort === 'price-desc') list = [...list].sort((a, b) => b.price - a.price);
     return list;
@@ -72,12 +89,14 @@ function ProductsContent() {
         )}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap gap-2">
-            {(Object.keys(catLabels) as Category[]).map(c => (
-              <button key={c} onClick={() => setCat(c)}
-                className={`px-5 py-2 rounded-full font-sans text-[13px] font-medium transition-all cursor-pointer border-none ${cat === c ? 'bg-gold text-[#5a4a1e] shadow-[0_2px_12px_#E6C97A55]' : 'bg-white text-subtle shadow-[0_1px_4px_rgba(180,156,140,0.12)]'
+            {catOptions.map((option) => (
+              <button
+                key={option.id}
+                onClick={() => setCat(option.id)}
+                className={`px-5 py-2 rounded-full font-sans text-[13px] font-medium transition-all cursor-pointer border-none ${cat === option.id ? 'bg-gold text-[#5a4a1e] shadow-[0_2px_12px_#E6C97A55]' : 'bg-white text-subtle shadow-[0_1px_4px_rgba(180,156,140,0.12)]'
                   }`}
               >
-                {catLabels[c]}
+                {option.label}
               </button>
             ))}
           </div>
@@ -96,7 +115,7 @@ function ProductsContent() {
         </div>
 
         <p className="mb-8 font-sans text-[13px] text-[#AFAFAF]">
-          {filtered.length} {filtered.length === 1 ? t('common.product') : t('common.products')}{cat !== 'all' ? ` ${t('common.in')} ${catLabels[cat]}` : ''}
+          {filtered.length} {filtered.length === 1 ? t('common.product') : t('common.products')}{cat !== 'all' ? ` ${t('common.in')} ${activeCategoryLabel}` : ''}
         </p>
 
         <AnimatePresence mode="wait">

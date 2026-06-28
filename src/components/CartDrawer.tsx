@@ -12,6 +12,7 @@ import { buildOrderMessage } from '@/lib/buildOrderMessage';
 import {
   buildTelegramOrderUrl,
   buildWhatsAppOrderUrl,
+  resolveStoreTelegramUsername,
   resolveStoreWhatsAppNumber,
 } from '@/lib/storeContact';
 
@@ -77,7 +78,14 @@ export default function CartDrawer() {
         }
         url = buildWhatsAppOrderUrl(phone, message);
       } else {
-        url = buildTelegramOrderUrl(message);
+        const username = resolveStoreTelegramUsername({
+          telegramUrl: settings.telegramUrl,
+        });
+        if (!username) {
+          setSendError(t('cart.messengerNotConfigured'));
+          return;
+        }
+        url = buildTelegramOrderUrl(username, message);
       }
 
       window.open(url, '_blank', 'noopener,noreferrer');

@@ -95,14 +95,14 @@ export const messagesEn = {
       users: 'Users',
       siteContent: 'Site content',
       settings: 'Settings',
+      security: 'Security',
     },
     search: 'Search...',
     logout: 'Log out',
     badge: 'Admin',
   },
   settings: {
-    taglineHy: 'Handcrafted · Unique · Made with Love',
-    footerHy:
-      'Every piece is a tiny sun — made with warmth, patience, and the kind of love only hands can give.',
+    taglineHy: 'Sunlight in your everyday',
+    footerHy: 'Made by hand with warmth, patience and love',
   },
 } as const;

@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { randomUUID } from "crypto";
-import { Contact, Faq, Gallery, Order, OrderItem, Product, Review, Setting } from "../models";
+import { Contact, Category, Faq, Gallery, Order, OrderItem, Product, Review, Setting } from "../models";
 import { mergeSiteContent } from "../utils/mergeSiteContent";
 import {
+  formatCategory,
   formatFaq,
   formatGalleryItem,
   formatProduct,
@@ -29,6 +30,7 @@ export async function getPublicSettings(_req: Request, res: Response) {
     instagramUrl: j.instagramUrl ?? j.instagram_url,
     facebookUrl: j.facebookUrl ?? j.facebook_url,
     whatsappUrl: j.whatsappUrl ?? j.whatsapp_url,
+    telegramUrl: j.telegramUrl ?? j.telegram_url ?? "",
     tiktokUrl: j.tiktokUrl ?? j.tiktok_url ?? "",
     youtubeUrl: j.youtubeUrl ?? j.youtube_url ?? "",
     siteContent,
@@ -71,6 +73,12 @@ export async function getGallery(req: Request, res: Response) {
   return res.json(rows.map((row) => formatGalleryItem(row, { locale })));
 }
 
+export async function getCategories(req: Request, res: Response) {
+  const locale = resolveRequestLocale(req);
+  const rows = await Category.findAll({ order: [["sortOrder", "ASC"], ["id", "ASC"]] });
+  return res.json(rows.map((row) => formatCategory(row.toJSON() as Record<string, unknown>, { locale })));
+}
+
 export async function createContact(req: Request, res: Response) {
   const id = randomUUID();
   await Contact.create({ id, ...req.body });
@@ -100,6 +108,8 @@ export async function createOrder(req: Request, res: Response) {
   });
 
   for (const item of body.items) {
+    const product = await Product.findByPk(String(item.id));
+    const unitCost = product ? Number((product.toJSON() as Record<string, unknown>).cost ?? 0) : 0;
     await OrderItem.create({
       id: randomUUID(),
       orderId: id,
@@ -107,6 +117,7 @@ export async function createOrder(req: Request, res: Response) {
       productName: item.name,
       quantity: item.quantity,
       unitPrice: item.price,
+      unitCost,
     });
   }
 

@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Package, ShoppingCart, Tags,
   MessageSquare, Image as ImageIcon, HelpCircle,
-  Users, Settings, Search, Bell, LogOut, FileText, Menu, X
+  Users, Settings, Search, Bell, LogOut, FileText, Menu, X, Shield
 } from 'lucide-react';
 import { useAdminStore } from '@/lib/adminStore';
 import { useTranslation } from '@/i18n/I18nProvider';
@@ -27,6 +27,7 @@ const links = [
   { href: '/admin/users', labelKey: 'admin.nav.users', icon: Users },
   { href: '/admin/site-content', labelKey: 'admin.nav.siteContent', icon: FileText },
   { href: '/admin/settings', labelKey: 'admin.nav.settings', icon: Settings },
+  { href: '/admin/security', labelKey: 'admin.nav.security', icon: Shield },
 ] as const;
 
 function SidebarNav({

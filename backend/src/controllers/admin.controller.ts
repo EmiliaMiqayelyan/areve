@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { randomUUID } from "crypto";
-import { Admin, Faq, Gallery, Order, OrderItem, Product, Review, Setting } from "../models";
+import { Admin, Category, Faq, Gallery, Order, OrderItem, Product, Review, Setting } from "../models";
 import { mergeSiteContent } from "../utils/mergeSiteContent";
 import {
+  formatCategory,
   formatFaq,
   formatGalleryItem,
   formatOrder,
@@ -30,6 +31,10 @@ function pickOrderPatch(body: Record<string, unknown>) {
   return patch;
 }
 
+async function categoryExists(categoryId: string) {
+  return Boolean(await Category.findByPk(categoryId));
+}
+
 export async function getAdminProducts(_req: Request, res: Response) {
   const rows = await Product.findAll({ order: [["createdAt", "DESC"]] });
   return res.json(rows.map((row) => formatProduct(row, { bilingual: true })));
@@ -37,6 +42,9 @@ export async function getAdminProducts(_req: Request, res: Response) {
 
 export async function createAdminProduct(req: Request, res: Response) {
   const { id: clientId, ...data } = req.body as Record<string, unknown>;
+  if (typeof data.category === "string" && !(await categoryExists(data.category))) {
+    return res.status(400).json({ message: "Category not found" });
+  }
   const id = typeof clientId === "string" && clientId.trim() ? clientId.trim() : randomUUID();
   const row = await Product.create({ id, ...data });
   return res.status(201).json(formatProduct(row, { bilingual: true }));
@@ -46,6 +54,9 @@ export async function updateAdminProduct(req: Request, res: Response) {
   const id = String(req.params.id);
   if (!Object.keys(req.body).length) {
     return res.status(400).json({ message: "No fields to update" });
+  }
+  if (typeof req.body.category === "string" && !(await categoryExists(req.body.category))) {
+    return res.status(400).json({ message: "Category not found" });
   }
   const [affected] = await Product.update(req.body, { where: { id } });
   if (!affected) return res.status(404).json({ message: "Product not found" });
@@ -167,30 +178,52 @@ export async function deleteAdminOrder(req: Request, res: Response) {
 }
 
 export async function createAdminOrder(req: Request, res: Response) {
-  const body = req.body;
+  const body = req.body as {
+    customerName?: string;
+    delivery?: string;
+    packaging?: string;
+    soldAt?: string;
+    firstName?: string;
+    lastName?: string;
+    items: Array<{
+      id: string;
+      name: string;
+      quantity: number;
+      price: number;
+      unitCost?: number;
+    }>;
+  };
   const id = `ADM-${Date.now()}`;
   const customerName =
     body.customerName || `${body.firstName || ""} ${body.lastName || ""}`.trim() || "Customer";
-  const customerEmail = body.customerEmail || body.email;
+  const customerEmail = "sale@areve.com";
   const total = body.items.reduce(
-    (sum: number, item: { price: number; quantity: number }) =>
-      sum + Number(item.price ?? 0) * Number(item.quantity ?? 1),
+    (sum, item) => sum + Number(item.price ?? 0) * Number(item.quantity ?? 1),
     0
   );
+  const soldAt = body.soldAt ? new Date(body.soldAt) : new Date();
 
   await Order.create({
     id,
     customerName,
     customerEmail,
     total,
-    status: body.status || "pending",
-    address: body.address,
-    city: body.city,
-    state: body.state,
-    zipCode: body.zipCode,
+    status: "delivered",
+    address: "Manual sale",
+    city: (body.packaging || "").trim() || "—",
+    state: (body.delivery || "").trim() || "—",
+    zipCode: "—",
+    createdAt: soldAt,
   });
 
   for (const item of body.items) {
+    const product = await Product.findByPk(String(item.id));
+    const unitCost =
+      item.unitCost !== undefined
+        ? Number(item.unitCost)
+        : product
+          ? Number((product.toJSON() as Record<string, unknown>).cost ?? 0)
+          : 0;
     await OrderItem.create({
       id: randomUUID(),
       orderId: id,
@@ -198,6 +231,7 @@ export async function createAdminOrder(req: Request, res: Response) {
       productName: item.name,
       quantity: item.quantity,
       unitPrice: item.price,
+      unitCost,
     });
   }
 
@@ -275,6 +309,7 @@ export async function updateAdminSettings(req: Request, res: Response) {
   }
   if (body.tiktokUrl === "") body.tiktokUrl = "";
   if (body.youtubeUrl === "") body.youtubeUrl = "";
+  if (body.telegramUrl === "") body.telegramUrl = "";
 
   const [affected] = await Setting.update(body, { where: { id: 1 } });
   if (!affected) return res.status(404).json({ message: "Settings not found" });
@@ -288,4 +323,42 @@ export async function getAdminUsers(_req: Request, res: Response) {
       order: [["createdAt", "DESC"]],
     })
   );
+}
+
+export async function getAdminCategories(_req: Request, res: Response) {
+  const rows = await Category.findAll({ order: [["sortOrder", "ASC"], ["id", "ASC"]] });
+  return res.json(rows.map((row) => formatCategory(row.toJSON() as Record<string, unknown>, { bilingual: true })));
+}
+
+export async function createAdminCategory(req: Request, res: Response) {
+  const { id, name, sortOrder } = req.body as { id: string; name: unknown; sortOrder?: number };
+  const existing = await Category.findByPk(id);
+  if (existing) return res.status(409).json({ message: "Category id already exists" });
+  const row = await Category.create({ id, name, sortOrder: sortOrder ?? 0 });
+  return res.status(201).json(formatCategory(row.toJSON() as Record<string, unknown>, { bilingual: true }));
+}
+
+export async function updateAdminCategory(req: Request, res: Response) {
+  const id = String(req.params.id);
+  if (!Object.keys(req.body).length) {
+    return res.status(400).json({ message: "No fields to update" });
+  }
+  const [affected] = await Category.update(req.body, { where: { id } });
+  if (!affected) return res.status(404).json({ message: "Category not found" });
+  const row = await Category.findByPk(id);
+  return res.json({
+    message: "Category updated",
+    category: row ? formatCategory(row.toJSON() as Record<string, unknown>, { bilingual: true }) : null,
+  });
+}
+
+export async function deleteAdminCategory(req: Request, res: Response) {
+  const id = String(req.params.id);
+  const inUse = await Product.count({ where: { category: id } });
+  if (inUse > 0) {
+    return res.status(400).json({ message: "Cannot delete a category that is used by products" });
+  }
+  const deleted = await Category.destroy({ where: { id } });
+  if (!deleted) return res.status(404).json({ message: "Category not found" });
+  return res.json({ message: "Category deleted" });
 }

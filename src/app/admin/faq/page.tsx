@@ -48,11 +48,11 @@ export default function AdminFAQPage() {
       ...newFaqs[i],
       question: {
         hy: draft.question.hy.trim(),
-        en: (draft.question.en || draft.question.hy).trim(),
+        en: draft.question.en.trim(),
       },
       answer: {
         hy: draft.answer.hy.trim(),
-        en: (draft.answer.en || draft.answer.hy).trim(),
+        en: draft.answer.en.trim(),
       },
     };
     setLocalFaqs(newFaqs);

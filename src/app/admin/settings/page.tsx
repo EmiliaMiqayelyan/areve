@@ -17,20 +17,22 @@ type StoreSettingsForm = {
   instagramUrl: string;
   facebookUrl: string;
   whatsappUrl: string;
+  telegramUrl: string;
   tiktokUrl: string;
   youtubeUrl: string;
 };
 
 const defaultSettings: StoreSettingsForm = {
   storeName: 'AREVÉ',
-  tagline: 'Handcrafted · Unique · Made with Love',
-  footerDescription: 'Every piece is a tiny sun — made with warmth, patience, and the kind of love only hands can give.',
+  tagline: 'Արև՝ քո առօրյայում',
+  footerDescription: 'Ստեղծված ձեռքերով՝ ջերմությամբ, համբերությամբ և սիրով',
   supportEmail: 'care@areve.com',
   businessPhone: '+374 41 83 21 22',
   address: '123 Artisan Maker Way, Creative District, NY 10012',
   instagramUrl: SOCIAL_URLS.instagram,
   facebookUrl: SOCIAL_URLS.facebook,
   whatsappUrl: 'https://wa.me/37441832122',
+  telegramUrl: '',
   tiktokUrl: SOCIAL_URLS.tiktok,
   youtubeUrl: SOCIAL_URLS.youtube,
 };
@@ -55,6 +57,7 @@ export default function AdminSettingsPage() {
           instagramUrl: result.instagram_url ?? result.instagramUrl,
           facebookUrl: result.facebook_url ?? result.facebookUrl,
           whatsappUrl: result.whatsapp_url ?? result.whatsappUrl,
+          telegramUrl: result.telegram_url ?? result.telegramUrl ?? '',
           tiktokUrl: result.tiktok_url ?? result.tiktokUrl ?? '',
           youtubeUrl: result.youtube_url ?? result.youtubeUrl ?? '',
         });
@@ -156,6 +159,10 @@ export default function AdminSettingsPage() {
             <div className="space-y-1.5">
               <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">WhatsApp Business Link</label>
               <input type="url" value={settings.whatsappUrl} onChange={(e) => setSettings((s) => ({ ...s, whatsappUrl: e.target.value }))} className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Telegram Link</label>
+              <input type="text" value={settings.telegramUrl} onChange={(e) => setSettings((s) => ({ ...s, telegramUrl: e.target.value }))} className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow" placeholder="https://t.me/your_username" />
             </div>
             <div className="space-y-1.5">
               <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">TikTok URL</label>

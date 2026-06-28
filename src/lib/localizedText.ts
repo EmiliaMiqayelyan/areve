@@ -7,10 +7,10 @@ function parseJsonLocalizedString(value: string): LocalizedText | null {
   if (!trimmed.startsWith('{') || !trimmed.endsWith('}')) return null;
   try {
     const parsed = JSON.parse(trimmed) as Partial<LocalizedText>;
-    const hy = String(parsed.hy ?? parsed.en ?? '').trim();
-    const en = String(parsed.en ?? parsed.hy ?? '').trim();
+    const hy = String(parsed.hy ?? '').trim();
+    const en = String(parsed.en ?? '').trim();
     if (!hy && !en) return null;
-    return { hy, en: en || hy };
+    return { hy, en };
   } catch {
     return null;
   }
@@ -21,13 +21,14 @@ export function parseLocalized(value: unknown): LocalizedText {
     const parsed = parseJsonLocalizedString(value);
     if (parsed) return parsed;
     const trimmed = value.trim();
-    return { hy: trimmed, en: trimmed };
+    return { hy: trimmed, en: '' };
   }
   if (value && typeof value === 'object') {
     const o = value as Partial<LocalizedText>;
-    const hy = String(o.hy ?? o.en ?? '').trim();
-    const en = String(o.en ?? o.hy ?? '').trim();
-    return { hy, en: en || hy };
+    return {
+      hy: String(o.hy ?? '').trim(),
+      en: String(o.en ?? '').trim(),
+    };
   }
   return { hy: '', en: '' };
 }

@@ -1,266 +1,359 @@
 'use client';
 
-import { useAdminStore } from '@/lib/adminStore';
-import { ArrowLeft, Plus, Trash2, ShoppingBag } from 'lucide-react';
-import Link from 'next/link';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import Link from 'next/link';
+import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
+import { useAdminStore } from '@/lib/adminStore';
+import AdminSelect from '@/components/admin/AdminSelect';
 import { pickLocalized } from '@/lib/localizedText';
+
+type LineItem = {
+  key: string;
+  productId: string;
+  name: string;
+  quantity: string;
+  price: string;
+  unitCost: string;
+};
+
+function sanitizeIntegerInput(value: string) {
+  return value.replace(/\D/g, '');
+}
+
+function sanitizeDecimalInput(value: string) {
+  const cleaned = value.replace(/[^\d.]/g, '');
+  const [whole, ...rest] = cleaned.split('.');
+  if (rest.length === 0) return whole;
+  return `${whole}.${rest.join('')}`;
+}
+
+function parseQuantity(value: string) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function parseAmount(value: string) {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function toDatetimeLocalValue(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function newLineItem(): LineItem {
+  return {
+    key: crypto.randomUUID(),
+    productId: '',
+    name: '',
+    quantity: '1',
+    price: '',
+    unitCost: '',
+  };
+}
 
 export default function NewOrderPage() {
   const router = useRouter();
   const { products, createOrder } = useAdminStore();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    email: '',
-    firstName: '',
-    lastName: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-  });
+  const [customerName, setCustomerName] = useState('');
+  const [delivery, setDelivery] = useState('');
+  const [packaging, setPackaging] = useState('');
+  const [soldAt, setSoldAt] = useState(() => toDatetimeLocalValue(new Date()));
+  const [items, setItems] = useState<LineItem[]>([newLineItem()]);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const [orderItems, setOrderItems] = useState<Array<{ id: string; name: string; quantity: number; price: number }>>([]);
+  const productOptions = useMemo(
+    () => [
+      { value: '', label: 'Select product or type manually' },
+      ...products.map((p) => ({
+        value: p.id,
+        label: pickLocalized(p.name, 'hy') || pickLocalized(p.name, 'en') || p.id,
+      })),
+    ],
+    [products]
+  );
 
-  const handleAddItem = (productId: string) => {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
+  const totals = useMemo(() => {
+    return items.reduce(
+      (acc, item) => {
+        const qty = parseQuantity(item.quantity);
+        const price = parseAmount(item.price);
+        const cost = parseAmount(item.unitCost);
+        acc.revenue += price * qty;
+        acc.cost += cost * qty;
+        return acc;
+      },
+      { revenue: 0, cost: 0 }
+    );
+  }, [items]);
 
-    const existing = orderItems.find(item => item.id === productId);
-    if (existing) {
-      setOrderItems(orderItems.map(item => 
-        item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
-      ));
-    } else {
-      setOrderItems([...orderItems, { 
-        id: product.id, 
-        name: pickLocalized(product.name, 'hy'), 
-        quantity: 1, 
-        price: Number(product.price) 
-      }]);
+  const updateItem = (key: string, patch: Partial<LineItem>) => {
+    setItems((prev) => prev.map((item) => (item.key === key ? { ...item, ...patch } : item)));
+  };
+
+  const handleProductSelect = (key: string, productId: string) => {
+    const product = products.find((p) => p.id === productId);
+    if (!product) {
+      updateItem(key, { productId: '', name: '' });
+      return;
     }
-  };
-
-  const handleRemoveItem = (id: string) => {
-    setOrderItems(orderItems.filter(item => item.id !== id));
-  };
-
-  const calculateTotal = () => {
-    return orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const name = pickLocalized(product.name, 'hy') || pickLocalized(product.name, 'en') || product.id;
+    updateItem(key, {
+      productId,
+      name,
+      price: String(Number(product.price) || ''),
+      unitCost: String(Number(product.cost ?? 0) || ''),
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (orderItems.length === 0) {
-      alert('Please add at least one item');
+    if (!customerName.trim()) {
+      setError('Customer name is required.');
       return;
     }
-    setIsSubmitting(true);
+
+    const validItems = items.filter((item) => item.name.trim() && parseQuantity(item.quantity) > 0);
+    if (validItems.length === 0) {
+      setError('Add at least one product line.');
+      return;
+    }
+
     try {
+      setSaving(true);
+      setError('');
       await createOrder({
-        ...formData,
-        items: orderItems,
+        customerName: customerName.trim(),
+        delivery: delivery.trim(),
+        packaging: packaging.trim(),
+        soldAt: new Date(soldAt).toISOString(),
+        items: validItems.map((item) => ({
+          id: item.productId || `manual-${item.key}`,
+          name: item.name.trim(),
+          quantity: parseQuantity(item.quantity),
+          price: parseAmount(item.price),
+          unitCost: parseAmount(item.unitCost),
+        })),
       });
-      router.push('/admin/orders');
+      router.push('/admin/orders/report');
     } catch (err) {
-      alert('Failed to create order');
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
     } finally {
-      setIsSubmitting(false);
+      setSaving(false);
     }
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center gap-4">
         <Link href="/admin/orders" className="p-2 text-[#AFAFAF] hover:text-[#2B2B2B] hover:bg-white rounded-xl transition-colors shrink-0">
           <ArrowLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-2xl font-serif font-bold text-[#2B2B2B]">Create New Order</h1>
-          <p className="text-[14px] text-[#7A7A7A] mt-1">Manually enter a new order into the system.</p>
+          <h1 className="text-2xl font-serif font-bold text-[#2B2B2B]">New Sale</h1>
+          <p className="text-[14px] text-[#7A7A7A] mt-1">
+            Record a sale manually — customer, date, price, and cost.
+          </p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left: Customer & Shipping */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white p-8 rounded-3xl border border-[#EADFD8] shadow-sm space-y-6">
-            <h3 className="text-[16px] font-bold text-[#2B2B2B] border-b border-[#EADFD8] pb-4 mb-2">Customer Information</h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">First Name</label>
-                <input 
-                  required
-                  type="text" 
-                  value={formData.firstName}
-                  onChange={e => setFormData({...formData, firstName: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-[#F8F5F2] border-none rounded-xl text-[14px] focus:ring-2 focus:ring-[#E6C97A]/50 outline-none"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Last Name</label>
-                <input 
-                  required
-                  type="text" 
-                  value={formData.lastName}
-                  onChange={e => setFormData({...formData, lastName: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-[#F8F5F2] border-none rounded-xl text-[14px] focus:ring-2 focus:ring-[#E6C97A]/50 outline-none"
-                />
-              </div>
-            </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-4 text-[13px]">{error}</div>
+        )}
 
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Email Address</label>
-              <input 
+        <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm space-y-5">
+          <h3 className="text-[15px] font-bold text-[#2B2B2B] border-b border-[#EADFD8] pb-4">Sale Details</h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-2">
+                Customer Name *
+              </label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
                 required
-                type="email" 
-                value={formData.email}
-                onChange={e => setFormData({...formData, email: e.target.value})}
-                className="w-full px-4 py-2.5 bg-[#F8F5F2] border-none rounded-xl text-[14px] focus:ring-2 focus:ring-[#E6C97A]/50 outline-none"
+                placeholder="Օր.՝ Անի Մարտիրոսյան"
+                className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/40"
               />
             </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Shipping Address</label>
-              <input 
-                required
-                type="text" 
-                placeholder="Street address"
-                value={formData.address}
-                onChange={e => setFormData({...formData, address: e.target.value})}
-                className="w-full px-4 py-2.5 bg-[#F8F5F2] border-none rounded-xl text-[14px] focus:ring-2 focus:ring-[#E6C97A]/50 outline-none"
+            <div>
+              <label className="block text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-2">
+                Առաքում
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={delivery}
+                onChange={(e) => setDelivery(sanitizeDecimalInput(e.target.value))}
+                placeholder="Օր.՝ 1500"
+                className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/40"
               />
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">City</label>
-                <input 
-                  required
-                  type="text" 
-                  value={formData.city}
-                  onChange={e => setFormData({...formData, city: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-[#F8F5F2] border-none rounded-xl text-[14px] focus:ring-2 focus:ring-[#E6C97A]/50 outline-none"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">State</label>
-                <input 
-                  required
-                  type="text" 
-                  value={formData.state}
-                  onChange={e => setFormData({...formData, state: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-[#F8F5F2] border-none rounded-xl text-[14px] focus:ring-2 focus:ring-[#E6C97A]/50 outline-none"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">ZIP</label>
-                <input 
-                  required
-                  type="text" 
-                  value={formData.zipCode}
-                  onChange={e => setFormData({...formData, zipCode: e.target.value})}
-                  className="w-full px-4 py-2.5 bg-[#F8F5F2] border-none rounded-xl text-[14px] focus:ring-2 focus:ring-[#E6C97A]/50 outline-none"
-                />
-              </div>
+            <div>
+              <label className="block text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-2">
+                Փաթեթավորում
+              </label>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={packaging}
+                onChange={(e) => setPackaging(sanitizeDecimalInput(e.target.value))}
+                placeholder="Օր.՝ 500"
+                className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/40"
+              />
             </div>
-          </div>
-
-          <div className="bg-white p-8 rounded-3xl border border-[#EADFD8] shadow-sm space-y-6">
-            <h3 className="text-[16px] font-bold text-[#2B2B2B] border-b border-[#EADFD8] pb-4 mb-2 flex items-center justify-between">
-              Order Items
-              <span className="text-[12px] font-normal text-[#AFAFAF]">{orderItems.length} items added</span>
-            </h3>
-
-            {orderItems.length === 0 ? (
-              <div className="py-12 text-center bg-[#F8F5F2] rounded-2xl border-2 border-dashed border-[#EADFD8]">
-                <ShoppingBag className="mx-auto text-[#D6C3B3] mb-3" size={32} />
-                <p className="text-[#7A7A7A] text-[14px]">No items added to this order yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {orderItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 bg-[#F8F5F2] rounded-2xl">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-[#BFA6A0] font-bold text-[18px]">
-                        {item.quantity}
-                      </div>
-                      <div>
-                        <p className="text-[14px] font-bold text-[#2B2B2B]">{item.name}</p>
-                        <p className="text-[12px] text-[#AFAFAF]">${item.price.toFixed(2)} each</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <p className="text-[15px] font-bold text-[#2B2B2B]">${(item.price * item.quantity).toFixed(2)}</p>
-                      <button 
-                        type="button"
-                        onClick={() => handleRemoveItem(item.id)}
-                        className="p-2 text-[#D6C3B3] hover:text-red-500 hover:bg-white rounded-lg transition-all"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div>
+              <label className="block text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-2">
+                Sale Date *
+              </label>
+              <input
+                type="datetime-local"
+                value={soldAt}
+                onChange={(e) => setSoldAt(e.target.value)}
+                required
+                className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/40"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Right: Product Selector & Summary */}
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-3xl border border-[#EADFD8] shadow-sm">
-            <h3 className="text-[15px] font-bold text-[#2B2B2B] mb-4">Add Products</h3>
-            <div className="max-h-[300px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-              {products.filter(p => p.status === 'active').map((product) => (
-                <button
-                  key={product.id}
-                  type="button"
-                  onClick={() => handleAddItem(product.id)}
-                  className="w-full flex items-center gap-3 p-2 hover:bg-[#F8F5F2] rounded-xl transition-colors group text-left"
-                >
-                  <div className="w-10 h-10 rounded-lg overflow-hidden bg-[#F8F5F2] shrink-0">
-                    <img src={product.image} alt="" className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-bold text-[#2B2B2B] truncate">{pickLocalized(product.name, 'hy')}</p>
-                    <p className="text-[11px] text-[#AFAFAF]">${Number(product.price).toFixed(2)}</p>
-                  </div>
-                  <Plus size={16} className="text-[#D6C3B3] group-hover:text-[#E6C97A] transition-colors" />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-3xl border border-[#EADFD8] shadow-sm space-y-4">
-            <h3 className="text-[15px] font-bold text-[#2B2B2B] border-b border-[#EADFD8] pb-3">Order Summary</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between text-[13px] text-[#7A7A7A]">
-                <span>Items Total</span>
-                <span>${calculateTotal().toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-[13px] text-[#7A7A7A]">
-                <span>Shipping</span>
-                <span>$0.00</span>
-              </div>
-              <div className="pt-3 border-t border-[#EADFD8] flex justify-between text-[16px] font-bold text-[#2B2B2B]">
-                <span>Total</span>
-                <span>${calculateTotal().toFixed(2)}</span>
-              </div>
-            </div>
+        <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm space-y-5">
+          <div className="flex items-center justify-between border-b border-[#EADFD8] pb-4">
+            <h3 className="text-[15px] font-bold text-[#2B2B2B]">Products</h3>
             <button
-              disabled={isSubmitting || orderItems.length === 0}
-              type="submit"
-              className="w-full py-4 bg-[#E6C97A] text-[#5a4a1e] rounded-2xl font-bold text-[14px] shadow-lg shadow-[#E6C97A]/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:scale-100 mt-4"
+              type="button"
+              onClick={() => setItems((prev) => [...prev, newLineItem()])}
+              className="flex items-center gap-1.5 text-[13px] font-semibold text-[#5a4a1e] hover:text-[#2B2B2B] transition-colors"
             >
-              {isSubmitting ? 'Creating Order...' : 'Create Order'}
+              <Plus size={16} /> Add line
             </button>
           </div>
+
+          <div className="space-y-4">
+            {items.map((item, index) => (
+              <div key={item.key} className="p-4 rounded-xl border border-[#EADFD8] bg-[#FDFCFB] space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-[12px] font-bold text-[#AFAFAF] uppercase tracking-wider">Line {index + 1}</p>
+                  {items.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setItems((prev) => prev.filter((row) => row.key !== item.key))}
+                      className="p-1.5 text-[#AFAFAF] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      aria-label="Remove line"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+
+                <AdminSelect
+                  label="Product"
+                  value={item.productId}
+                  onChange={(v) => handleProductSelect(item.key, v)}
+                  options={productOptions}
+                  menuAlign="left"
+                />
+
+                <div>
+                  <label className="block text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-2">
+                    Product Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={item.name}
+                    onChange={(e) => updateItem(item.key, { name: e.target.value })}
+                    required
+                    placeholder="Product name"
+                    className="w-full bg-white border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/40"
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-2">
+                      Qty
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={item.quantity}
+                      onChange={(e) => updateItem(item.key, { quantity: sanitizeIntegerInput(e.target.value) })}
+                      onBlur={() => {
+                        if (!parseQuantity(item.quantity)) {
+                          updateItem(item.key, { quantity: '1' });
+                        }
+                      }}
+                      placeholder="1"
+                      className="w-full bg-white border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/40"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-2">
+                      Sale Price ($)
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={item.price}
+                      onChange={(e) => updateItem(item.key, { price: sanitizeDecimalInput(e.target.value) })}
+                      placeholder="0"
+                      className="w-full bg-white border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/40"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider mb-2">
+                      Cost ($)
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={item.unitCost}
+                      onChange={(e) => updateItem(item.key, { unitCost: sanitizeDecimalInput(e.target.value) })}
+                      placeholder="0"
+                      className="w-full bg-white border border-[#EADFD8] rounded-xl py-2.5 px-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/40"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm">
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#AFAFAF]">Total Sale</p>
+              <p className="text-xl font-serif font-bold text-[#2B2B2B] mt-1">${totals.revenue.toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#AFAFAF]">Total Cost</p>
+              <p className="text-xl font-serif font-bold text-[#2B2B2B] mt-1">${totals.cost.toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#AFAFAF]">Profit</p>
+              <p className={`text-xl font-serif font-bold mt-1 ${totals.revenue - totals.cost >= 0 ? 'text-[#166534]' : 'text-red-600'}`}>
+                ${(totals.revenue - totals.cost).toFixed(2)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-end">
+          <Link href="/admin/orders" className="btn-outline text-center px-6 py-3">
+            Cancel
+          </Link>
+          <button type="submit" disabled={saving} className="btn-primary flex items-center justify-center gap-2 px-8 py-3">
+            <Save size={18} />
+            {saving ? 'Saving...' : 'Save Sale'}
+          </button>
         </div>
       </form>
     </div>

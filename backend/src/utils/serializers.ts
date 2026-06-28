@@ -32,6 +32,7 @@ export function formatProduct(product: Product | JsonRecord, opts?: FormatOption
     id: j.id,
     name: formatLocalizedField(j.name, opts),
     price: Number(j.price ?? 0),
+    cost: Number(j.cost ?? 0),
     image: j.image,
     category: j.category,
     badge: j.badge != null ? formatLocalizedField(j.badge, opts) : null,
@@ -68,6 +69,14 @@ export function formatFaq(faq: JsonRecord, opts?: FormatOptions) {
   };
 }
 
+export function formatCategory(category: JsonRecord, opts?: FormatOptions) {
+  return {
+    id: category.id,
+    name: formatLocalizedField(category.name, opts),
+    sortOrder: category.sortOrder ?? category.sort_order ?? 0,
+  };
+}
+
 export function formatGalleryItem(item: Gallery | JsonRecord, opts?: FormatOptions) {
   const j =
     typeof (item as Gallery).toJSON === "function"
@@ -94,6 +103,7 @@ export function formatOrderItem(item: OrderItem | JsonRecord) {
     name: String(j.productName ?? j.product_name ?? ""),
     quantity: Number(j.quantity ?? 0),
     price: Number(j.unitPrice ?? j.unit_price ?? 0),
+    unitCost: Number(j.unitCost ?? j.unit_cost ?? 0),
   };
 }
 
@@ -134,6 +144,7 @@ export function formatSettings(row: JsonRecord) {
     instagramUrl: row.instagramUrl ?? row.instagram_url,
     facebookUrl: row.facebookUrl ?? row.facebook_url,
     whatsappUrl: row.whatsappUrl ?? row.whatsapp_url,
+    telegramUrl: row.telegramUrl ?? row.telegram_url ?? "",
     tiktokUrl: row.tiktokUrl ?? row.tiktok_url ?? "",
     youtubeUrl: row.youtubeUrl ?? row.youtube_url ?? "",
     siteContent: rawContent,

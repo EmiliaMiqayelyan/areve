@@ -73,20 +73,20 @@ export const DEFAULT_SITE_CONTENT = {
   home: {
     collectionsSection: {
       eyebrow: 'Կատեգորիաներ',
-      title: 'Գտիր քոնը',
-      subtitle: 'Տոպրակներ, խաղալիքներ, աքսեսուարներ՝ ձեռքով ստեղծված։',
+      title: 'Բացահայտիր Arevé-ի աշխարհը',
+      subtitle: 'Ձեռագործ հավաքածուներ՝ ստեղծված առանձնանալու համար։',
     },
     hero: {
       image: '/images/hero-light.png',
       eyebrow: 'Նոր հավաքածու · 2026',
-      title: 'Ձեռագործ',
-      titleAccent: 'գեղեցկություն',
+      title: 'Ոճ, որը ստեղծվում է',
+      titleAccent: 'ձեռքով',
       subtitle:
-        'Բիջակապարց տոպրակներ և աքսեսուարներ՝ մեկական, ձեռքով, միայն քեզ համար։',
-      trustLine: '100% ձեռագործ · Եզակի յուրաքանչյուր կտոր',
+        'Եզակի դիզայն, որակյալ նյութեր և ձեռքի աշխատանք՝ ամեն օրվա և հատուկ պահերի համար',
+      trustLine: '100% ձեռագործ • Պատրաստված Հայաստանում',
       badgePrefix: 'Նոր հավաքածու',
-      titleLine1: 'Ձեռագործ',
-      titleGold1: 'գեղեցկություն',
+      titleLine1: 'Ոճ, որը ստեղծվում է',
+      titleGold1: 'ձեռքով',
       conjunction: '',
       titleGold2: '',
       stats: [
@@ -98,8 +98,8 @@ export const DEFAULT_SITE_CONTENT = {
       secondaryCta: { label: 'Դիտել հավաքածուն', href: '/gallery' },
     },
     featuredSection: {
-      eyebrow: 'Ընտրյալ',
-      title: 'Այս շաբաթի նորությունը',
+      eyebrow: 'Ֆավորիտ',
+      title: 'Ամենապահանջված մոդելները',
       viewAllLabel: 'Բոլոր ապրանքները',
     },
     storySection: {
@@ -108,11 +108,11 @@ export const DEFAULT_SITE_CONTENT = {
       floatingStatLabel: 'ժամ մեկ տոպրակի',
       eyebrow: 'AREVÉ',
       titleLine1: 'Ստեղծված է',
-      titleItalic: 'սիրով,',
-      titleLine2: 'կարված է ձեռքերով',
+      titleItalic: 'քեզ համար',
+      titleLine2: '',
       paragraphs: [
-        'Յուրաքանչյուր կտոր ստեղծվում է ձեռքերով՝ մեծ ուշադրությամբ և մանրուքներին։',
-        'AREVÉ-ն արև է առօրյայում — ջերմ, եզակի, քո համար։',
+        'Մենք ստեղծում ենք ձեռագործ պայուսակներ, որոնք համադրում են ոճը, որակն ու անհատականությունը։',
+        'AREVÉ — ստեղծված՝ առանձնանալու համար',
       ],
       pillars: [
         { icon: '✦', label: 'Ձեռագործ' },
@@ -124,21 +124,21 @@ export const DEFAULT_SITE_CONTENT = {
     },
     testimonialsSection: {
       eyebrow: 'Գնահատականներ',
-      title: 'Հաճախորդների խոսքը',
-      subtitle: 'Ինչ են ասում նրանք, ովքեր արդեն ընտրել են AREVÉ-ն։',
+      title: 'Հաճախորդների կարծիքները',
+      subtitle: 'Ինչ են ասում նրանք, ովքեր արդեն ընտրել են AREVÉ-ն',
       readAllLabel: 'Բոլոր կարծիքները',
     },
     instagramSection: {
       eyebrow: '@areve.handmade',
       title: 'Հետևիր մեզ',
-      subtitle: 'Նոր հավաքածուներ, կուլիսներ, նորություններ։',
+      subtitle: '',
       viewLinkLabel: 'Instagram →',
     },
     ctaSection: {
       emoji: '☀️',
-      titleLine1: 'Ուզու՞մ ես',
-      titleItalic: 'ինչ-որ եզակի',
-      paragraph: 'Անհատական պատվերներ՝ քո գույներով, մեր ձեռքերով։',
+      titleLine1: 'Դարձրու այն',
+      titleItalic: 'եզակի',
+      paragraph: 'Անհատական պատվերներ՝ ստեղծված հենց քեզ համար',
       buttonLabel: 'Պատվիրել',
       buttonHref: '/contact',
     },

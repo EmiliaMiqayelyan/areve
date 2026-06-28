@@ -3,6 +3,12 @@ import { normalizeLocalizedInput } from "../utils/localizedText";
 
 const optionalUrlOrEmpty = z.union([z.string().url(), z.literal("")]).optional();
 
+const telegramContactOrEmpty = z.union([
+  z.string().url(),
+  z.string().regex(/^@?[A-Za-z0-9_]{5,32}$/),
+  z.literal(""),
+]).optional();
+
 const localizedTextSchema = z
   .union([
     z.string().min(1).max(5000),
@@ -35,7 +41,8 @@ export const productSchema = z.object({
   name: localizedTextSchema,
   price: z.coerce.number().positive(),
   image: z.string().min(1),
-  category: z.enum(["bags", "toys", "accessories"]),
+  category: z.string().min(1).max(64),
+  cost: z.coerce.number().nonnegative().optional(),
   badge: optionalLocalizedTextSchema,
   description: optionalLocalizedTextSchema,
   status: z.enum(["active", "inactive"]).default("active"),
@@ -101,8 +108,41 @@ export const loginSchema = z.object({
   password: z.string().min(6).max(100),
 });
 
+export const adminCredentialsUpdateSchema = z
+  .object({
+    currentPassword: z.string().min(6).max(100),
+    newEmail: z.string().email().optional(),
+    newPassword: z.string().min(6).max(100).optional(),
+    confirmPassword: z.string().min(6).max(100).optional(),
+  })
+  .refine((data) => !data.newPassword || data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => Boolean(data.newEmail || data.newPassword), {
+    message: "Provide a new email and/or new password",
+  });
+
 export const orderStatusSchema = z.object({
   status: z.enum(["pending", "shipped", "delivered"]),
+});
+
+export const adminOrderCreateSchema = z.object({
+  customerName: z.string().min(1).max(160),
+  delivery: z.string().max(100).optional(),
+  packaging: z.string().max(100).optional(),
+  soldAt: z.string().min(1).optional(),
+  items: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        name: z.string().min(1).max(120),
+        quantity: z.coerce.number().int().min(1),
+        price: z.coerce.number().nonnegative(),
+        unitCost: z.coerce.number().nonnegative().optional(),
+      })
+    )
+    .min(1),
 });
 
 /** Admin dashboard order edits (customer/shipping fields). */
@@ -138,6 +178,23 @@ export const faqReplaceSchema = z.array(
   })
 );
 
+const categorySlugSchema = z
+  .string()
+  .min(1)
+  .max(64)
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens only");
+
+export const categoryCreateSchema = z.object({
+  id: categorySlugSchema,
+  name: localizedTextSchema,
+  sortOrder: z.coerce.number().int().min(0).optional(),
+});
+
+export const categoryUpdateSchema = z.object({
+  name: localizedTextSchema.optional(),
+  sortOrder: z.coerce.number().int().min(0).optional(),
+});
+
 export const settingsSchema = z.object({
   storeName: z.string().min(1).max(120),
   tagline: z.string().max(240),
@@ -148,6 +205,7 @@ export const settingsSchema = z.object({
   instagramUrl: z.string().url(),
   facebookUrl: z.string().url(),
   whatsappUrl: z.string().url(),
+  telegramUrl: telegramContactOrEmpty,
   tiktokUrl: optionalUrlOrEmpty,
   youtubeUrl: optionalUrlOrEmpty,
   siteContent: z.any().optional(),

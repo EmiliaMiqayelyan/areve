@@ -49,7 +49,7 @@ export default function AdminGalleryPage() {
         addGalleryImage({
           id: 'gal-' + Math.random().toString(36).substring(2, 9),
           src: dataUrl,
-          alt: { hy: alt.hy.trim(), en: (alt.en || alt.hy).trim() },
+          alt: { hy: alt.hy.trim(), en: alt.en.trim() },
           cols,
         });
         setAlt(emptyLocalized());

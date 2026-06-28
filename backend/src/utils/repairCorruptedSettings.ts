@@ -2,9 +2,9 @@ import { Setting } from "../models";
 
 const MOJIBAKE_RE = /[ÕÔÃ][±°´€³]|Ã©|â€|AREVÃ/;
 
-const ARMENIAN_TAGLINE = "Ձեռագործ · Եզակի · Սիրով ստեղծված";
+const ARMENIAN_TAGLINE = "Արև՝ քո առօրյայում";
 const ARMENIAN_FOOTER =
-  "Յուրաքանչյուր կտոր փոքրիկ արև է — ստեղծված ջերմությամբ, համբերությամբ և միայն ձեռքերով տրվող սիրով։";
+  "Ստեղծված ձեռքերով՝ ջերմությամբ, համբերությամբ և սիրով";
 
 function hasMojibake(value: unknown): boolean {
   if (value == null) return false;

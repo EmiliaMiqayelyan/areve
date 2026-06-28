@@ -11,6 +11,7 @@ OrderItem.init(
     productName: { type: DataTypes.STRING(120), allowNull: false, field: "product_name" },
     quantity: { type: DataTypes.INTEGER, allowNull: false },
     unitPrice: { type: DataTypes.DECIMAL(10, 2), allowNull: false, field: "unit_price" },
+    unitCost: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0, field: "unit_cost" },
   },
   { sequelize, tableName: "order_items", underscored: true, timestamps: false }
 );

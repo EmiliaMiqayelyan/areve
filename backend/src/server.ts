@@ -2,6 +2,7 @@ import app from "./app";
 import { env } from "./config/env";
 import { sequelize } from "./config/sequelize";
 import { ensureSchemaColumns } from "./utils/ensureSchema";
+import { ensureCategories } from "./utils/ensureCategories";
 import { migrateLocalizedColumns } from "./utils/migrateLocalizedColumns";
 import { repairCorruptedSettings } from "./utils/repairCorruptedSettings";
 import { syncDefaultSocialUrls } from "./utils/syncDefaultSocialUrls";
@@ -10,6 +11,7 @@ import "./models";
 async function bootstrap() {
   await sequelize.authenticate();
   await ensureSchemaColumns();
+  await ensureCategories();
   await migrateLocalizedColumns();
   await repairCorruptedSettings();
   await syncDefaultSocialUrls();

@@ -9,10 +9,17 @@ export interface Product {
   name: LocalizedText | string;
   price: number | string;
   image: string;
-  category: 'bags' | 'toys' | 'accessories';
+  category: string;
+  cost?: number | string;
   badge?: LocalizedText | string | null;
   description?: LocalizedText | string | null;
   status?: 'active' | 'inactive';
+}
+
+export interface CategoryItem {
+  id: string;
+  name: LocalizedText | string;
+  sortOrder?: number;
 }
 
 export interface Review {
@@ -37,7 +44,7 @@ export interface Order {
   city?: string;
   state?: string;
   zipCode?: string;
-  items: Array<{ id: string; name: string; quantity: number; price: number }>;
+  items: Array<{ id: string; name: string; quantity: number; price: number; unitCost?: number }>;
 }
 
 export interface GalleryImage {
@@ -56,11 +63,18 @@ export interface FAQ {
 interface AdminStore {
   isAuthenticated: boolean;
   token: string | null;
+  adminEmail: string | null;
   loading: boolean;
   login: () => void;
   loginWithApi: (email: string, password: string) => Promise<void>;
   logout: () => void;
   hydrateFromApi: () => Promise<void>;
+  updateAdminCredentials: (payload: {
+    currentPassword: string;
+    newEmail?: string;
+    newPassword?: string;
+    confirmPassword?: string;
+  }) => Promise<void>;
 
   products: Product[];
   addProduct: (product: Product) => Promise<void>;
@@ -85,6 +99,11 @@ interface AdminStore {
   faqs: FAQ[];
   updateFaq: (index: number, faq: FAQ) => Promise<void>;
   saveAllFaqs: (faqs: FAQ[]) => Promise<void>;
+
+  categories: CategoryItem[];
+  addCategory: (category: CategoryItem) => Promise<void>;
+  updateCategory: (id: string, updates: Partial<CategoryItem>) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
 }
 
 const LEGACY_STORAGE_KEYS = ['areve-admin-storage-v2', 'areve-admin-storage'];
@@ -139,6 +158,7 @@ export const useAdminStore = create<AdminStore>()(
     (set, get) => ({
       isAuthenticated: false,
       token: null,
+      adminEmail: null,
       loading: false,
       login: () => set({ isAuthenticated: true }),
       loginWithApi: async (email, password) => {
@@ -149,29 +169,44 @@ export const useAdminStore = create<AdminStore>()(
             body: JSON.stringify({ email, password }),
           }
         );
-        set({ isAuthenticated: true, token: result.token });
+        set({ isAuthenticated: true, token: result.token, adminEmail: email });
         await get().hydrateFromApi();
       },
       logout: () => {
         // Clear persisted token so we don't get stuck with an expired JWT.
         if (typeof window !== 'undefined') window.localStorage.removeItem(ADMIN_STORAGE_KEY);
-        set({ isAuthenticated: false, token: null, loading: false });
+        set({ isAuthenticated: false, token: null, adminEmail: null, loading: false });
+      },
+      updateAdminCredentials: async (payload) => {
+        const token = get().token;
+        if (!token) throw new Error('Not authenticated');
+        const result = await apiFetch<{
+          token: string;
+          admin: { email: string };
+        }>(
+          '/admin/account/credentials',
+          { method: 'PUT', body: JSON.stringify(payload) },
+          token
+        );
+        set({ token: result.token, adminEmail: result.admin.email });
       },
       hydrateFromApi: async () => {
         const token = get().token;
         if (!token) return;
         set({ loading: true });
         try {
-          const [products, orders, reviews, gallery, faqs] = await Promise.all([
+          const [products, orders, reviews, gallery, faqs, categories] = await Promise.all([
             apiFetch<Product[]>('/admin/products', {}, token),
             apiFetch<Order[]>('/admin/orders', {}, token),
             apiFetch<Review[]>('/admin/reviews', {}, token),
             apiFetch<GalleryImage[]>('/admin/gallery', {}, token),
             apiFetch<FAQ[]>('/admin/faqs', {}, token),
+            apiFetch<CategoryItem[]>('/admin/categories', {}, token),
           ]);
           const normalizedProducts = products.map((p) => ({
             ...p,
             price: Number(p.price ?? 0),
+            cost: Number(p.cost ?? 0),
           }));
           const normalizedOrders = orders.map((o) => ({
             ...o,
@@ -186,10 +221,11 @@ export const useAdminStore = create<AdminStore>()(
                   ...item,
                   price: Number(item.price ?? 0),
                   quantity: Number(item.quantity ?? 0),
+                  unitCost: Number(item.unitCost ?? 0),
                 }))
               : [],
           }));
-          set({ products: normalizedProducts, orders: normalizedOrders, reviews, gallery, faqs, loading: false });
+          set({ products: normalizedProducts, orders: normalizedOrders, reviews, gallery, faqs, categories, loading: false });
         } catch {
           set({ loading: false });
         }
@@ -342,6 +378,48 @@ export const useAdminStore = create<AdminStore>()(
           },
           get().token || undefined
         );
+      },
+
+      categories: [],
+      addCategory: async (category) => {
+        if (get().token) {
+          try {
+            await apiFetch('/admin/categories', { method: 'POST', body: JSON.stringify(category) }, get().token || undefined);
+            await get().hydrateFromApi();
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message)) get().logout();
+            throw err;
+          }
+        } else {
+          set((state) => ({ categories: [...state.categories, category] }));
+        }
+      },
+      updateCategory: async (id, updates) => {
+        set((state) => ({
+          categories: state.categories.map((c) => (c.id === id ? { ...c, ...updates } : c)),
+        }));
+        if (get().token) {
+          try {
+            await apiFetch(`/admin/categories/${id}`, { method: 'PUT', body: JSON.stringify(updates) }, get().token || undefined);
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message)) get().logout();
+            throw err;
+          }
+        }
+      },
+      deleteCategory: async (id) => {
+        set((state) => ({ categories: state.categories.filter((c) => c.id !== id) }));
+        if (get().token) {
+          try {
+            await apiFetch(`/admin/categories/${id}`, { method: 'DELETE' }, get().token || undefined);
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message)) get().logout();
+            throw err;
+          }
+        }
       },
     }),
     {

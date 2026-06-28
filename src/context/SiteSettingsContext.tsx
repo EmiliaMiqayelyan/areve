@@ -45,6 +45,7 @@ function buildSettings(locale: Locale, data?: Partial<PublicSettings> | null): P
     instagramUrl: data?.instagramUrl ?? SOCIAL_URLS.instagram,
     facebookUrl: data?.facebookUrl ?? SOCIAL_URLS.facebook,
     whatsappUrl: data?.whatsappUrl ?? 'https://wa.me/37441832122',
+    telegramUrl: data?.telegramUrl ?? '',
     tiktokUrl: data?.tiktokUrl ?? SOCIAL_URLS.tiktok,
     youtubeUrl: data?.youtubeUrl ?? SOCIAL_URLS.youtube,
     siteContent,
