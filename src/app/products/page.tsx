@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SlidersHorizontal, Tags } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
-import SectionHeader from '@/components/ui/SectionHeader';
+import PageHero from '@/components/ui/PageHero';
 import SortDropdown from '@/components/ui/SortDropdown';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
@@ -70,11 +70,12 @@ function ProductsContent() {
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
-      <div style={{ background: '#EADFD8', padding: 'var(--section-padding)', borderBottom: '1px solid #D6C3B3' }}>
-        <div className="mx-auto max-w-[1280px]">
-          <SectionHeader eyebrow={pg.eyebrow} title={pg.title} subtitle={pg.subtitle} centered />
-        </div>
-      </div>
+      <PageHero
+        variant="shop"
+        eyebrow={pg.eyebrow}
+        title={pg.title}
+        subtitle={pg.subtitle}
+      />
 
       <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
         {loadError && !loading && (

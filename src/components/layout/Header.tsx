@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Heart, Menu, X } from 'lucide-react';
 import { useCartStore, useWishlistStore } from '@/lib/store';
 import CartDrawer from '../CartDrawer';
+import WishlistPopover from '../WishlistPopover';
 import areve from "../../../public/areve.png"
 import Image from "next/image";
 import { useSiteSettings } from '@/context/SiteSettingsContext';
@@ -24,8 +25,20 @@ export default function Header() {
   const { settings } = useSiteSettings();
   const { locale, setLocale, locales, localeLabels } = useTranslation();
   const navLinks = settings.siteContent.nav;
-  const { count, toggleCart } = useCartStore();
-  const { items: wishlist } = useWishlistStore();
+  const wishlistButtonRef = useRef<HTMLButtonElement>(null);
+  const { count, toggleCart, isOpen: cartOpen } = useCartStore();
+  const { items: wishlist, toggleWishlistPanel, closeWishlistPanel, isOpen: wishlistOpen } =
+    useWishlistStore();
+
+  const handleToggleWishlist = () => {
+    if (cartOpen) toggleCart();
+    toggleWishlistPanel();
+  };
+
+  const handleToggleCart = () => {
+    if (wishlistOpen) closeWishlistPanel();
+    toggleCart();
+  };
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 10);
@@ -34,6 +47,7 @@ export default function Header() {
   }, []);
 
   useEffect(() => { setMobileOpen(false); }, [pathname]);
+  useEffect(() => { closeWishlistPanel(); }, [pathname, closeWishlistPanel]);
 
   if (pathname.startsWith('/admin')) return null;
 
@@ -51,7 +65,7 @@ export default function Header() {
           transition: 'background 0.3s, border-color 0.3s',
         }}
       >
-        <div className="mx-auto flex h-[68px] min-h-[68px] max-h-[68px] items-center justify-between gap-3 px-4 sm:px-6 lg:max-w-[1280px] overflow-hidden">
+        <div className="mx-auto flex h-[68px] min-h-[68px] max-h-[68px] items-center justify-between gap-3 px-4 sm:px-6 lg:max-w-[1280px]">
 
           <Link href="/" className="flex shrink-0 items-center no-underline">
             <Image src={areve} alt="areve" width={120} height={48} className="h-10 w-auto sm:h-11" priority />
@@ -103,16 +117,26 @@ export default function Header() {
                 </button>
               ))}
             </div>
-            <Link href="/products" className="hidden sm:flex relative text-subtle" style={{ color: '#7A7A7A' }}>
-              <Heart size={20} strokeWidth={1.6} />
-              {mounted && wishlist.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose text-[9px] font-bold text-[#6b3e3a]">
-                  {wishlist.length}
-                </span>
-              )}
-            </Link>
+            <div className="relative hidden sm:block">
+              <button
+                ref={wishlistButtonRef}
+                type="button"
+                onClick={handleToggleWishlist}
+                className="relative border-none bg-none p-1 cursor-pointer text-subtle"
+                style={{ color: wishlistOpen ? '#E6C97A' : '#7A7A7A' }}
+                aria-expanded={wishlistOpen}
+                aria-haspopup="true"
+              >
+                <Heart size={20} strokeWidth={1.6} fill={wishlistOpen ? '#E6C97A25' : 'none'} />
+                {mounted && wishlist.length > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose text-[9px] font-bold text-[#6b3e3a]">
+                    {wishlist.length}
+                  </span>
+                )}
+              </button>
+            </div>
 
-            <button onClick={toggleCart} className="group relative border-none bg-none p-1 cursor-pointer text-subtle" style={{ color: '#7A7A7A' }}>
+            <button onClick={handleToggleCart} className="group relative border-none bg-none p-1 cursor-pointer text-subtle" style={{ color: '#7A7A7A' }}>
               <ShoppingBag size={20} strokeWidth={1.6} />
               {mounted && count() > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[9px] font-bold text-[#5a4a1e]">
@@ -183,6 +207,7 @@ export default function Header() {
       </motion.header>
 
       <CartDrawer />
+      <WishlistPopover anchorRef={wishlistButtonRef} />
     </>
   );
 }

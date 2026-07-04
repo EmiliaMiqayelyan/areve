@@ -140,11 +140,12 @@ export default function CartDrawer() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '20px 24px',
+                gap: 12,
+                padding: '16px 20px',
                 borderBottom: '1px solid #EADFD8',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
                 {step === 'messenger' && (
                   <button
                     type="button"
@@ -158,17 +159,21 @@ export default function CartDrawer() {
                       padding: 0,
                       display: 'flex',
                       alignItems: 'center',
+                      flexShrink: 0,
                     }}
                   >
-                    <ChevronLeft size={20} />
+                    <ChevronLeft size={18} />
                   </button>
                 )}
-                <ShoppingBag size={18} color="#E6C97A" strokeWidth={1.8} />
+                <ShoppingBag size={16} color="#E6C97A" strokeWidth={1.8} style={{ flexShrink: 0 }} />
                 <span
                   style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: 18,
+                    fontFamily: step === 'messenger' ? 'var(--font-sans)' : 'var(--font-serif)',
+                    fontSize: step === 'messenger' ? 13 : 17,
+                    fontWeight: step === 'messenger' ? 500 : 400,
+                    lineHeight: 1.35,
                     color: '#2B2B2B',
+                    minWidth: 0,
                   }}
                 >
                   {headerTitle}
@@ -177,8 +182,9 @@ export default function CartDrawer() {
                   <span
                     style={{
                       fontFamily: 'var(--font-sans)',
-                      fontSize: 13,
+                      fontSize: 12,
                       color: '#AFAFAF',
+                      flexShrink: 0,
                     }}
                   >
                     ({items.length})
@@ -186,13 +192,18 @@ export default function CartDrawer() {
                 )}
               </div>
               <button
+                type="button"
                 onClick={toggleCart}
+                aria-label={t('cart.back')}
                 style={{
-                  background: '#EADFD8',
+                  background: '#EDE6DF',
                   border: 'none',
-                  borderRadius: '50%',
-                  width: 32,
-                  height: 32,
+                  borderRadius: '9999px',
+                  width: 36,
+                  height: 36,
+                  minWidth: 36,
+                  minHeight: 36,
+                  flexShrink: 0,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -200,7 +211,7 @@ export default function CartDrawer() {
                   color: '#7A7A7A',
                 }}
               >
-                <X size={15} />
+                <X size={14} />
               </button>
             </div>
 
@@ -291,92 +302,97 @@ export default function CartDrawer() {
                           />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p
-                            style={{
-                              fontFamily: 'var(--font-sans)',
-                              fontSize: 14,
-                              fontWeight: 500,
-                              color: '#2B2B2B',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap',
-                            }}
-                          >
-                            {item.name}
-                          </p>
-                          <p
-                            style={{
-                              fontFamily: 'var(--font-serif)',
-                              fontSize: 16,
-                              color: '#E6C97A',
-                              marginTop: 2,
-                            }}
-                          >
-                            ${item.price.toFixed(2)}
-                          </p>
                           <div
                             style={{
                               display: 'flex',
-                              alignItems: 'center',
+                              alignItems: 'flex-start',
                               justifyContent: 'space-between',
-                              marginTop: 6,
+                              gap: 8,
                             }}
                           >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <button
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                style={{
-                                  width: 24,
-                                  height: 24,
-                                  borderRadius: '50%',
-                                  background: '#EADFD8',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  color: '#7A7A7A',
-                                }}
-                              >
-                                <Minus size={11} />
-                              </button>
-                              <span
-                                style={{
-                                  fontFamily: 'var(--font-sans)',
-                                  fontSize: 13,
-                                  color: '#2B2B2B',
-                                }}
-                              >
-                                {item.quantity}
-                              </span>
-                              <button
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                style={{
-                                  width: 24,
-                                  height: 24,
-                                  borderRadius: '50%',
-                                  background: '#EADFD8',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  color: '#7A7A7A',
-                                }}
-                              >
-                                <Plus size={11} />
-                              </button>
-                            </div>
+                            <p
+                              style={{
+                                fontFamily: 'var(--font-sans)',
+                                fontSize: 14,
+                                fontWeight: 500,
+                                color: '#2B2B2B',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                flex: 1,
+                              }}
+                            >
+                              {item.name}
+                            </p>
+                            <p
+                              style={{
+                                fontFamily: 'var(--font-serif)',
+                                fontSize: 15,
+                                fontWeight: 600,
+                                color: '#2B2B2B',
+                                flexShrink: 0,
+                              }}
+                            >
+                              ${(item.price * item.quantity).toFixed(2)}
+                            </p>
+                          </div>
+                          <p
+                            style={{
+                              fontFamily: 'var(--font-sans)',
+                              fontSize: 12,
+                              color: '#AFAFAF',
+                              marginTop: 2,
+                            }}
+                          >
+                            ${item.price.toFixed(2)} × {item.quantity}
+                          </p>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              style={{
+                                width: 26,
+                                height: 26,
+                                borderRadius: '50%',
+                                background: '#F5F0EC',
+                                border: '1px solid #EADFD8',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#7A7A7A',
+                              }}
+                            >
+                              <Minus size={11} />
+                            </button>
                             <span
                               style={{
                                 fontFamily: 'var(--font-sans)',
                                 fontSize: 13,
                                 fontWeight: 500,
                                 color: '#2B2B2B',
+                                minWidth: 16,
+                                textAlign: 'center',
                               }}
                             >
-                              {t('cart.subtotal')}: ${(item.price * item.quantity).toFixed(2)}
+                              {item.quantity}
                             </span>
+                            <button
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              style={{
+                                width: 26,
+                                height: 26,
+                                borderRadius: '50%',
+                                background: '#F5F0EC',
+                                border: '1px solid #EADFD8',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#7A7A7A',
+                              }}
+                            >
+                              <Plus size={11} />
+                            </button>
                           </div>
                         </div>
                         <button

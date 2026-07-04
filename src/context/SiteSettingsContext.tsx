@@ -16,6 +16,33 @@ function looksCorrupted(value?: string | null): boolean {
   return Boolean(value && MOJIBAKE_RE.test(value));
 }
 
+function resolveFooterDescription(
+  locale: Locale,
+  value: string | undefined,
+  fallback: string
+): string {
+  const trimmed = (value ?? '').trim();
+  if (!trimmed || looksCorrupted(trimmed)) return fallback;
+
+  if (
+    locale === 'hy' &&
+    (trimmed.startsWith('Յուրաքանչյուր կտոր փոքրիկ արև է') ||
+      trimmed.startsWith('Ստեղծված ձեռքերով'))
+  ) {
+    return fallback;
+  }
+
+  if (locale === 'en' && /Every piece is a tiny sun/i.test(trimmed)) {
+    return fallback;
+  }
+
+  if (locale === 'hy') {
+    return hasArmenianScript(trimmed) ? trimmed : fallback;
+  }
+
+  return !hasArmenianScript(trimmed) ? trimmed : fallback;
+}
+
 function buildSettings(locale: Locale, data?: Partial<PublicSettings> | null): PublicSettings {
   const m = getMessages(locale);
   const siteContent = mergeSiteContentForLocale(locale, data?.siteContent) as SiteContent;
@@ -29,16 +56,11 @@ function buildSettings(locale: Locale, data?: Partial<PublicSettings> | null): P
         : !hasArmenianScript(data?.tagline) && data?.tagline && !looksCorrupted(data.tagline)
           ? data.tagline
           : m.settings.taglineHy,
-    footerDescription:
-      locale === 'hy'
-        ? hasArmenianScript(data?.footerDescription) && !looksCorrupted(data?.footerDescription)
-          ? data!.footerDescription!
-          : m.settings.footerHy
-        : !hasArmenianScript(data?.footerDescription) &&
-            data?.footerDescription &&
-            !looksCorrupted(data.footerDescription)
-          ? data.footerDescription
-          : m.settings.footerHy,
+    footerDescription: resolveFooterDescription(
+      locale,
+      data?.footerDescription,
+      m.settings.footerHy
+    ),
     supportEmail: data?.supportEmail ?? '',
     businessPhone: data?.businessPhone ?? '',
     address: data?.address ?? '',

@@ -25,7 +25,7 @@ type StoreSettingsForm = {
 const defaultSettings: StoreSettingsForm = {
   storeName: 'AREVÉ',
   tagline: 'Արև՝ քո առօրյայում',
-  footerDescription: 'Ստեղծված ձեռքերով՝ ջերմությամբ, համբերությամբ և սիրով',
+  footerDescription: 'Յուրաքանչյուրը փոքրիկ արև է',
   supportEmail: 'care@areve.com',
   businessPhone: '+374 41 83 21 22',
   address: '123 Artisan Maker Way, Creative District, NY 10012',

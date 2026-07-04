@@ -10,7 +10,6 @@ export const SITE_CONTENT_EN = {
     { href: "/products", label: "Products" },
     { href: "/gallery", label: "Gallery" },
     { href: "/about", label: "About" },
-    { href: "/reviews", label: "Reviews" },
     { href: "/faq", label: "FAQ" },
     { href: "/contact", label: "Contact" },
   ],
@@ -20,7 +19,6 @@ export const SITE_CONTENT_EN = {
       ["/products", "Products"],
       ["/gallery", "Gallery"],
       ["/about", "Our Story"],
-      ["/reviews", "Reviews"],
     ] as [string, string][],
     support: [
       ["/faq", "FAQ"],
@@ -39,9 +37,9 @@ export const SITE_CONTENT_EN = {
   },
   pages: {
     shop: {
-      eyebrow: "Shop AREVÉ",
-      title: "Our Collection",
-      subtitle: "Every piece is handmade — no two are exactly the same. Find what speaks to you.",
+      eyebrow: "Handmade Collection",
+      title: "Your Next Bag",
+      subtitle: 'Create something unique for yourself',
     },
     reviews: {
       eyebrow: "Customer Reviews",
@@ -56,14 +54,14 @@ export const SITE_CONTENT_EN = {
       featuredAuthor: "— Sophie Laurent, Paris",
     },
     gallery: {
-      eyebrow: "Visual Stories",
-      title: "The Gallery",
-      subtitle: "A window into the world of AREVÉ — products, process, and the beauty of handmade.",
+      eyebrow: "AREVÉ",
+      title: "The Full\nCreative Journey",
+      subtitle: "Craft • Style • Sunlight",
     },
     faq: {
-      eyebrow: "Help Center",
+      eyebrow: "· FAQ",
       title: "Frequently Asked Questions",
-      subtitle: "Everything you need to know about AREVÉ — answered with care.",
+      subtitle: "Everything you need to know about AREVÉ",
     },
     checkout: {
       title: "Checkout",
@@ -80,13 +78,13 @@ export const SITE_CONTENT_EN = {
       image: "/images/hero-light.png",
       eyebrow: "New Collection · 2026",
       title: "Style crafted",
-      titleAccent: "by hand",
+      titleAccent: "from the sun",
       subtitle:
         "Unique design, quality materials and handcrafted work — for everyday moments and special occasions.",
       trustLine: "100% handmade • Made in Armenia",
       badgePrefix: "New Collection",
       titleLine1: "Style crafted",
-      titleGold1: "by hand",
+      titleGold1: "from the sun",
       conjunction: "",
       titleGold2: "",
       stats: [
@@ -145,19 +143,16 @@ export const SITE_CONTENT_EN = {
     collectionCards: [
       {
         title: "Beaded Bags",
-        desc: "Wearable art — bead by bead, by hand.",
         img: "/images/prod-bag-a.png",
         href: "/products?category=bags",
       },
       {
         title: "Handmade Toys",
-        desc: "Soft, safe, made with love.",
         img: "/images/prod-toy-a.png",
         href: "/products?category=toys",
       },
       {
         title: "Accessories",
-        desc: "A golden touch for every day.",
         img: "/images/prod-acc-a.png",
         href: "/products?category=accessories",
       },
@@ -166,19 +161,17 @@ export const SITE_CONTENT_EN = {
   about: {
     hero: {
       emoji: "☀️",
-      eyebrow: "Our Story",
-      titleLine1: "Made from the",
-      titleItalic: "heart",
-      intro:
-        "AREVÉ is more than a brand. It is a love letter to the art of making things by hand — slowly, intentionally, beautifully.",
+      eyebrow: "AREVÉ · sun",
+      titleLine1: "Created from the",
+      titleItalic: "sun",
+      intro: "Made in Armenia",
     },
     beginning: {
       eyebrow: "The Beginning",
-      title: "A story told in beads",
+      title: "AREVÉ",
       paragraphs: [
-        "AREVÉ started on a small table by a window, with a bowl of beads and an afternoon of sunlight. What began as a personal obsession with handcraft grew into something shared.",
-        "The name AREVÉ comes from the Armenian word for sun — arév — because sunlight transforms ordinary things into something luminous.",
-        "Today we create pieces designed to be cherished, not consumed. Every piece has a story, and when you carry it, that story becomes yours.",
+        "The name AREVÉ comes from the word arév — the idea of light that highlights beauty.",
+        "Today we create handmade bags and accessories with simple design and high quality.",
       ],
       image: "/images/about-light.png",
     },
@@ -242,18 +235,33 @@ export const SITE_CONTENT_EN = {
     },
     bannerImages: ["/images/gallery-light-3.png", "/images/gallery-light-4.png", "/images/gallery-light-1.png"],
     closing: {
-      title: "Ready to find your piece?",
-      subtitle: "Explore our handmade collection — each one waiting for the right person.",
+      title: "Keep searching for yours",
+      subtitle: "Browse our handmade collections — each one is waiting",
       ctaLabel: "Shop the Collection",
       ctaHref: "/products",
     },
   },
   contact: {
     hero: {
-      eyebrow: "Get in Touch",
-      title: "We'd Love to Hear from You",
-      subtitle: "Connect with us directly for custom orders, product advice, or just to say hello.",
+      eyebrow: "CONTACT",
+      title: "Let's create together",
+      subtitle:
+        "Questions, custom orders or collaborations? We're always happy to hear from you.",
+      ctaLabel: "Contact us",
     },
+    imageCaption: "Every handmade piece begins with a conversation.",
+    customOrder: {
+      title: "Need something unique?",
+      subtitle: "We create custom handmade pieces designed especially for you.",
+      ctaLabel: "Start Custom Order",
+    },
+    social: {
+      title: "Follow AREVÉ",
+    },
+    closing: {
+      quote: "Handmade with love. Created to be treasured.",
+    },
+    image: "/images/prod-bag-a.png",
     card1: {
       title: "General Inquiry",
       subtitle: "For general questions and collaborations.",
@@ -273,7 +281,7 @@ export const SITE_CONTENT_EN = {
     studio: {
       image: "/images/gallery-light-3.png",
       eyebrow: "At the Studio",
-      quote: "Every piece is a tiny sun — made with warmth & sunlight.",
+      quote: "Each one is a little sun",
     },
   },
 } as const;

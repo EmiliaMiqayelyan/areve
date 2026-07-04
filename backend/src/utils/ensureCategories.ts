@@ -2,7 +2,7 @@ import { Category } from "../models";
 import { sequelize } from "../config/sequelize";
 
 const DEFAULT_CATEGORIES = [
-  { id: "bags", name: { hy: "Բիջակապարց տոպրակներ", en: "Beaded Bags" }, sortOrder: 1 },
+  { id: "bags", name: { hy: "Ուլունքագործ պայուսակներ", en: "Beaded Bags" }, sortOrder: 1 },
   { id: "toys", name: { hy: "Ձեռագործ խաղալիքներ", en: "Handmade Toys" }, sortOrder: 2 },
   { id: "accessories", name: { hy: "Աքսեսուարներ", en: "Accessories" }, sortOrder: 3 },
 ] as const;

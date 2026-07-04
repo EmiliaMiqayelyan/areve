@@ -30,10 +30,13 @@ interface CartStore {
 
 interface WishlistStore {
   items: Product[];
+  isOpen: boolean;
   addItem: (product: Product) => void;
   removeItem: (id: string) => void;
   isWishlisted: (id: string) => boolean;
   toggleWishlist: (product: Product) => void;
+  toggleWishlistPanel: () => void;
+  closeWishlistPanel: () => void;
 }
 
 const safeStorage: StateStorage = {
@@ -99,6 +102,7 @@ export const useWishlistStore = create<WishlistStore>()(
   persist(
     (set, get) => ({
       items: [],
+      isOpen: false,
       addItem: (product) =>
         set((state) => ({ items: [...state.items, product] })),
       removeItem: (id) =>
@@ -111,6 +115,8 @@ export const useWishlistStore = create<WishlistStore>()(
           get().addItem(product);
         }
       },
+      toggleWishlistPanel: () => set((state) => ({ isOpen: !state.isOpen })),
+      closeWishlistPanel: () => set({ isOpen: false }),
     }),
     { name: 'areve-wishlist', storage: createJSONStorage(() => safeStorage) }
   )

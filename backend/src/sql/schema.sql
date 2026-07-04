@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS categories (
 );
 
 INSERT IGNORE INTO categories (id, name, sort_order) VALUES
-  ('bags', '{"hy":"Բիջակապարց տոպրակներ","en":"Beaded Bags"}', 1),
+  ('bags', '{"hy":"Ուլունքագործ պայուսակներ","en":"Beaded Bags"}', 1),
   ('toys', '{"hy":"Ձեռագործ խաղալիքներ","en":"Handmade Toys"}', 2),
   ('accessories', '{"hy":"Աքսեսուարներ","en":"Accessories"}', 3);
 
@@ -110,7 +110,7 @@ INSERT IGNORE INTO settings (
   id, store_name, tagline, footer_description, support_email, business_phone, address, instagram_url, facebook_url, whatsapp_url, telegram_url, tiktok_url, youtube_url, site_content
 ) VALUES (
   1, 'AREVÉ', 'Արև՝ քո առօրյայում',
-  'Ստեղծված ձեռքերով՝ ջերմությամբ, համբերությամբ և սիրով',
+  'Յուրաքանչյուրը փոքրիկ արև է',
   'care@areve.com', '+374 41 83 21 22',
   '123 Artisan Maker Way, Creative District, NY 10012',
   'https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr',

@@ -240,17 +240,48 @@ export default function Home() {
       <section style={{ ...S.section('#F5F0EC'), padding: 'var(--section-padding)' }}>
         <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
           <SectionHeader eyebrow={home.collectionsSection.eyebrow} title={home.collectionsSection.title} subtitle={home.collectionsSection.subtitle} centered />
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:items-end md:gap-7 lg:gap-9">
             {home.collectionCards.map((cat, i) => (
-              <motion.div key={cat.title} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55, delay: i * 0.12 }}>
-                <Link href={cat.href} className="group relative block h-[340px] overflow-hidden rounded-[20px] no-underline">
-                  <Image src={cat.img} alt={cat.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#2B2B2B]/60 via-[#2B2B2B]/10 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-                    <h3 className="mb-1.5 font-serif text-xl font-bold text-white sm:text-2xl">{cat.title}</h3>
-                    <p className="mb-4 font-sans text-[13px] leading-relaxed text-white/80">{cat.desc}</p>
-                    <span className="flex items-center gap-1.5 font-sans text-xs font-semibold uppercase tracking-widest text-[#F4D58D]">
-                      {t('common.explore')} <ArrowRight size={12} />
+              <motion.div
+                key={cat.title}
+                initial={{ opacity: 0, y: 36 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, delay: i * 0.1 }}
+                className={i === 1 ? 'md:-translate-y-6 lg:-translate-y-10' : ''}
+              >
+                <Link
+                  href={cat.href}
+                  className="group block overflow-hidden rounded-[28px] border border-white/80 bg-white no-underline shadow-[0_8px_40px_rgba(180,156,140,0.1)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_56px_rgba(180,156,140,0.18)]"
+                >
+                  <div className="relative aspect-[4/5] overflow-hidden p-4 pb-0 sm:p-5 sm:pb-0">
+                    <div className="relative h-full w-full overflow-hidden rounded-[22px] bg-ivory">
+                      <Image
+                        src={cat.img}
+                        alt={cat.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
+                        loading="lazy"
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#2B2B2B]/25 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    </div>
+                    <span className="absolute left-7 top-7 rounded-full bg-white/92 px-3 py-1 font-sans text-[10px] font-bold uppercase tracking-[0.18em] text-[#5a4a1e] shadow-sm backdrop-blur-sm sm:left-8 sm:top-8">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+
+                  <div className="flex items-end justify-between gap-4 p-5 pt-4 sm:p-7 sm:pt-5">
+                    <div className="min-w-0">
+                      <h3 className="font-serif text-xl font-bold leading-snug text-ink transition-colors group-hover:text-[#5a4a1e] sm:text-2xl">
+                        {cat.title}
+                      </h3>
+                      <span className="mt-4 inline-flex items-center gap-1.5 font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">
+                        {t('common.explore')}
+                        <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-1" />
+                      </span>
+                    </div>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-beige bg-ivory text-mocha transition-all duration-300 group-hover:border-gold group-hover:bg-gold group-hover:text-[#5a4a1e]">
+                      <ArrowRight size={16} />
                     </span>
                   </div>
                 </Link>
@@ -354,11 +385,6 @@ export default function Home() {
                 {t('common.noReviews')}
               </div>
             )}
-          </div>
-          <div className="text-center">
-            <Link href="/reviews" className="btn-outline no-underline">
-              {home.testimonialsSection.readAllLabel} <ArrowRight size={14} />
-            </Link>
           </div>
         </div>
       </section>

@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import SectionHeader from '@/components/ui/SectionHeader';
+import PageHero from '@/components/ui/PageHero';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { useLocaleApiFetch } from '@/lib/useLocaleApi';
@@ -29,11 +29,12 @@ export default function FAQPage() {
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
-      <div style={{ background: '#EADFD8', padding: '64px 24px 56px', borderBottom: '1px solid #D6C3B3' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <SectionHeader eyebrow={pg.eyebrow} title={pg.title} subtitle={pg.subtitle} centered />
-        </div>
-      </div>
+      <PageHero
+        variant="faq"
+        eyebrow={pg.eyebrow}
+        title={pg.title}
+        subtitle={pg.subtitle}
+      />
 
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px' }}>
         {loading && (

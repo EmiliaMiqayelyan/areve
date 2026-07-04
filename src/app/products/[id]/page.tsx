@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Heart, ShoppingBag, Star, Shield, Truck, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Heart, ShoppingBag, Star, Shield, Truck, Package } from 'lucide-react';
 import { useCartStore, useWishlistStore } from '@/lib/store';
 import ProductCard from '@/components/ui/ProductCard';
 import { useTranslation } from '@/i18n/I18nProvider';
@@ -112,42 +112,42 @@ export default function ProductDetailPage() {
 
           {/* Info */}
           <motion.div initial={{ opacity: 0, x: 32 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55 }} className="flex flex-col justify-center">
-            <p className="mb-2 font-sans text-[11px] uppercase tracking-[2.5px] text-[#AFAFAF]">{product.category}</p>
-            <h1 className="mb-4 font-serif text-3xl font-bold text-ink sm:text-4xl lg:text-5xl lg:leading-tight">{displayName}</h1>
+            <p className="mb-1.5 font-sans text-[10px] uppercase tracking-[2px] text-[#AFAFAF]">{product.category}</p>
+            <h1 className="mb-3 font-serif text-xl font-semibold text-ink sm:text-2xl lg:text-[26px] lg:leading-snug">{displayName}</h1>
 
-            <div className="mb-5 flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={14} fill="#E6C97A" color="#E6C97A" />)}
-              <span className="ml-2 font-sans text-[13px] text-[#AFAFAF]">({t('product.reviewsCount', { count: 12 })})</span>
+            <div className="mb-4 flex items-center gap-1">
+              {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={12} fill="#E6C97A" color="#E6C97A" />)}
+              <span className="ml-1.5 font-sans text-[12px] text-[#AFAFAF]">({t('product.reviewsCount', { count: 12 })})</span>
             </div>
 
-            <div className="divider-gold mb-6" />
+            <div className="divider-gold mb-5" />
 
-            <p className="mb-8 font-sans text-base leading-relaxed text-subtle sm:text-lg">{displayDescription}</p>
+            <p className="mb-6 font-sans text-sm leading-relaxed text-subtle sm:text-[15px]">{displayDescription}</p>
 
-            <p className="mb-8 font-serif text-4xl font-bold text-ink sm:text-5xl">${product.price}</p>
+            <p className="mb-6 font-serif text-2xl font-semibold text-ink sm:text-[28px]">${product.price}</p>
 
-            <div className="mb-8 flex flex-col gap-4 sm:flex-row">
-              <button onClick={() => addItem({ ...product, name: displayName })} className="btn-primary flex-1 justify-center py-4">
-                <ShoppingBag size={15} /> {t('product.addToBag')}
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+              <button onClick={() => addItem({ ...product, name: displayName })} className="btn-primary flex-1 justify-center !py-3 !text-[12px] !tracking-[1px]">
+                <ShoppingBag size={14} /> {t('product.addToBag')}
               </button>
               <button onClick={() => toggleWishlist(product)}
-                className={`flex h-[52px] w-full items-center justify-center rounded-full border-[1.5px] transition-all sm:w-[52px] ${
+                className={`flex h-[44px] w-full items-center justify-center rounded-full border-[1.5px] transition-all sm:w-[44px] ${
                     wishlisted ? 'border-gold bg-gold/10' : 'border-beige bg-white'
                 }`}
               >
-                <Heart size={18} strokeWidth={1.6} fill={wishlisted ? '#E8CFCB' : 'none'} color={wishlisted ? '#c97a7a' : '#BFA6A0'} />
+                <Heart size={16} strokeWidth={1.6} fill={wishlisted ? '#E8CFCB' : 'none'} color={wishlisted ? '#c97a7a' : '#BFA6A0'} />
               </button>
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
               {[
-                [<Shield size={16} />, t('product.qualityGuaranteed')],
-                [<Truck size={16} />, t('product.worldwideShipping')],
-                [<RefreshCw size={16} />, t('product.returns14')],
+                [<Shield size={16} />, t('product.quality')],
+                [<Truck size={16} />, t('product.delivery')],
+                [<Package size={16} />, t('product.packaging')],
               ].map(([ic, lbl], i) => (
                 <div key={i} className="flex items-center gap-3 rounded-[12px] bg-beige/40 p-4 sm:flex-col sm:justify-center sm:text-center sm:bg-beige/60">
                   <div className="text-gold">{ic as React.ReactNode}</div>
-                  <p className="font-sans text-[11px] font-medium text-subtle uppercase tracking-wider">{lbl as string}</p>
+                  <p className="font-sans text-[11px] font-medium text-subtle tracking-wide">{lbl as string}</p>
                 </div>
               ))}
             </div>
@@ -156,7 +156,7 @@ export default function ProductDetailPage() {
 
         {related.length > 0 && (
           <div className="border-t border-beige pt-16 sm:pt-24">
-            <h2 className="mb-8 font-serif text-2xl font-bold text-ink sm:text-3xl sm:mb-12">{t('product.relatedTitle')}</h2>
+            <h2 className="mb-6 font-serif text-lg font-semibold text-ink sm:text-xl sm:mb-10">{t('product.relatedTitle')}</h2>
             <div className="grid grid-cols-1 gap-5 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {related.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
             </div>

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import SectionHeader from '@/components/ui/SectionHeader';
+import PageHero from '@/components/ui/PageHero';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 
 export default function AboutPage() {
@@ -14,89 +14,83 @@ export default function AboutPage() {
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
 
-      <section className="bg-beige text-center border-b border-sand" style={{ padding: 'var(--section-padding)' }}>
-        <div className="mx-auto max-w-[720px]">
-          <motion.div initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-            <span className="mb-5 block text-4xl sm:text-5xl">{about.hero.emoji}</span>
-            <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.25em] text-mocha sm:text-xs">{about.hero.eyebrow}</p>
-            <h1 className="mb-5 font-serif text-4xl font-bold leading-[1.1] text-ink sm:text-6xl lg:text-7xl">
-              {about.hero.titleLine1} <span className="italic text-gold">{about.hero.titleItalic}</span>
-            </h1>
-            <div className="divider-gold-center mb-6" />
-            <p className="font-sans text-base leading-relaxed text-subtle sm:text-lg sm:leading-loose">
-              {about.hero.intro}
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        variant="about"
+        emoji={about.hero.emoji}
+        eyebrow={about.hero.eyebrow}
+        title={about.hero.titleLine1}
+        titleItalic={about.hero.titleItalic}
+        subtitle={about.hero.intro}
+      />
 
+      {/* Story */}
       <section className="bg-ivory" style={{ padding: 'var(--section-padding)' }}>
-        <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
-          <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.65 }}>
-            <SectionHeader eyebrow={about.beginning.eyebrow} title={about.beginning.title} />
-            {about.beginning.paragraphs.map((p, idx) => (
-              <p key={idx} className="mb-4 font-sans text-base leading-relaxed text-subtle sm:text-lg">
-                {p}
-              </p>
-            ))}
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.65 }} className="relative">
-            <div className="relative h-[400px] overflow-hidden rounded-[24px] sm:h-[460px]">
+        <div
+          className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-14"
+          style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}
+        >
+          <motion.div
+            initial={{ opacity: 0, x: -32 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative order-2 lg:order-1"
+          >
+            <div className="relative aspect-[4/5] max-h-[520px] overflow-hidden rounded-[28px] bg-beige sm:aspect-auto sm:h-[480px]">
               <Image src={about.beginning.image} alt="" fill className="object-cover" loading="lazy" />
             </div>
-            <div className="absolute -bottom-3 -left-3 h-24 w-24 rounded-[16px] border-2 border-gold/40" />
+            <div className="absolute -bottom-3 -right-3 hidden h-20 w-20 rounded-[18px] border-2 border-gold/35 sm:block" />
+            <motion.div
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 3.5, repeat: Infinity }}
+              className="absolute -left-3 bottom-10 rounded-2xl border border-beige bg-white px-4 py-3 shadow-[0_8px_32px_rgba(180,156,140,0.18)] sm:-left-5 sm:px-5 sm:py-4"
+            >
+              <p className="font-serif text-2xl font-bold text-ink">40+</p>
+              <p className="font-sans text-[10px] uppercase tracking-wider text-muted">ժամ մեկ կտորի</p>
+            </motion.div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 32 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="order-1 lg:order-2"
+          >
+            <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-mocha">
+              {about.beginning.eyebrow}
+            </p>
+            <h2 className="mb-4 font-serif text-[clamp(24px,3vw,36px)] font-bold leading-snug text-ink">
+              {about.beginning.title}
+            </h2>
+            <div className="divider-gold mb-6" />
+            <div className="space-y-4">
+              {about.beginning.paragraphs.map((p, idx) => (
+                <p key={idx} className="font-sans text-[15px] leading-relaxed text-subtle sm:text-base">
+                  {p}
+                </p>
+              ))}
+            </div>
           </motion.div>
         </div>
       </section>
 
+      {/* CTA */}
       <section className="bg-beige" style={{ padding: 'var(--section-padding)' }}>
-        <div className="mx-auto max-w-[1280px] px-4 sm:px-6" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
-          <SectionHeader eyebrow={about.values.eyebrow} title={about.values.title} subtitle={about.values.subtitle} centered />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-            {about.values.items.map((v, i) => (
-              <motion.div key={v.title} initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group rounded-[20px] border border-sand bg-white p-7 text-center transition-all hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(180,156,140,0.18)]">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full text-2xl" style={{ background: v.bg + '60' }}>{v.icon}</div>
-                <h3 className="mb-2.5 font-serif text-lg font-bold text-ink">{v.title}</h3>
-                <p className="font-sans text-sm leading-relaxed text-subtle">{v.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+        <div className="mx-auto max-w-[1280px]" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mx-auto max-w-[640px] rounded-[28px] border border-white/80 bg-white px-6 py-10 text-center shadow-[0_8px_40px_rgba(180,156,140,0.1)] sm:px-10 sm:py-12"
+          >
+            <h2 className="mb-3 font-serif text-[clamp(24px,3vw,34px)] font-bold text-ink">{about.closing.title}</h2>
+            <p className="mb-8 font-sans text-[15px] leading-relaxed text-subtle">{about.closing.subtitle}</p>
+            <Link href={about.closing.ctaHref} className="btn-primary no-underline">
+              {about.closing.ctaLabel} <ArrowRight size={15} />
+            </Link>
+          </motion.div>
         </div>
-      </section>
-
-      <section className="bg-ivory" style={{ padding: 'var(--section-padding)' }}>
-        <div className="mx-auto max-w-[1280px] px-4 sm:px-6" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
-          <SectionHeader eyebrow={about.process.eyebrow} title={about.process.title} subtitle={about.process.subtitle} centered />
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
-            {about.process.steps.map((s, i) => (
-              <motion.div key={s.n} initial={{ opacity: 0, y: 32 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55, delay: i * 0.12 }}>
-                <p className="mb-3 font-serif text-5xl font-bold leading-none text-gold/30 sm:text-6xl">{s.n}</p>
-                <h3 className="mb-2.5 font-serif text-xl font-bold text-ink">{s.title}</h3>
-                <p className="font-sans text-sm leading-relaxed text-subtle">{s.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-beige p-0">
-        <div className="grid h-[200px] grid-cols-1 sm:h-[260px] sm:grid-cols-3">
-          {about.bannerImages.map((img, i) => (
-            <div key={img} className={`relative overflow-hidden ${i > 0 ? 'hidden sm:block' : 'block'}`}>
-              <Image src={img} alt="" fill className="object-cover transition-transform duration-700 hover:scale-105" loading="lazy" />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-ivory text-center" style={{ padding: 'var(--section-padding)' }}>
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mx-auto max-w-[480px]">
-          <h2 className="mb-3 font-serif text-3xl font-bold text-ink sm:text-4xl">{about.closing.title}</h2>
-          <p className="mb-8 font-sans text-base text-subtle sm:text-lg">{about.closing.subtitle}</p>
-          <Link href={about.closing.ctaHref} className="btn-primary no-underline">{about.closing.ctaLabel} <ArrowRight size={15} /></Link>
-        </motion.div>
       </section>
     </div>
   );
