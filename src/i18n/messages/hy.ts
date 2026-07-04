@@ -67,6 +67,8 @@ export const messagesHy = {
     badge_Handmade: 'Ձեռագործ',
   },
   shop: {
+    filterCategory: 'Կատեգորիա',
+    filterSort: 'Դասավորել',
     sortFeatured: 'Ընտրյալ',
     sortPriceAsc: 'Գին՝ աճող',
     sortPriceDesc: 'Գին՝ նվազող',

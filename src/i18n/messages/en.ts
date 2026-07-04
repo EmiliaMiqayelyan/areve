@@ -67,6 +67,8 @@ export const messagesEn = {
     badge_Handmade: 'Handmade',
   },
   shop: {
+    filterCategory: 'Category',
+    filterSort: 'Sort by',
     sortFeatured: 'Featured',
     sortPriceAsc: 'Price: Low to High',
     sortPriceDesc: 'Price: High to Low',

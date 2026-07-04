@@ -3,7 +3,7 @@
 import { useState, useMemo, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, Tags } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import SortDropdown from '@/components/ui/SortDropdown';
@@ -87,36 +87,54 @@ function ProductsContent() {
             {t('common.loadingProducts')}
           </div>
         )}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-2">
-            {catOptions.map((option) => (
-              <button
-                key={option.id}
-                onClick={() => setCat(option.id)}
-                className={`px-5 py-2 rounded-full font-sans text-[13px] font-medium transition-all cursor-pointer border-none ${cat === option.id ? 'bg-gold text-[#5a4a1e] shadow-[0_2px_12px_#E6C97A55]' : 'bg-white text-subtle shadow-[0_1px_4px_rgba(180,156,140,0.12)]'
-                  }`}
-              >
-                {option.label}
-              </button>
-            ))}
+        <div className="relative z-20 mb-8 rounded-[22px] border border-beige bg-white shadow-[0_4px_28px_rgba(180,156,140,0.08)]">
+          <div className="grid grid-cols-1 gap-5 overflow-visible p-4 sm:p-5 md:grid-cols-2">
+            <div className="relative z-30 space-y-2">
+              <span className="flex items-center gap-2 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+                <Tags size={13} className="text-gold" />
+                {t('shop.filterCategory')}
+              </span>
+              <SortDropdown
+                value={cat}
+                onChange={setCat}
+                variant="field"
+                options={catOptions.map((option) => ({ value: option.id, label: option.label }))}
+                className="w-full"
+                menuAlign="left"
+              />
+            </div>
+            <div className="relative z-20 space-y-2">
+              <span className="flex items-center gap-2 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+                <SlidersHorizontal size={13} className="text-gold" />
+                {t('shop.filterSort')}
+              </span>
+              <SortDropdown
+                value={sort}
+                onChange={setSort}
+                variant="field"
+                options={[
+                  { value: 'default', label: t('shop.sortFeatured') },
+                  { value: 'price-asc', label: t('shop.sortPriceAsc') },
+                  { value: 'price-desc', label: t('shop.sortPriceDesc') },
+                ]}
+                className="w-full"
+                menuAlign="left"
+              />
+            </div>
           </div>
-          <div className="flex items-center gap-2.5">
-            <SlidersHorizontal size={15} className="text-[#AFAFAF]" />
-            <SortDropdown
-              value={sort}
-              onChange={setSort}
-              options={[
-                { value: 'default', label: t('shop.sortFeatured') },
-                { value: 'price-asc', label: t('shop.sortPriceAsc') },
-                { value: 'price-desc', label: t('shop.sortPriceDesc') },
-              ]}
-            />
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-beige bg-ivory/60 px-4 py-3 sm:px-5">
+            <p className="font-sans text-[13px] text-subtle">
+              <span className="font-serif text-[18px] font-semibold text-ink">{filtered.length}</span>
+              {' '}
+              {filtered.length === 1 ? t('common.product') : t('common.products')}
+            </p>
+            {cat !== 'all' && (
+              <p className="font-sans text-[12px] text-muted">
+                {activeCategoryLabel}
+              </p>
+            )}
           </div>
         </div>
-
-        <p className="mb-8 font-sans text-[13px] text-[#AFAFAF]">
-          {filtered.length} {filtered.length === 1 ? t('common.product') : t('common.products')}{cat !== 'all' ? ` ${t('common.in')} ${activeCategoryLabel}` : ''}
-        </p>
 
         <AnimatePresence mode="wait">
           <motion.div key={cat} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}
