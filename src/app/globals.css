@@ -16,10 +16,12 @@
   --color-gold: #E6C97A;
   --color-gold-light: #F4D58D;
 
-  /* ── Text ── */
-  --color-ink: #2B2B2B;
-  --color-subtle: #7A7A7A;
-  --color-muted: #AFAFAF;
+  /* ── Text (warm stone palette) ── */
+  --color-ink: #736B64;
+  --color-heading: #A39589;
+  --color-subtle: #948B84;
+  --color-muted: #B3AAA3;
+  --color-accent-soft: #B8A074;
 
   /* ── Spacing ── */
   --section-padding: 96px 24px;
@@ -67,7 +69,7 @@ html {
 
 body {
   background-color: #F8F5F2;
-  color: #2B2B2B;
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -80,21 +82,22 @@ h3,
 h4,
 h5 {
   font-family: var(--font-serif);
-  color: #2B2B2B;
-  line-height: 1.15;
+  color: var(--color-heading);
+  font-weight: 500;
+  line-height: 1.25;
   letter-spacing: -0.01em;
 }
 
 h1 {
-  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-size: clamp(1.75rem, 3.5vw, 2.65rem);
 }
 
 h2 {
-  font-size: clamp(1.85rem, 4vw, 2.5rem);
+  font-size: clamp(1.45rem, 2.8vw, 2rem);
 }
 
 h3 {
-  font-size: clamp(1.35rem, 3vw, 1.85rem);
+  font-size: clamp(1.15rem, 2.2vw, 1.45rem);
 }
 
 /* ── Scrollbar ──────────────────────── */
@@ -635,7 +638,7 @@ h3 {
   gap: 8px;
   padding: 14px 32px;
   background: #E6C97A;
-  color: #2B2B2B;
+  color: #5a4a1e;
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 600;
@@ -659,7 +662,7 @@ h3 {
   gap: 8px;
   padding: 13px 32px;
   background: transparent;
-  color: #2B2B2B;
+  color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 600;
@@ -706,15 +709,23 @@ h3 {
 
 /* Text helpers */
 .text-ink {
-  color: #2B2B2B;
+  color: var(--color-ink);
+}
+
+.text-heading {
+  color: var(--color-heading);
 }
 
 .text-subtle {
-  color: #7A7A7A;
+  color: var(--color-subtle);
 }
 
 .text-muted {
-  color: #AFAFAF;
+  color: var(--color-muted);
+}
+
+.text-accent-soft {
+  color: var(--color-accent-soft);
 }
 
 /* Input */
@@ -726,16 +737,58 @@ h3 {
   padding: 13px 16px;
   font-family: var(--font-sans);
   font-size: 14px;
-  color: #2B2B2B;
+  color: var(--color-ink);
   transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
 }
 
 .field::placeholder {
-  color: #AFAFAF;
+  color: var(--color-muted);
 }
 
 .field:focus {
   border-color: #E6C97A;
   box-shadow: 0 0 0 3px #E6C97A22;
+}
+
+/* ── Admin panel — black ink, compact & light ── */
+.admin-shell {
+  --admin-ink: #1a1a1a;
+  --admin-muted: #6b6b6b;
+  color: var(--admin-ink);
+}
+
+.admin-shell .text-ink,
+.admin-shell .text-heading {
+  color: var(--admin-ink);
+}
+
+.admin-shell .text-subtle {
+  color: var(--admin-muted);
+}
+
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell h3,
+.admin-shell h4,
+.admin-shell h5 {
+  color: var(--admin-ink);
+  letter-spacing: 0;
+}
+
+.admin-shell h1 {
+  font-size: 1.125rem !important;
+  font-weight: 400 !important;
+  line-height: 1.35;
+}
+
+.admin-shell h2 {
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+  line-height: 1.35;
+}
+
+.admin-shell h3 {
+  font-weight: 400;
+  line-height: 1.4;
 }

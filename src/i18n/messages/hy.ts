@@ -13,7 +13,7 @@ export const messagesHy = {
     explore: 'Դիտել',
     scroll: 'Ոլորել',
     total: 'Ընդամենը',
-    apiUnavailable: 'Տվյալները բեռնել հնարավոր չեղավ։ Ստուգեք, որ backend-ը աշխատում է։',
+    apiUnavailable: 'Տվյալները բեռնել հնարավոր չեղավ',
     product: 'ապրանք',
     products: 'ապրանք',
     in: '՝',

@@ -45,7 +45,7 @@ export default function AboutPage() {
               transition={{ duration: 3.5, repeat: Infinity }}
               className="absolute -left-3 bottom-10 rounded-2xl border border-beige bg-white px-4 py-3 shadow-[0_8px_32px_rgba(180,156,140,0.18)] sm:-left-5 sm:px-5 sm:py-4"
             >
-              <p className="font-serif text-2xl font-bold text-ink">40+</p>
+              <p className="font-serif text-xl font-medium text-heading">40+</p>
               <p className="font-sans text-[10px] uppercase tracking-wider text-muted">ժամ մեկ կտորի</p>
             </motion.div>
           </motion.div>
@@ -60,7 +60,7 @@ export default function AboutPage() {
             <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.22em] text-mocha">
               {about.beginning.eyebrow}
             </p>
-            <h2 className="mb-4 font-serif text-[clamp(24px,3vw,36px)] font-bold leading-snug text-ink">
+            <h2 className="mb-4 font-serif text-[clamp(1.35rem,2.6vw,1.85rem)] font-medium leading-snug text-heading">
               {about.beginning.title}
             </h2>
             <div className="divider-gold mb-6" />
@@ -84,7 +84,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="mx-auto max-w-[640px] rounded-[28px] border border-white/80 bg-white px-6 py-10 text-center shadow-[0_8px_40px_rgba(180,156,140,0.1)] sm:px-10 sm:py-12"
           >
-            <h2 className="mb-3 font-serif text-[clamp(24px,3vw,34px)] font-bold text-ink">{about.closing.title}</h2>
+            <h2 className="mb-3 font-serif text-[clamp(1.3rem,2.4vw,1.75rem)] font-medium text-heading">{about.closing.title}</h2>
             <p className="mb-8 font-sans text-[15px] leading-relaxed text-subtle">{about.closing.subtitle}</p>
             <Link href={about.closing.ctaHref} className="btn-primary no-underline">
               {about.closing.ctaLabel} <ArrowRight size={15} />

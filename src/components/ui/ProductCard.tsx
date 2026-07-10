@@ -8,6 +8,8 @@ import { Heart, ShoppingBag } from 'lucide-react';
 import { Product, useCartStore, useWishlistStore } from '@/lib/store';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { pickLocalized } from '@/lib/localizedText';
+import { formatPrice } from '@/lib/currency';
+import { publicProductPath } from '@/lib/resourceId';
 
 const FALLBACK_PRODUCT_IMAGE = '/images/prod-bag-a.png';
 
@@ -128,13 +130,13 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
         <p style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: '#AFAFAF', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 6 }}>
           {product.category}
         </p>
-        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 17, color: '#2B2B2B', marginBottom: 10, lineHeight: 1.3 }}>
+        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 500, color: 'var(--color-heading)', marginBottom: 10, lineHeight: 1.35 }}>
           {pickLocalized(product.name, locale)}
         </h3>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-          <span style={{ fontFamily: 'var(--font-serif)', fontSize: 20, color: '#2B2B2B' }}>${product.price}</span>
+          <span style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 500, color: 'var(--color-ink)' }}>{formatPrice(product.price)}</span>
           <Link
-            href={`/products/${product.id}`}
+            href={publicProductPath(product.id)}
             style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: '#BFA6A0', textDecoration: 'none', borderBottom: '1px solid #BFA6A0', paddingBottom: 1, transition: 'color 0.2s, border-color 0.2s' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#E6C97A'; (e.currentTarget as HTMLElement).style.borderColor = '#E6C97A'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#BFA6A0'; (e.currentTarget as HTMLElement).style.borderColor = '#BFA6A0'; }}

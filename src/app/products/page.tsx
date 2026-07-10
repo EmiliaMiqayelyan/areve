@@ -125,7 +125,7 @@ function ProductsContent() {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 border-t border-beige bg-ivory/60 px-4 py-3 sm:px-5">
             <p className="font-sans text-[13px] text-subtle">
-              <span className="font-serif text-[18px] font-semibold text-ink">{filtered.length}</span>
+              <span className="font-serif text-base font-medium text-heading">{filtered.length}</span>
               {' '}
               {filtered.length === 1 ? t('common.product') : t('common.products')}
             </p>

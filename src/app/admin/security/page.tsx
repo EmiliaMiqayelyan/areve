@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Shield, Save, Mail, KeyRound, Lock } from 'lucide-react';
+import { Shield, Mail, KeyRound, Lock } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { useAdminStore } from '@/lib/adminStore';
 import { toast } from '@/lib/uiStore';
+import AdminSaveButton from '@/components/admin/AdminSaveButton';
 
 function translateSecurityError(message: string): string {
   const map: Record<string, string> = {
@@ -199,13 +200,9 @@ export default function AdminSecurityPage() {
         </div>
 
         <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={saving || loading || !account}
-            className="flex items-center gap-2 bg-[#E6C97A] text-[#5a4a1e] px-6 py-2.5 rounded-xl font-medium text-[13px] hover:bg-[#D5B86A] transition-colors shadow-sm cursor-pointer disabled:opacity-60"
-          >
-            <Save size={16} /> {saving ? 'Պահպանվում է...' : 'Պահպանել'}
-          </button>
+          <AdminSaveButton loading={saving} loadingLabel="Պահպանվում է..." compact className="font-medium px-6" disabled={loading || !account}>
+            Պահպանել
+          </AdminSaveButton>
         </div>
       </form>
     </div>

@@ -1,9 +1,10 @@
 'use client';
 
 import { useAdminStore } from '@/lib/adminStore';
-import { Package, ShoppingCart, DollarSign, Star, TrendingUp, MoreHorizontal, Plus } from 'lucide-react';
+import { Package, ShoppingCart, Coins, Star, TrendingUp, MoreHorizontal, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
+import { formatPrice } from '@/lib/currency';
 
 export default function AdminDashboard() {
   const { products, orders, reviews } = useAdminStore();
@@ -18,7 +19,7 @@ export default function AdminDashboard() {
   }, [orders, reviews]);
 
   const cards = [
-    { label: 'Total Revenue', value: '$' + Number(metrics.revenue ?? 0).toFixed(2), icon: DollarSign, trend: '+12.5%', color: 'text-green-600' },
+    { label: 'Total Revenue', value: formatPrice(metrics.revenue), icon: Coins, trend: '+12.5%', color: 'text-green-600' },
     { label: 'Total Orders', value: orders.length, icon: ShoppingCart, trend: '+4.2%', color: 'text-green-600' },
     { label: 'Total Products', value: products.length, icon: Package, trend: 'Active', color: 'text-[#AFAFAF]' },
     { label: 'New Reviews', value: metrics.newReviews, icon: Star, trend: 'Pending', color: 'text-[#E6C97A]' },
@@ -93,7 +94,7 @@ export default function AdminDashboard() {
                   <p className="text-[11px] text-[#AFAFAF] mt-0.5 uppercase tracking-wide">{order.id} • {new Date(order.date || '').toLocaleDateString()}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[13px] font-bold text-[#2B2B2B]">${Number(order.total ?? 0).toFixed(2)}</p>
+                  <p className="text-[13px] font-bold text-[#2B2B2B]">{formatPrice(order.total)}</p>
                   <p className="text-[11px] mt-0.5 font-bold uppercase tracking-wider" style={{ color: order.status === 'delivered' ? '#16a34a' : order.status === 'shipped' ? '#CA8A04' : '#7A7A7A' }}>
                     {order.status}
                   </p>

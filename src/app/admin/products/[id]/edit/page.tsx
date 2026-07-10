@@ -2,12 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useAdminStore } from '@/lib/adminStore';
-import { ArrowLeft, UploadCloud, Save } from 'lucide-react';
+import { useAdminStore, type Product } from '@/lib/adminStore';
+import { apiFetch } from '@/lib/api';
+import { adminProductApiPath, findByResourceId } from '@/lib/resourceId';
+import { CURRENCY_SYMBOL } from '@/lib/currency';
+import { ArrowLeft, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import BilingualField from '@/components/admin/BilingualField';
 import AdminSelect from '@/components/admin/AdminSelect';
+import AdminSaveButton from '@/components/admin/AdminSaveButton';
 import { emptyLocalized, parseLocalized, pickLocalized, type LocalizedText } from '@/lib/localizedText';
 
 async function fileToDataUrl(file: File): Promise<string> {
@@ -22,17 +26,41 @@ async function fileToDataUrl(file: File): Promise<string> {
 export default function EditProductPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  const { products, updateProduct, categories } = useAdminStore();
-  const product = products.find(p => p.id === id);
+  const { products, updateProduct, categories, loading, token } = useAdminStore();
+  const [fetchedProduct, setFetchedProduct] = useState<Product | null>(null);
+  const [fetching, setFetching] = useState(false);
+  const product = findByResourceId(products, id) ?? fetchedProduct;
 
   const [name, setName] = useState<LocalizedText>(emptyLocalized());
   const [price, setPrice] = useState('');
   const [cost, setCost] = useState('');
   const [category, setCategory] = useState('');
-  const [description, setDescription] = useState<LocalizedText>(emptyLocalized());
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (product || !id || loading) return;
+    if (!token) return;
+
+    let cancelled = false;
+    setFetching(true);
+    void apiFetch<Product>(adminProductApiPath(id), {}, token)
+      .then((row) => {
+        if (!cancelled) setFetchedProduct(row);
+      })
+      .catch(() => {
+        if (!cancelled) setFetchedProduct(null);
+      })
+      .finally(() => {
+        if (!cancelled) setFetching(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [product, id, loading, token]);
 
   useEffect(() => {
     if (product) {
@@ -40,7 +68,6 @@ export default function EditProductPage() {
       setPrice(product.price.toString());
       setCost(String(product.cost ?? 0));
       setCategory(product.category);
-      setDescription(product.description ? parseLocalized(product.description) : emptyLocalized());
       setStatus(product.status || 'active');
       setImagePreview(product.image);
     }
@@ -51,6 +78,7 @@ export default function EditProductPage() {
     if (!product || !name.hy.trim() || !price || !category) return;
 
     try {
+      setSaving(true);
       setError('');
       const nextImage = imagePreview || product.image;
       if (typeof nextImage === 'string' && nextImage.startsWith('/uploads/')) {
@@ -62,9 +90,6 @@ export default function EditProductPage() {
         price: parseFloat(price),
         cost: cost ? parseFloat(cost) : 0,
         category,
-        description: description.hy || description.en
-          ? { hy: description.hy.trim(), en: description.en.trim() }
-          : null,
         status,
         image: nextImage,
       });
@@ -73,6 +98,8 @@ export default function EditProductPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -82,6 +109,14 @@ export default function EditProductPage() {
       void fileToDataUrl(file).then(setImagePreview).catch(() => setImagePreview(null));
     }
   };
+
+  if (loading || fetching) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-[#7A7A7A] text-[14px]">
+        Loading product...
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -118,7 +153,6 @@ export default function EditProductPage() {
 
             <BilingualField label="Product Name *" value={name} onChange={setName} required />
 
-            <BilingualField label="Description" value={description} onChange={setDescription} multiline />
           </div>
 
           <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm space-y-5">
@@ -172,13 +206,13 @@ export default function EditProductPage() {
           <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm space-y-5">
             <h3 className="text-[15px] font-bold text-[#2B2B2B] border-b border-[#EADFD8] pb-4">Organization</h3>
             <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Price (USD)</label>
+              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Price ({CURRENCY_SYMBOL})</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#AFAFAF] font-bold">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#AFAFAF] font-bold">{CURRENCY_SYMBOL}</span>
                 <input
                   required
                   type="number"
-                  step="0.01"
+                  step="1"
                   min="0"
                   value={price} onChange={e => setPrice(e.target.value)}
                   className="w-full bg-[#F8F5F2] border border-[#EADFD8] rounded-xl py-2.5 pl-8 pr-4 text-[14px] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#E6C97A]/50 transition-shadow"
@@ -187,12 +221,12 @@ export default function EditProductPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Product Cost (USD)</label>
+              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Product Cost ({CURRENCY_SYMBOL})</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#AFAFAF] font-bold">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#AFAFAF] font-bold">{CURRENCY_SYMBOL}</span>
                 <input
                   type="number"
-                  step="0.01"
+                  step="1"
                   min="0"
                   value={cost}
                   onChange={(e) => setCost(e.target.value)}
@@ -224,9 +258,9 @@ export default function EditProductPage() {
           <Link href="/admin/products" className="px-6 py-2.5 rounded-xl border border-[#EADFD8] font-bold text-[13px] text-[#7A7A7A] hover:bg-white hover:text-[#2B2B2B] transition-colors bg-[#F8F5F2]">
             Cancel
           </Link>
-          <button type="submit" className="flex items-center gap-2 bg-[#E6C97A] text-[#5a4a1e] px-8 py-2.5 rounded-xl font-bold text-[13px] hover:bg-[#D5B86A] transition-colors shadow-sm">
-            <Save size={16} /> Save Changes
-          </button>
+          <AdminSaveButton loading={saving} loadingLabel="Saving...">
+            Save Changes
+          </AdminSaveButton>
         </div>
       </form>
 

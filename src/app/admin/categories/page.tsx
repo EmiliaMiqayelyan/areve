@@ -7,7 +7,8 @@ import { makeCategorySlug } from '@/lib/categorySlug';
 import BilingualField from '@/components/admin/BilingualField';
 import { emptyLocalized, parseLocalized, pickLocalized } from '@/lib/localizedText';
 import type { LocalizedText } from '@/lib/localizedText';
-import { Plus, Save, Trash2, Edit2, Tags } from 'lucide-react';
+import { Plus, Trash2, Edit2, Tags } from 'lucide-react';
+import AdminSaveButton from '@/components/admin/AdminSaveButton';
 
 type Draft = {
   id: string;
@@ -24,6 +25,7 @@ export default function AdminCategoriesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(emptyDraft(categories.length + 1));
   const [slugTouched, setSlugTouched] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const productCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -84,6 +86,7 @@ export default function AdminCategoriesPage() {
     };
 
     try {
+      setSaving(true);
       if (editingId === '__new__') {
         const id = draft.id.trim() || makeCategorySlug(draft.name.en || draft.name.hy);
         if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) {
@@ -102,6 +105,8 @@ export default function AdminCategoriesPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save category';
       await modal.alert(message, 'Error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -195,13 +200,9 @@ export default function AdminCategoriesPage() {
             >
               Cancel
             </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              className="flex items-center gap-2 bg-[#E6C97A] text-[#5a4a1e] px-6 py-2.5 rounded-xl font-bold text-[13px] hover:bg-[#D5B86A] transition-colors shadow-sm"
-            >
-              <Save size={16} /> Save Category
-            </button>
+            <AdminSaveButton type="button" loading={saving} loadingLabel="Saving..." compact className="px-6" onClick={() => void handleSave()}>
+              Save Category
+            </AdminSaveButton>
           </div>
         </div>
       )}

@@ -42,7 +42,7 @@ export default function ReviewsPage() {
               [pg.fiveStarValue, pg.fiveStarLabel, null]
             ].map(([n, l, extra], i) => (
               <div key={i} className="text-center w-full sm:w-auto">
-                <p className="font-serif text-3xl sm:text-4xl font-bold text-ink leading-none mb-2">{n}</p>
+                <p className="font-serif text-2xl sm:text-3xl font-medium text-heading leading-none mb-2">{n}</p>
                 {extra}
                 <p className="font-sans text-[11px] uppercase tracking-widest text-muted mt-2">{l}</p>
                 {i < 2 && <div className="hidden sm:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-12 bg-beige" />}

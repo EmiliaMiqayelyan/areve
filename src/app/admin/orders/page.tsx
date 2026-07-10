@@ -5,6 +5,7 @@ import { Search, Filter, Eye, Trash2, BarChart3, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useMemo } from 'react';
 import AdminSelect from '@/components/admin/AdminSelect';
+import { formatPrice } from '@/lib/currency';
 
 const STATUS_FILTER_OPTIONS = [
   { value: 'All', label: 'All Statuses' },
@@ -108,7 +109,7 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="py-4 px-6">
                     <p className="text-[14px] font-bold text-[#2B2B2B]">
-                      ${Number(order.total ?? 0).toFixed(2)}
+                      {formatPrice(order.total)}
                     </p>
                   </td>
                   <td className="py-4 px-6">

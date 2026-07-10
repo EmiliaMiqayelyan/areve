@@ -11,6 +11,8 @@ import ProductCard from '@/components/ui/ProductCard';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { useLocaleApiFetch } from '@/lib/useLocaleApi';
 import { pickLocalized } from '@/lib/localizedText';
+import { formatPrice } from '@/lib/currency';
+import { findByResourceId } from '@/lib/resourceId';
 
 const FALLBACK_PRODUCT_IMAGE = '/images/prod-bag-a.png';
 
@@ -44,7 +46,7 @@ export default function ProductDetailPage() {
     void localeFetch<any[]>('/products?active=true')
       .then((items) => {
         setRelatedPool(items);
-        setProduct(items.find((p) => p.id === id) || null);
+        setProduct(findByResourceId(items, id) || null);
       })
       .catch(() => {
         setRelatedPool([]);
@@ -113,7 +115,7 @@ export default function ProductDetailPage() {
           {/* Info */}
           <motion.div initial={{ opacity: 0, x: 32 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55 }} className="flex flex-col justify-center">
             <p className="mb-1.5 font-sans text-[10px] uppercase tracking-[2px] text-[#AFAFAF]">{product.category}</p>
-            <h1 className="mb-3 font-serif text-xl font-semibold text-ink sm:text-2xl lg:text-[26px] lg:leading-snug">{displayName}</h1>
+            <h1 className="mb-3 font-serif text-lg font-medium text-heading sm:text-xl lg:text-[22px] lg:leading-snug">{displayName}</h1>
 
             <div className="mb-4 flex items-center gap-1">
               {Array.from({ length: 5 }).map((_, i) => <Star key={i} size={12} fill="#E6C97A" color="#E6C97A" />)}
@@ -124,7 +126,7 @@ export default function ProductDetailPage() {
 
             <p className="mb-6 font-sans text-sm leading-relaxed text-subtle sm:text-[15px]">{displayDescription}</p>
 
-            <p className="mb-6 font-serif text-2xl font-semibold text-ink sm:text-[28px]">${product.price}</p>
+            <p className="mb-6 font-serif text-xl font-medium text-ink sm:text-2xl">{formatPrice(product.price)}</p>
 
             <div className="mb-6 flex flex-col gap-3 sm:flex-row">
               <button onClick={() => addItem({ ...product, name: displayName })} className="btn-primary flex-1 justify-center !py-3 !text-[12px] !tracking-[1px]">
@@ -156,7 +158,7 @@ export default function ProductDetailPage() {
 
         {related.length > 0 && (
           <div className="border-t border-beige pt-16 sm:pt-24">
-            <h2 className="mb-6 font-serif text-lg font-semibold text-ink sm:text-xl sm:mb-10">{t('product.relatedTitle')}</h2>
+            <h2 className="mb-6 font-serif text-base font-medium text-heading sm:text-lg sm:mb-10">{t('product.relatedTitle')}</h2>
             <div className="grid grid-cols-1 gap-5 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {related.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
             </div>

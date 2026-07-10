@@ -9,6 +9,7 @@ import { useCartStore } from '@/lib/store';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { buildOrderMessage } from '@/lib/buildOrderMessage';
+import { formatPrice } from '@/lib/currency';
 import {
   buildTelegramOrderUrl,
   buildWhatsAppOrderUrl,
@@ -333,7 +334,7 @@ export default function CartDrawer() {
                                 flexShrink: 0,
                               }}
                             >
-                              ${(item.price * item.quantity).toFixed(2)}
+                              {formatPrice(item.price * item.quantity)}
                             </p>
                           </div>
                           <p
@@ -344,7 +345,7 @@ export default function CartDrawer() {
                               marginTop: 2,
                             }}
                           >
-                            ${item.price.toFixed(2)} × {item.quantity}
+                            {formatPrice(item.price)} × {item.quantity}
                           </p>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
                             <button
@@ -446,7 +447,7 @@ export default function CartDrawer() {
                           color: '#2B2B2B',
                         }}
                       >
-                        ${cartTotal.toFixed(2)}
+                        {formatPrice(cartTotal)}
                       </span>
                     </div>
                     <button
@@ -531,7 +532,7 @@ export default function CartDrawer() {
                         color: '#2B2B2B',
                       }}
                     >
-                      ${cartTotal.toFixed(2)}
+                      {formatPrice(cartTotal)}
                     </p>
                     <p
                       style={{

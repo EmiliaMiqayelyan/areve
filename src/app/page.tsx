@@ -166,13 +166,13 @@ export default function Home() {
             initial={heroReady ? false : { opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.75, delay: heroReady ? 0 : 0.08, ease: 'easeOut' }}
-            className="mb-5 max-w-[640px] mx-auto lg:mx-0 font-serif text-[2.35rem] font-semibold leading-[1.08] text-ink sm:text-5xl lg:text-[3.5rem]"
+            className="mb-5 max-w-[640px] mx-auto lg:mx-0 font-serif text-[1.85rem] font-normal leading-[1.15] text-heading sm:text-[2.15rem] lg:text-[2.5rem]"
           >
             {heroTitle}
             {heroAccent ? (
               <>
                 <br />
-                <span className="italic text-gold">{heroAccent}</span>
+                <span className="font-normal mt-3 italic text-gold">{heroAccent}</span>
               </>
             ) : null}
           </motion.h1>
@@ -225,7 +225,7 @@ export default function Home() {
             >
               {hero.stats.map(({ value, label }) => (
                 <div key={label}>
-                  <p className="font-serif text-xl font-semibold text-ink">{value}</p>
+                  <p className="font-serif text-xl font-medium text-heading">{value}</p>
                   <p className="mt-0.5 font-sans text-[10px] uppercase tracking-widest text-muted">
                     {label}
                   </p>
@@ -237,53 +237,39 @@ export default function Home() {
       </section>
 
 
-      <section style={{ ...S.section('#F5F0EC'), padding: 'var(--section-padding)' }}>
-        <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
-          <SectionHeader eyebrow={home.collectionsSection.eyebrow} title={home.collectionsSection.title} subtitle={home.collectionsSection.subtitle} centered />
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:items-end md:gap-7 lg:gap-9">
+      <section className="bg-beige py-12 sm:py-14">
+        <div className="mx-auto max-w-[760px] px-4 sm:px-6">
+          <div className="mb-7 text-center sm:mb-8">
+            <p className="mb-2 font-sans text-[10px] font-medium uppercase tracking-[0.2em] text-muted">
+              {home.collectionsSection.eyebrow}
+            </p>
+            <h2 className="font-serif text-xl font-medium text-heading sm:text-[1.65rem]">
+              {home.collectionsSection.title}
+            </h2>
+          </div>
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {home.collectionCards.map((cat, i) => (
               <motion.div
                 key={cat.title}
-                initial={{ opacity: 0, y: 36 }}
+                initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.55, delay: i * 0.1 }}
-                className={i === 1 ? 'md:-translate-y-6 lg:-translate-y-10' : ''}
+                transition={{ duration: 0.4, delay: i * 0.06 }}
               >
-                <Link
-                  href={cat.href}
-                  className="group block overflow-hidden rounded-[28px] border border-white/80 bg-white no-underline shadow-[0_8px_40px_rgba(180,156,140,0.1)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_20px_56px_rgba(180,156,140,0.18)]"
-                >
-                  <div className="relative aspect-[4/5] overflow-hidden p-4 pb-0 sm:p-5 sm:pb-0">
-                    <div className="relative h-full w-full overflow-hidden rounded-[22px] bg-ivory">
-                      <Image
-                        src={cat.img}
-                        alt={cat.title}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
-                        loading="lazy"
-                      />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#2B2B2B]/25 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    </div>
-                    <span className="absolute left-7 top-7 rounded-full bg-white/92 px-3 py-1 font-sans text-[10px] font-bold uppercase tracking-[0.18em] text-[#5a4a1e] shadow-sm backdrop-blur-sm sm:left-8 sm:top-8">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
+                <Link href={cat.href} className="group block no-underline">
+                  <div className="relative mb-2 aspect-[3/4] overflow-hidden rounded-lg bg-ivory sm:mb-2.5">
+                    <Image
+                      src={cat.img}
+                      alt={cat.title}
+                      fill
+                      className="object-cover transition-opacity duration-300 group-hover:opacity-90"
+                      loading="lazy"
+                      sizes="(max-width: 760px) 30vw, 220px"
+                    />
                   </div>
-
-                  <div className="flex items-end justify-between gap-4 p-5 pt-4 sm:p-7 sm:pt-5">
-                    <div className="min-w-0">
-                      <h3 className="font-serif text-xl font-bold leading-snug text-ink transition-colors group-hover:text-[#5a4a1e] sm:text-2xl">
-                        {cat.title}
-                      </h3>
-                      <span className="mt-4 inline-flex items-center gap-1.5 font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-gold">
-                        {t('common.explore')}
-                        <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-1" />
-                      </span>
-                    </div>
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-beige bg-ivory text-mocha transition-all duration-300 group-hover:border-gold group-hover:bg-gold group-hover:text-[#5a4a1e]">
-                      <ArrowRight size={16} />
-                    </span>
-                  </div>
+                  <p className="text-center font-sans text-[11px] leading-snug text-subtle transition-colors group-hover:text-ink sm:text-xs">
+                    {cat.title}
+                  </p>
                 </Link>
               </motion.div>
             ))}
@@ -328,14 +314,14 @@ export default function Home() {
 
             <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 3.5, repeat: Infinity }}
               className="absolute -left-4 bottom-8 rounded-[16px] bg-white p-4 shadow-[0_8px_32px_rgba(180,156,140,0.22)] sm:p-5">
-              <p className="font-serif text-2xl font-bold text-ink sm:text-3xl">{home.storySection.floatingStatValue}</p>
+              <p className="font-serif text-xl font-medium text-heading sm:text-2xl">{home.storySection.floatingStatValue}</p>
               <p className="font-sans text-[11px] text-[#AFAFAF] sm:text-xs">{home.storySection.floatingStatLabel}</p>
             </motion.div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: 40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.65 }}>
             <p className="mb-3 font-sans text-[11px] font-semibold uppercase tracking-[0.25em] text-mocha">{home.storySection.eyebrow}</p>
-            <h2 className="mb-4 font-serif text-3xl font-bold leading-tight text-ink sm:text-4xl lg:text-5xl">
+            <h2 className="mb-4 font-serif text-[clamp(1.35rem,2.6vw,1.85rem)] font-medium leading-snug text-heading">
               {home.storySection.titleLine1}{' '}
               <span className="italic text-gold">{home.storySection.titleItalic}</span>
               {home.storySection.titleLine2 ? (
@@ -365,27 +351,6 @@ export default function Home() {
               {home.storySection.ctaLabel} <ArrowRight size={14} />
             </Link>
           </motion.div>
-        </div>
-      </section>
-
-      <section style={{ ...S.section('#F3EDE8'), padding: 'var(--section-padding)' }}>
-        <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
-          <SectionHeader eyebrow={home.testimonialsSection.eyebrow} title={home.testimonialsSection.title} subtitle={home.testimonialsSection.subtitle} centered />
-          <div className="mb-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {loading && (
-              <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
-                {t('common.loadingReviews')}
-              </div>
-            )}
-            {!loading && reviewList.slice(0, 3).map((r, i) => (
-              <ReviewCard key={String(r.id)} review={{ ...r, location: r.location ?? '' }} index={i} />
-            ))}
-            {!loading && reviewList.length === 0 && (
-              <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
-                {t('common.noReviews')}
-              </div>
-            )}
-          </div>
         </div>
       </section>
 
@@ -420,10 +385,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-t border-beige bg-ivory text-center" style={{ padding: 'var(--section-padding)' }}>
+      <section className="border-t border-beige text-center" style={{ padding: 'var(--section-padding)', background: 'rgb(245, 240, 236)' }}>
         <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="mx-auto max-w-[600px]">
           <span className="mb-5 block text-[40px]">{home.ctaSection.emoji}</span>
-          <h2 className="mb-4 font-serif text-3xl font-bold leading-tight text-ink sm:text-4xl lg:text-5xl">
+          <h2 className="mb-4 font-serif text-[clamp(1.35rem,2.6vw,1.85rem)] font-medium leading-snug text-heading">
             {home.ctaSection.titleLine1}{' '}
             <span className="italic text-gold">{home.ctaSection.titleItalic}</span>
           </h2>

@@ -3,10 +3,12 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { useAdminStore } from '@/lib/adminStore';
 import AdminSelect from '@/components/admin/AdminSelect';
+import AdminSaveButton from '@/components/admin/AdminSaveButton';
 import { pickLocalized } from '@/lib/localizedText';
+import { formatPrice } from '@/lib/currency';
 
 type LineItem = {
   key: string;
@@ -331,16 +333,16 @@ export default function NewOrderPage() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-[#AFAFAF]">Total Sale</p>
-              <p className="text-xl font-serif font-bold text-[#2B2B2B] mt-1">${totals.revenue.toFixed(2)}</p>
+              <p className="text-xl font-serif font-bold text-[#2B2B2B] mt-1">{formatPrice(totals.revenue)}</p>
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-[#AFAFAF]">Total Cost</p>
-              <p className="text-xl font-serif font-bold text-[#2B2B2B] mt-1">${totals.cost.toFixed(2)}</p>
+              <p className="text-xl font-serif font-bold text-[#2B2B2B] mt-1">{formatPrice(totals.cost)}</p>
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-[#AFAFAF]">Profit</p>
               <p className={`text-xl font-serif font-bold mt-1 ${totals.revenue - totals.cost >= 0 ? 'text-[#166534]' : 'text-red-600'}`}>
-                ${(totals.revenue - totals.cost).toFixed(2)}
+                {formatPrice(totals.revenue - totals.cost)}
               </p>
             </div>
           </div>
@@ -350,10 +352,9 @@ export default function NewOrderPage() {
           <Link href="/admin/orders" className="btn-outline text-center px-6 py-3">
             Cancel
           </Link>
-          <button type="submit" disabled={saving} className="btn-primary flex items-center justify-center gap-2 px-8 py-3">
-            <Save size={18} />
-            {saving ? 'Saving...' : 'Save Sale'}
-          </button>
+          <AdminSaveButton loading={saving} loadingLabel="Saving..." className="btn-primary px-8 py-3">
+            Save Sale
+          </AdminSaveButton>
         </div>
       </form>
     </div>

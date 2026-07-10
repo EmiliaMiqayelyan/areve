@@ -13,6 +13,7 @@ import {
   getAdminGallery,
   getAdminOrderById,
   getAdminOrders,
+  getAdminProduct,
   getAdminProducts,
   getAdminReviews,
   getAdminSettings,
@@ -60,6 +61,7 @@ router.put(
 );
 
 router.get("/admin/products", asyncHandler(getAdminProducts));
+router.get("/admin/products/:id", asyncHandler(getAdminProduct));
 router.post("/admin/products", validateBody(productCreateSchema), asyncHandler(createAdminProduct));
 router.put("/admin/products/:id", validateBody(productSchema.partial()), asyncHandler(updateAdminProduct));
 router.delete("/admin/products/:id", asyncHandler(deleteAdminProduct));

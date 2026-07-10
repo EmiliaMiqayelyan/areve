@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useWishlistStore } from '@/lib/store';
 import { useTranslation } from '@/i18n/I18nProvider';
+import { formatPrice } from '@/lib/currency';
 
 type WishlistPopoverProps = {
   anchorRef: React.RefObject<HTMLButtonElement | null>;
@@ -259,7 +260,7 @@ export default function WishlistPopover({ anchorRef }: WishlistPopoverProps) {
                         marginTop: 2,
                       }}
                     >
-                      ${item.price.toFixed(2)}
+                      {formatPrice(item.price)}
                     </p>
                   </div>
                   <button

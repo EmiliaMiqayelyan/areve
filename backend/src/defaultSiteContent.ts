@@ -77,14 +77,14 @@ export const DEFAULT_SITE_CONTENT = {
     hero: {
       image: '/images/hero-light.png',
       eyebrow: 'Նոր հավաքածու · 2026',
-      title: 'Ոճ, որը ստեղծվում է',
-      titleAccent: 'արևից',
+      title: 'Ոճ, որը ստեղծում է',
+      titleAccent: 'AREVÉ-ն',
       subtitle:
         'Եզակի դիզայն, որակյալ նյութեր և ձեռքի աշխատանք՝ ամեն օրվա և հատուկ պահերի համար',
       trustLine: '100% ձեռագործ • Պատրաստված Հայաստանում',
       badgePrefix: 'Նոր հավաքածու',
-      titleLine1: 'Ոճ, որը ստեղծվում է',
-      titleGold1: 'արևից',
+      titleLine1: 'Ոճ, որը ստեղծում է',
+      titleGold1: 'AREVÉ-ն',
       conjunction: '',
       titleGold2: '',
       stats: [

@@ -21,22 +21,22 @@ export default function SectionHeader({
     titleSize === 'compact'
       ? {
           fontFamily: 'var(--font-serif)',
-          fontSize: 'clamp(22px, 2.8vw, 32px)',
-          color: '#2B2B2B',
-          fontWeight: 700,
+          fontSize: 'clamp(18px, 2.4vw, 26px)',
+          color: 'var(--color-heading)',
+          fontWeight: 500,
           lineHeight: 1.35,
-          marginBottom: 16,
-          maxWidth: centered ? 720 : undefined,
+          marginBottom: 12,
+          maxWidth: centered ? 640 : undefined,
           marginLeft: centered ? 'auto' : undefined,
           marginRight: centered ? 'auto' : undefined,
         }
       : {
           fontFamily: 'var(--font-serif)',
-          fontSize: 'clamp(28px,4vw,46px)',
-          color: '#2B2B2B',
-          fontWeight: 700,
-          lineHeight: 1.2,
-          marginBottom: 16,
+          fontSize: 'clamp(20px, 2.6vw, 30px)',
+          color: 'var(--color-heading)',
+          fontWeight: 500,
+          lineHeight: 1.3,
+          marginBottom: 12,
         };
 
   return (
@@ -45,10 +45,10 @@ export default function SectionHeader({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.55 }}
-      style={{ marginBottom: titleSize === 'compact' ? 36 : 48, textAlign: centered ? 'center' : 'left' }}
+      style={{ marginBottom: titleSize === 'compact' ? 32 : 40, textAlign: centered ? 'center' : 'left' }}
     >
       {eyebrow && (
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', color: '#BFA6A0', marginBottom: 12 }}>
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 10, fontWeight: 500, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#BFA6A0', marginBottom: 10 }}>
           {eyebrow}
         </p>
       )}
@@ -57,7 +57,7 @@ export default function SectionHeader({
       </h2>
       <div className={centered ? 'divider-gold-center' : 'divider-gold'} />
       {subtitle && (
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: titleSize === 'compact' ? 15 : 16, color: '#7A7A7A', lineHeight: 1.75, maxWidth: 560, marginTop: 16, marginLeft: centered ? 'auto' : 0, marginRight: centered ? 'auto' : 0 }}>
+        <p style={{ fontFamily: 'var(--font-sans)', fontSize: titleSize === 'compact' ? 14 : 15, color: 'var(--color-subtle)', lineHeight: 1.75, maxWidth: 520, marginTop: 14, marginLeft: centered ? 'auto' : 0, marginRight: centered ? 'auto' : 0 }}>
           {subtitle}
         </p>
       )}

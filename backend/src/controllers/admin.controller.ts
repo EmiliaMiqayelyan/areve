@@ -11,6 +11,7 @@ import {
   formatReview,
   formatSettings,
 } from "../utils/serializers";
+import { normalizeResourceId } from "../utils/resourceId";
 
 const ORDER_PATCH_FIELDS = [
   "customerName",
@@ -40,6 +41,13 @@ export async function getAdminProducts(_req: Request, res: Response) {
   return res.json(rows.map((row) => formatProduct(row, { bilingual: true })));
 }
 
+export async function getAdminProduct(req: Request, res: Response) {
+  const id = normalizeResourceId(String(req.params.id));
+  const row = await Product.findByPk(id);
+  if (!row) return res.status(404).json({ message: "Product not found" });
+  return res.json(formatProduct(row, { bilingual: true }));
+}
+
 export async function createAdminProduct(req: Request, res: Response) {
   const { id: clientId, ...data } = req.body as Record<string, unknown>;
   if (typeof data.category === "string" && !(await categoryExists(data.category))) {
@@ -51,7 +59,7 @@ export async function createAdminProduct(req: Request, res: Response) {
 }
 
 export async function updateAdminProduct(req: Request, res: Response) {
-  const id = String(req.params.id);
+  const id = normalizeResourceId(String(req.params.id));
   if (!Object.keys(req.body).length) {
     return res.status(400).json({ message: "No fields to update" });
   }
@@ -68,7 +76,7 @@ export async function updateAdminProduct(req: Request, res: Response) {
 }
 
 export async function deleteAdminProduct(req: Request, res: Response) {
-  const id = String(req.params.id);
+  const id = normalizeResourceId(String(req.params.id));
   const deleted = await Product.destroy({ where: { id } });
   if (!deleted) return res.status(404).json({ message: "Product not found" });
   return res.json({ message: "Product deleted" });

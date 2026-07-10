@@ -1,3 +1,5 @@
+import { formatPrice } from './currency';
+
 export type OrderLineItem = {
   id: string;
   name: string;
@@ -32,12 +34,12 @@ export function buildOrderMessage(
     lines.push(`${index + 1}. ${item.name}`);
     lines.push(`   ${labels.link}: ${productUrl}`);
     lines.push(`   ${labels.quantity}: ${item.quantity}`);
-    lines.push(`   ${labels.unitPrice}: $${item.price.toFixed(2)}`);
-    lines.push(`   ${labels.lineTotal}: $${subtotal.toFixed(2)}`);
+    lines.push(`   ${labels.unitPrice}: ${formatPrice(item.price)}`);
+    lines.push(`   ${labels.lineTotal}: ${formatPrice(subtotal)}`);
     lines.push('');
   });
 
-  lines.push(`${labels.orderTotal}: $${orderTotal.toFixed(2)}`);
+  lines.push(`${labels.orderTotal}: ${formatPrice(orderTotal)}`);
   lines.push(labels.itemCount.replace('{count}', String(totalItemCount)));
   lines.push('');
   lines.push(labels.thanks);

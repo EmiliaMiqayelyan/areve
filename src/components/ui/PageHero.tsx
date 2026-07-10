@@ -76,7 +76,7 @@ function ShopHero({ eyebrow, title, subtitle }: { eyebrow: string; title: string
             <p className="mb-1.5 font-sans text-[9px] font-medium uppercase tracking-[0.22em] text-[#AEA49C]">
               {eyebrow}
             </p>
-            <h1 className="font-serif text-[clamp(20px,2.8vw,28px)] font-medium leading-snug tracking-[-0.01em] text-ink">
+            <h1 className="font-serif text-[clamp(18px,2.2vw,24px)] font-normal leading-snug tracking-[-0.01em] text-heading">
               {title}
             </h1>
             {subtitle && (
@@ -95,7 +95,7 @@ function formatGalleryTitle(title: string) {
     return (
       <>
         <span className="block">{title.slice(0, newline)}</span>
-        <span className="mt-0.5 block italic text-[#B28A5A]">{title.slice(newline + 1).trim()}</span>
+        <span className="mt-0.5 block italic text-gold">{title.slice(newline + 1).trim()}</span>
       </>
     );
   }
@@ -105,7 +105,7 @@ function formatGalleryTitle(title: string) {
     return (
       <>
         <span className="block">{title.slice(0, comma + 1)}</span>
-        <span className="mt-0.5 block italic text-[#B28A5A]">{title.slice(comma + 1).trim()}</span>
+        <span className="mt-0.5 block italic text-gold">{title.slice(comma + 1).trim()}</span>
       </>
     );
   }
@@ -124,7 +124,7 @@ function GalleryHero({ eyebrow, title, subtitle }: { eyebrow: string; title: str
           <p className="mb-1.5 font-sans text-[9px] font-medium uppercase tracking-[0.22em] text-[#AEA49C]">
             {eyebrow}
           </p>
-          <h1 className="font-serif text-[clamp(20px,2.8vw,28px)] font-medium leading-[1.3] tracking-[-0.01em] text-ink">
+          <h1 className="font-serif text-[clamp(18px,2.2vw,24px)] font-normal leading-[1.3] tracking-[-0.01em] text-heading">
             {formatGalleryTitle(title)}
           </h1>
           {subtitle && (
@@ -153,9 +153,9 @@ function FaqHero({ eyebrow, title, subtitle }: { eyebrow: string; title: string;
             <p className="mb-1.5 font-sans text-[9px] font-medium uppercase tracking-[0.22em] text-[#AEA49C]">
               {eyebrow}
             </p>
-            <h1 className="font-serif text-[clamp(20px,2.8vw,28px)] font-medium leading-snug tracking-[-0.01em] text-ink">
+            <h1 className="font-serif text-[clamp(18px,2.2vw,24px)] font-normal leading-snug tracking-[-0.01em] text-heading">
               {rest && <span>{rest} </span>}
-              <span className="italic text-[#B28A5A]">{accent}</span>
+              <span className="italic text-gold">{accent}</span>
             </h1>
           </div>
           {subtitle && (
@@ -195,9 +195,9 @@ function ContactHero({
             <span className="inline-block h-px w-5 bg-[#C4A574]" aria-hidden />
             {eyebrow}
           </p>
-          <h1 className="font-serif text-[clamp(20px,2.8vw,28px)] font-medium leading-[1.3] tracking-[-0.01em] text-ink">
+          <h1 className="font-serif text-[clamp(18px,2.2vw,24px)] font-normal leading-[1.3] tracking-[-0.01em] text-heading">
             {rest && <span>{rest} </span>}
-            <span className="italic text-[#B28A5A]">{accent}</span>
+            <span className="italic text-gold">{accent}</span>
           </h1>
           {subtitle && (
             <p className="mt-2.5 font-sans text-[12px] leading-relaxed text-[#9A9189]">{subtitle}</p>
@@ -245,12 +245,12 @@ function AboutHero({
               {emoji && <span className="mr-1 not-italic">{emoji}</span>}
               {eyebrow}
             </p>
-            <h1 className="font-serif text-[clamp(20px,2.8vw,28px)] font-medium leading-[1.3] tracking-[-0.01em] text-ink">
+            <h1 className="font-serif text-[clamp(18px,2.2vw,24px)] font-normal leading-[1.3] tracking-[-0.01em] text-heading">
               {title}
               {titleItalic && (
                 <>
                   {' '}
-                  <span className="italic text-[#B28A5A]">{titleItalic}</span>
+                  <span className="italic text-gold">{titleItalic}</span>
                 </>
               )}
             </h1>

@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, TrendingUp, Wallet, PiggyBank, Receipt } from 'lucide-react';
 import { useAdminStore } from '@/lib/adminStore';
+import { formatPrice } from '@/lib/currency';
 
 type SaleRow = {
   orderId: string;
@@ -15,10 +16,6 @@ type SaleRow = {
   cost: number;
   profit: number;
 };
-
-function formatMoney(value: number) {
-  return `$${value.toFixed(2)}`;
-}
 
 function formatDate(value?: string) {
   if (!value) return '—';
@@ -108,7 +105,7 @@ export default function SalesReportPage() {
             </div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-[#AFAFAF]">Total Sales</p>
           </div>
-          <p className="text-2xl font-serif font-bold text-[#2B2B2B]">{formatMoney(totals.revenue)}</p>
+          <p className="text-2xl font-serif font-bold text-[#2B2B2B]">{formatPrice(totals.revenue)}</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-[#EADFD8] p-5 shadow-sm">
@@ -118,7 +115,7 @@ export default function SalesReportPage() {
             </div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-[#AFAFAF]">Total Cost</p>
           </div>
-          <p className="text-2xl font-serif font-bold text-[#2B2B2B]">{formatMoney(totals.cost)}</p>
+          <p className="text-2xl font-serif font-bold text-[#2B2B2B]">{formatPrice(totals.cost)}</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-[#EADFD8] p-5 shadow-sm">
@@ -129,7 +126,7 @@ export default function SalesReportPage() {
             <p className="text-[11px] font-bold uppercase tracking-wider text-[#AFAFAF]">Profit</p>
           </div>
           <p className={`text-2xl font-serif font-bold ${totals.profit >= 0 ? 'text-[#166534]' : 'text-red-600'}`}>
-            {formatMoney(totals.profit)}
+            {formatPrice(totals.profit)}
           </p>
         </div>
       </div>
@@ -172,10 +169,10 @@ export default function SalesReportPage() {
                     </td>
                     <td className="py-4 px-6 text-[14px] text-[#2B2B2B]">{row.productName}</td>
                     <td className="py-4 px-6 text-center text-[13px] text-[#7A7A7A]">{row.quantity}</td>
-                    <td className="py-4 px-6 text-right text-[14px] font-semibold text-[#2B2B2B]">{formatMoney(row.revenue)}</td>
-                    <td className="py-4 px-6 text-right text-[14px] text-[#7A7A7A]">{formatMoney(row.cost)}</td>
+                    <td className="py-4 px-6 text-right text-[14px] font-semibold text-[#2B2B2B]">{formatPrice(row.revenue)}</td>
+                    <td className="py-4 px-6 text-right text-[14px] text-[#7A7A7A]">{formatPrice(row.cost)}</td>
                     <td className={`py-4 px-6 text-right text-[14px] font-semibold ${row.profit >= 0 ? 'text-[#166534]' : 'text-red-600'}`}>
-                      {formatMoney(row.profit)}
+                      {formatPrice(row.profit)}
                     </td>
                   </tr>
                 ))}

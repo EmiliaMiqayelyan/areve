@@ -1,11 +1,12 @@
 'use client';
 
-import { Save, Info, Link as LinkIcon, Mail } from 'lucide-react';
+import { Info, Link as LinkIcon, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { SOCIAL_URLS } from '@/lib/socialDefaults';
 import { useAdminStore } from '@/lib/adminStore';
 import { toast, modal } from '@/lib/uiStore';
+import AdminSaveButton from '@/components/admin/AdminSaveButton';
 
 type StoreSettingsForm = {
   storeName: string;
@@ -38,7 +39,7 @@ const defaultSettings: StoreSettingsForm = {
 };
 
 export default function AdminSettingsPage() {
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const { token } = useAdminStore();
   const [settings, setSettings] = useState<StoreSettingsForm>(defaultSettings);
 
@@ -65,16 +66,15 @@ export default function AdminSettingsPage() {
       .catch(() => {});
   }, [token]);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleSave = async () => {
+    setSaving(true);
     try {
       if (token) {
         await apiFetch('/admin/settings', { method: 'PUT', body: JSON.stringify(settings) }, token);
       }
       modal.alert('Settings saved successfully!', 'Success');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -87,12 +87,12 @@ export default function AdminSettingsPage() {
           <h1 className="text-2xl font-serif font-bold text-[#2B2B2B]">Settings</h1>
           <p className="text-[14px] text-[#7A7A7A] mt-1">Manage global website configuration and brand details.</p>
         </div>
-        <button onClick={handleSave} className="flex items-center gap-2 bg-[#E6C97A] text-[#5a4a1e] px-6 py-2.5 rounded-xl font-medium text-[13px] hover:bg-[#D5B86A] transition-colors shadow-sm cursor-pointer">
-          <Save size={16} /> {loading ? 'Saving...' : 'Save Settings'}
-        </button>
+        <AdminSaveButton type="button" loading={saving} loadingLabel="Saving..." compact className="font-medium px-6" onClick={() => void handleSave()}>
+          Save Settings
+        </AdminSaveButton>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
+      <form onSubmit={(e) => { e.preventDefault(); void handleSave(); }} className="space-y-6">
         
         {/* General Info */}
         <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm space-y-6">

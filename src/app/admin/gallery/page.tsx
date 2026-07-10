@@ -2,7 +2,7 @@
 
 import { useAdminStore } from '@/lib/adminStore';
 import { modal } from '@/lib/uiStore';
-import { UploadCloud, Trash2, Image as ImageIcon } from 'lucide-react';
+import { UploadCloud, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import BilingualField from '@/components/admin/BilingualField';
@@ -37,23 +37,31 @@ export default function AdminGalleryPage() {
   const [cols, setCols] = useState<1 | 2>(1);
   const [alt, setAlt] = useState<LocalizedText>(emptyLocalized());
   const [brokenImageIds, setBrokenImageIds] = useState<Record<string, true>>({});
+  const [uploading, setUploading] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      void fileToDataUrl(file).then((dataUrl) => {
-        if (!alt.hy.trim()) {
-          modal.alert('Please enter Armenian alt text before uploading.', 'Alt text required');
-          return;
+      void (async () => {
+        try {
+          setUploading(true);
+          const dataUrl = await fileToDataUrl(file);
+          if (!alt.hy.trim()) {
+            await modal.alert('Please enter Armenian alt text before uploading.', 'Alt text required');
+            return;
+          }
+          await addGalleryImage({
+            id: 'gal-' + Math.random().toString(36).substring(2, 9),
+            src: dataUrl,
+            alt: { hy: alt.hy.trim(), en: alt.en.trim() },
+            cols,
+          });
+          setAlt(emptyLocalized());
+        } finally {
+          setUploading(false);
+          e.target.value = '';
         }
-        addGalleryImage({
-          id: 'gal-' + Math.random().toString(36).substring(2, 9),
-          src: dataUrl,
-          alt: { hy: alt.hy.trim(), en: alt.en.trim() },
-          cols,
-        });
-        setAlt(emptyLocalized());
-      });
+      })();
     }
   };
 
@@ -111,9 +119,14 @@ export default function AdminGalleryPage() {
               </div>
 
               <div 
-                className="border-2 border-dashed border-[#EADFD8] bg-[#F8F5F2] rounded-xl p-6 flex flex-col items-center justify-center text-center hover:bg-[#EADFD8]/30 transition-colors cursor-pointer group mt-4 h-48"
-                onClick={() => document.getElementById('gallery-upload')?.click()}
+                className={`border-2 border-dashed border-[#EADFD8] bg-[#F8F5F2] rounded-xl p-6 flex flex-col items-center justify-center text-center transition-colors cursor-pointer group mt-4 h-48 relative ${uploading ? 'pointer-events-none opacity-70' : 'hover:bg-[#EADFD8]/30'}`}
+                onClick={() => !uploading && document.getElementById('gallery-upload')?.click()}
               >
+                {uploading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-xl">
+                    <Loader2 size={28} className="animate-spin text-[#E6C97A]" />
+                  </div>
+                )}
                 <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                   <ImageIcon size={20} className="text-[#AFAFAF] group-hover:text-[#E6C97A] transition-colors" />
                 </div>

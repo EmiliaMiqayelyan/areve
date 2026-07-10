@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 import { apiFetch } from './api';
+import { adminProductApiPath, normalizeResourceId, resourceIdsMatch } from './resourceId';
 import type { LocalizedText } from './localizedText';
 
 // --- Types ---
@@ -248,12 +249,19 @@ export const useAdminStore = create<AdminStore>()(
         }
       },
       updateProduct: async (id, updates) => {
+        const normalizedId = normalizeResourceId(id);
         set((state) => ({
-          products: state.products.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+          products: state.products.map((p) =>
+            resourceIdsMatch(p.id, normalizedId) ? { ...p, ...updates } : p
+          ),
         }));
         if (get().token) {
           try {
-            await apiFetch(`/admin/products/${id}`, { method: 'PUT', body: JSON.stringify(updates) }, get().token || undefined);
+            await apiFetch(
+              adminProductApiPath(normalizedId),
+              { method: 'PUT', body: JSON.stringify(updates) },
+              get().token || undefined
+            );
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             if (isAuthErrorMessage(message)) get().logout();
@@ -262,10 +270,17 @@ export const useAdminStore = create<AdminStore>()(
         }
       },
       deleteProduct: async (id) => {
-        set((state) => ({ products: state.products.filter((p) => p.id !== id) }));
+        const normalizedId = normalizeResourceId(id);
+        set((state) => ({
+          products: state.products.filter((p) => !resourceIdsMatch(p.id, normalizedId)),
+        }));
         if (get().token) {
           try {
-            await apiFetch(`/admin/products/${id}`, { method: 'DELETE' }, get().token || undefined);
+            await apiFetch(
+              adminProductApiPath(normalizedId),
+              { method: 'DELETE' },
+              get().token || undefined
+            );
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             if (isAuthErrorMessage(message)) get().logout();

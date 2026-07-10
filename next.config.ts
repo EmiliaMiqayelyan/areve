@@ -6,6 +6,13 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  webpack: (config, { dev }) => {
+    // Avoid corrupted PackFileCacheStrategy errors on Windows/slow disks.
+    if (dev) {
+      config.cache = { type: "memory" };
+    }
+    return config;
+  },
   async rewrites() {
     return [
       {

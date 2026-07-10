@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Package, ShoppingCart, Tags,
-  MessageSquare, Image as ImageIcon, HelpCircle,
+  Image as ImageIcon, HelpCircle,
   Users, Settings, Search, Bell, LogOut, FileText, Menu, X, Shield
 } from 'lucide-react';
 import { useAdminStore } from '@/lib/adminStore';
@@ -21,7 +21,6 @@ const links = [
   { href: '/admin/products', labelKey: 'admin.nav.products', icon: Package },
   { href: '/admin/orders', labelKey: 'admin.nav.orders', icon: ShoppingCart },
   { href: '/admin/categories', labelKey: 'admin.nav.categories', icon: Tags },
-  { href: '/admin/reviews', labelKey: 'admin.nav.reviews', icon: MessageSquare },
   { href: '/admin/gallery', labelKey: 'admin.nav.gallery', icon: ImageIcon },
   { href: '/admin/faq', labelKey: 'admin.nav.faq', icon: HelpCircle },
   { href: '/admin/users', labelKey: 'admin.nav.users', icon: Users },
@@ -114,7 +113,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const closeSidebar = () => setSidebarOpen(false);
 
   return (
-    <div className="fixed inset-0 z-50 flex bg-[#F8F5F2] text-[#2B2B2B] font-sans">
+    <div className="admin-shell fixed inset-0 z-50 flex bg-[#F8F5F2] text-[#1a1a1a] font-sans">
       <ToastContainer />
       <AppModal />
 
@@ -135,12 +134,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }`}
       >
         <div className="h-14 flex items-center justify-between px-4 border-b border-[#EADFD8] sm:px-6">
-          <Link href="/" className="flex items-center gap-2 text-ink no-underline min-w-0">
+          <Link href="/" className="flex items-center gap-2 no-underline min-w-0">
             <Image src={areveMark} alt="AREVÉ" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
-            <span className="font-serif text-lg font-bold tracking-wide text-[#2B2B2B] truncate">AREVÉ</span>
-            <span className="hidden sm:inline ml-1 text-[9px] font-bold tracking-wider text-[#AFAFAF] uppercase bg-[#F8F5F2] px-2 py-0.5 rounded-full shrink-0">
-              {t('admin.badge')}
-            </span>
           </Link>
           <button
             type="button"
@@ -197,13 +192,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <Search size={18} />
             </button>
-            <button type="button" className="relative p-2 rounded-lg text-[#7A7A7A] hover:text-[#2B2B2B] hover:bg-[#F8F5F2] transition-colors">
-              <Bell size={18} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#E6C97A] rounded-full border-2 border-white" />
-            </button>
             <div className="flex items-center gap-2 sm:gap-3 cursor-pointer group">
               <div className="text-right hidden sm:block">
-                <p className="text-[12px] font-medium text-[#2B2B2B] group-hover:text-[#E6C97A] transition-colors">Admin User</p>
+                <p className="text-[11px] font-normal text-[#1a1a1a] group-hover:text-[#E6C97A] transition-colors">Admin User</p>
                 <p className="text-[10px] text-[#AFAFAF]">Store Manager</p>
               </div>
               <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0">

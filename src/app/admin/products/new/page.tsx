@@ -3,12 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminStore } from '@/lib/adminStore';
-import { ArrowLeft, UploadCloud, Save } from 'lucide-react';
+import { ArrowLeft, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import BilingualField from '@/components/admin/BilingualField';
 import AdminSelect from '@/components/admin/AdminSelect';
+import AdminSaveButton from '@/components/admin/AdminSaveButton';
 import { emptyLocalized, pickLocalized, type LocalizedText } from '@/lib/localizedText';
+import { createProductId } from '@/lib/resourceId';
+import { CURRENCY_SYMBOL } from '@/lib/currency';
 
 async function fileToDataUrl(file: File): Promise<string> {
   return await new Promise((resolve, reject) => {
@@ -27,10 +30,10 @@ export default function AddProductPage() {
   const [price, setPrice] = useState('');
   const [cost, setCost] = useState('');
   const [category, setCategory] = useState('');
-  const [description, setDescription] = useState<LocalizedText>(emptyLocalized());
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!category && categories.length > 0) {
@@ -43,22 +46,20 @@ export default function AddProductPage() {
     if (!name.hy.trim() || !price || !category) return;
 
     try {
+      setSaving(true);
       setError('');
       const nextImage = imagePreview || '/images/prod-bag-a.png';
       if (typeof imagePreview === 'string' && imagePreview.startsWith('/uploads/')) {
         setError('Your selected image saved as `/uploads/*`, but those files are missing. Please choose/upload the image again.');
         return;
       }
-      const slugBase = (name.hy || name.en).toLowerCase().replace(/\s+/g, '-').slice(0, 15);
       await addProduct({
-        id: slugBase + '-' + Math.floor(Math.random() * 1000),
+        id: createProductId(name),
         name: { hy: name.hy.trim(), en: name.en.trim() },
         price: parseFloat(price),
         cost: cost ? parseFloat(cost) : 0,
         category,
-        description: description.hy || description.en
-          ? { hy: description.hy.trim(), en: description.en.trim() }
-          : null,
+        description: null,
         status,
         image: nextImage,
       });
@@ -67,6 +68,8 @@ export default function AddProductPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -106,17 +109,8 @@ export default function AddProductPage() {
               value={name}
               onChange={setName}
               required
-              hyPlaceholder="Օր.՝ Արևոտ փաթեթ"
-              enPlaceholder="e.g., Golden Sunburst Clutch"
-            />
-
-            <BilingualField
-              label="Description"
-              value={description}
-              onChange={setDescription}
-              multiline
-              hyPlaceholder="Պատմեք, թե ինչպես է ստեղծվել այս ապրանքը..."
-              enPlaceholder="Tell the story of how this product was crafted..."
+              hyPlaceholder="Օր.՝ Ուլունքագործ պայուսակ"
+              enPlaceholder="e.g., Beaded bag"
             />
           </div>
 
@@ -176,13 +170,13 @@ export default function AddProductPage() {
             <h3 className="text-[15px] font-bold text-[#2B2B2B] border-b border-[#EADFD8] pb-4">Organization</h3>
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Price (USD) *</label>
+              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Price ({CURRENCY_SYMBOL}) *</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#AFAFAF] font-bold">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#AFAFAF] font-bold">{CURRENCY_SYMBOL}</span>
                 <input
                   required
                   type="number"
-                  step="0.01"
+                  step="1"
                   min="0"
                   value={price} onChange={e => setPrice(e.target.value)}
                   placeholder="0.00"
@@ -192,12 +186,12 @@ export default function AddProductPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Product Cost (USD)</label>
+              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Product Cost ({CURRENCY_SYMBOL})</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#AFAFAF] font-bold">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#AFAFAF] font-bold">{CURRENCY_SYMBOL}</span>
                 <input
                   type="number"
-                  step="0.01"
+                  step="1"
                   min="0"
                   value={cost}
                   onChange={(e) => setCost(e.target.value)}
@@ -226,10 +220,9 @@ export default function AddProductPage() {
           <Link href="/admin/products" className="px-6 py-2.5 rounded-xl border border-[#EADFD8] font-bold text-[13px] text-[#7A7A7A] hover:bg-white hover:text-[#2B2B2B] transition-colors bg-[#F8F5F2]">
             Cancel
           </Link>
-          <button type="submit" className="flex items-center gap-2 bg-[#E6C97A] text-[#5a4a1e] px-8 py-2.5 rounded-xl font-bold text-[13px] hover:bg-[#D5B86A] transition-colors shadow-sm">
-            <Save size={16} />
+          <AdminSaveButton loading={saving} loadingLabel="Saving...">
             Save Product
-          </button>
+          </AdminSaveButton>
         </div>
       </form>
 

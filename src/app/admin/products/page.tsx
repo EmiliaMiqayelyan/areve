@@ -7,6 +7,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useMemo } from 'react';
 import { pickLocalized } from '@/lib/localizedText';
+import { adminProductEditPath } from '@/lib/resourceId';
+import { formatPrice } from '@/lib/currency';
 import AdminSelect from '@/components/admin/AdminSelect';
 
 const FALLBACK_PRODUCT_IMAGE = '/images/prod-bag-a.png';
@@ -162,7 +164,7 @@ export default function AdminProductsPage() {
                     </span>
                   </td>
                   <td className="py-4 px-6">
-                    <p className="text-[14px] font-bold text-[#2B2B2B]">${Number(product.price ?? 0).toFixed(2)}</p>
+                    <p className="text-[14px] font-bold text-[#2B2B2B]">{formatPrice(product.price)}</p>
                   </td>
                   <td className="py-4 px-6">
                     <button
@@ -184,7 +186,7 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="py-4 px-6 text-right">
                     <div className="flex items-center justify-end gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                      <Link href={`/admin/products/${product.id}/edit`} className="p-2 text-[#AFAFAF] hover:text-[#2B2B2B] hover:bg-[#F8F5F2] rounded-lg transition-colors">
+                      <Link href={adminProductEditPath(product.id)} className="p-2 text-[#AFAFAF] hover:text-[#2B2B2B] hover:bg-[#F8F5F2] rounded-lg transition-colors">
                         <Edit size={16} />
                       </Link>
                       <button 

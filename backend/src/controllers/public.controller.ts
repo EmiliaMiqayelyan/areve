@@ -10,6 +10,7 @@ import {
   formatReview,
   resolveRequestLocale,
 } from "../utils/serializers";
+import { normalizeResourceId } from "../utils/resourceId";
 
 export async function getHealth(_req: Request, res: Response) {
   return res.json({ status: "ok" });
@@ -46,7 +47,7 @@ export async function getProducts(req: Request, res: Response) {
 
 export async function getProductById(req: Request, res: Response) {
   const locale = resolveRequestLocale(req);
-  const id = String(req.params.id);
+  const id = normalizeResourceId(String(req.params.id));
   const row = await Product.findByPk(id);
   if (!row) return res.status(404).json({ message: "Product not found" });
   return res.json(formatProduct(row, { locale }));

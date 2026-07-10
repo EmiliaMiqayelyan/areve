@@ -2,9 +2,10 @@
 
 import { useAdminStore, FAQ } from '@/lib/adminStore';
 import { modal } from '@/lib/uiStore';
-import { Plus, Edit2, Trash2, ChevronDown, Save } from 'lucide-react';
+import { Plus, Edit2, Trash2, ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import BilingualField from '@/components/admin/BilingualField';
+import AdminSaveButton from '@/components/admin/AdminSaveButton';
 import { emptyLocalized, parseLocalized, pickLocalized } from '@/lib/localizedText';
 import type { LocalizedText } from '@/lib/localizedText';
 
@@ -17,6 +18,7 @@ export default function AdminFAQPage() {
     question: emptyLocalized(),
     answer: emptyLocalized(),
   });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setLocalFaqs(faqs);
@@ -24,10 +26,13 @@ export default function AdminFAQPage() {
 
   const handleSaveAll = async () => {
     try {
+      setSaving(true);
       await saveAllFaqs(localFaqs);
       modal.alert('FAQ Settings Saved!', 'Success');
     } catch {
       modal.alert('Failed to save FAQs. Please try again.', 'Error');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -92,9 +97,9 @@ export default function AdminFAQPage() {
           <button onClick={addNew} className="flex items-center gap-2 bg-white text-[#2B2B2B] px-5 py-2.5 border border-[#EADFD8] rounded-xl font-medium text-[13px] hover:bg-[#F8F5F2] transition-colors shadow-sm">
             <Plus size={16} /> Add FAQ
           </button>
-          <button onClick={handleSaveAll} className="flex items-center gap-2 bg-[#E6C97A] text-[#5a4a1e] px-6 py-2.5 rounded-xl font-medium text-[13px] hover:bg-[#D5B86A] transition-colors shadow-sm">
-            <Save size={16} /> Save Changes
-          </button>
+          <AdminSaveButton type="button" loading={saving} loadingLabel="Saving..." compact className="font-medium px-6" onClick={() => void handleSaveAll()}>
+            Save Changes
+          </AdminSaveButton>
         </div>
       </div>
 

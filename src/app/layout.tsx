@@ -4,11 +4,12 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Providers from "@/components/Providers";
 import { getApiBaseUrl } from "@/lib/api";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import { fontVariables } from "@/lib/fonts";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const res = await fetch(`${getApiBaseUrl()}/settings`, { next: { revalidate: 120 } });
+    const res = await fetchWithTimeout(`${getApiBaseUrl()}/settings`, { next: { revalidate: 120 } });
     if (!res.ok) throw new Error("unavailable");
     const data = await res.json();
     const title = data.siteContent?.metadata?.title as string | undefined;
@@ -29,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="hy" className={`${fontVariables} locale-hy`} suppressHydrationWarning>
-      <body style={{ background: '#F8F5F2', color: '#2B2B2B' }}>
+      <body style={{ background: '#F8F5F2', color: 'var(--color-ink)' }}>
         <Providers>
           <Header />
           <main>{children}</main>

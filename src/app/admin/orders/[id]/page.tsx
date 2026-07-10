@@ -6,6 +6,8 @@ import { ArrowLeft, Package, User, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import AdminSelect from '@/components/admin/AdminSelect';
+import AdminSaveButton from '@/components/admin/AdminSaveButton';
+import { formatPrice } from '@/lib/currency';
 
 const ORDER_STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending' },
@@ -20,6 +22,7 @@ export default function OrderDetailsPage() {
   const order = orders.find(o => o.id === id);
   
   const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<any>(null);
 
   useEffect(() => {
@@ -38,10 +41,13 @@ export default function OrderDetailsPage() {
   const handleSave = async () => {
     if (!order) return;
     try {
+      setSaving(true);
       await updateOrder(order.id, formData);
       setIsEditing(false);
     } catch (err) {
       alert('Failed to update order');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -81,14 +87,26 @@ export default function OrderDetailsPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-            className={`px-4 py-2 rounded-xl text-[13px] font-medium transition-colors ${
-              isEditing ? 'bg-[#E6C97A] text-[#5a4a1e]' : 'bg-white border border-[#EADFD8] text-[#2B2B2B] hover:bg-[#F8F5F2]'
-            }`}
-          >
-            {isEditing ? 'Save Changes' : 'Edit Details'}
-          </button>
+          {isEditing ? (
+            <AdminSaveButton
+              type="button"
+              loading={saving}
+              loadingLabel="Saving..."
+              compact
+              className="px-4 py-2 font-medium"
+              onClick={() => void handleSave()}
+            >
+              Save Changes
+            </AdminSaveButton>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="px-4 py-2 rounded-xl text-[13px] font-medium transition-colors bg-white border border-[#EADFD8] text-[#2B2B2B] hover:bg-[#F8F5F2]"
+            >
+              Edit Details
+            </button>
+          )}
           {isEditing && (
             <button 
               onClick={() => setIsEditing(false)}
@@ -122,7 +140,7 @@ export default function OrderDetailsPage() {
                       <p className="text-[14px] font-bold text-[#2B2B2B]">{item.name}</p>
                       <p className="text-[13px] text-[#AFAFAF] mt-0.5">Quantity: {item.quantity}</p>
                     </div>
-                    <p className="text-[14px] font-bold text-[#2B2B2B]">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="text-[14px] font-bold text-[#2B2B2B]">{formatPrice(item.price * item.quantity)}</p>
                   </div>
                 ))}
              </div>
@@ -130,15 +148,15 @@ export default function OrderDetailsPage() {
              <div className="mt-6 border-t border-[#EADFD8] pt-4 space-y-2 text-right">
                 <div className="flex justify-end gap-12 text-[13px] text-[#7A7A7A]">
                   <span>Subtotal</span>
-                  <span className="w-20 text-[#2B2B2B] font-medium">${Number(order.total ?? 0).toFixed(2)}</span>
+                  <span className="w-20 text-[#2B2B2B] font-medium">{formatPrice(order.total)}</span>
                 </div>
                 <div className="flex justify-end gap-12 text-[13px] text-[#7A7A7A]">
                    <span>Shipping</span>
-                   <span className="w-20 text-[#2B2B2B] font-medium">$0.00</span>
+                   <span className="w-20 text-[#2B2B2B] font-medium">{formatPrice(0)}</span>
                 </div>
                 <div className="flex justify-end gap-12 text-[15px] font-bold text-[#2B2B2B] pt-2">
                    <span>Total</span>
-                   <span className="w-20">${Number(order.total ?? 0).toFixed(2)}</span>
+                   <span className="w-20">{formatPrice(order.total)}</span>
                 </div>
              </div>
           </div>

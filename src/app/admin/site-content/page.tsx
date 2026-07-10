@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FileText, RotateCcw, Save } from 'lucide-react';
+import { FileText, RotateCcw } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { useAdminStore } from '@/lib/adminStore';
 import { DEFAULT_SITE_CONTENT } from '@/lib/siteContentDefaults';
 import { modal, toast } from '@/lib/uiStore';
+import AdminSaveButton from '@/components/admin/AdminSaveButton';
 
 type GeneralPayload = {
   storeName: string;
@@ -113,14 +114,17 @@ export default function AdminSiteContentPage() {
           >
             <RotateCcw size={16} /> Reset editor to defaults
           </button>
-          <button
+          <AdminSaveButton
             type="button"
-            onClick={handleSave}
-            disabled={saving || loading || !general}
-            className="flex items-center gap-2 bg-[#E6C97A] text-[#5a4a1e] px-6 py-2.5 rounded-xl font-medium text-[13px] hover:bg-[#D5B86A] shadow-sm cursor-pointer disabled:opacity-50"
+            loading={saving}
+            loadingLabel="Saving…"
+            compact
+            className="font-medium px-6"
+            disabled={loading || !general}
+            onClick={() => void handleSave()}
           >
-            <Save size={16} /> {saving ? 'Saving…' : 'Save to database'}
-          </button>
+            Save to database
+          </AdminSaveButton>
         </div>
       </div>
 
