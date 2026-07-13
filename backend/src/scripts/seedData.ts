@@ -27,8 +27,8 @@ async function seed() {
   ]);
 
   await Gallery.bulkCreate([
-    { id: "g1", src: "/images/gallery-light-1.png", alt: "Collection flat lay", cols: 2 },
-    { id: "g2", src: "/images/gallery-light-2.png", alt: "Lifestyle shoot", cols: 1 },
+    { id: "g1", src: "/images/gallery-light-1.png", alt: "Collection flat lay", cols: 2, sortOrder: 0 },
+    { id: "g2", src: "/images/gallery-light-2.png", alt: "Lifestyle shoot", cols: 1, sortOrder: 1 },
   ]);
 
   await Order.bulkCreate([

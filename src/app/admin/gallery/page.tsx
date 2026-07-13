@@ -1,13 +1,11 @@
 'use client';
 
 import { useAdminStore } from '@/lib/adminStore';
-import { modal } from '@/lib/uiStore';
-import { UploadCloud, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { modal, toast } from '@/lib/uiStore';
+import { UploadCloud, Trash2, Image as ImageIcon, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-import BilingualField from '@/components/admin/BilingualField';
-import { emptyLocalized, pickLocalized } from '@/lib/localizedText';
-import type { LocalizedText } from '@/lib/localizedText';
+import { pickLocalized } from '@/lib/localizedText';
 
 const FALLBACK_GALLERY_IMAGE = '/images/gallery-light-1.png';
 
@@ -18,12 +16,34 @@ function resolveGalleryImageSrc(src?: string): string {
     if (val.length < 1200) return FALLBACK_GALLERY_IMAGE;
     return val;
   }
+  if (val.startsWith('/uploads/')) return val;
   if (/^https?:\/\//i.test(val)) return val;
   if (val.startsWith('/')) return val;
   return `/${val.replace(/^\/+/, '')}`;
 }
 
 async function fileToDataUrl(file: File): Promise<string> {
+  // Compress large photos so the JSON upload stays reliable.
+  if (file.size > 1.5 * 1024 * 1024 && file.type.startsWith('image/')) {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const maxSide = 1800;
+      const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas unavailable');
+      ctx.drawImage(bitmap, 0, 0, width, height);
+      bitmap.close();
+      return canvas.toDataURL('image/jpeg', 0.82);
+    } catch {
+      // fall through to raw FileReader
+    }
+  }
+
   return await new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error('Failed to read file'));
@@ -33,11 +53,11 @@ async function fileToDataUrl(file: File): Promise<string> {
 }
 
 export default function AdminGalleryPage() {
-  const { gallery, addGalleryImage, deleteGalleryImage } = useAdminStore();
+  const { gallery, addGalleryImage, deleteGalleryImage, reorderGallery } = useAdminStore();
   const [cols, setCols] = useState<1 | 2>(1);
-  const [alt, setAlt] = useState<LocalizedText>(emptyLocalized());
   const [brokenImageIds, setBrokenImageIds] = useState<Record<string, true>>({});
   const [uploading, setUploading] = useState(false);
+  const [reorderingId, setReorderingId] = useState<string | null>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,17 +66,19 @@ export default function AdminGalleryPage() {
         try {
           setUploading(true);
           const dataUrl = await fileToDataUrl(file);
-          if (!alt.hy.trim()) {
-            await modal.alert('Please enter Armenian alt text before uploading.', 'Alt text required');
-            return;
-          }
           await addGalleryImage({
             id: 'gal-' + Math.random().toString(36).substring(2, 9),
             src: dataUrl,
-            alt: { hy: alt.hy.trim(), en: alt.en.trim() },
+            alt: { hy: 'Պատկերասրահ', en: 'Gallery' },
             cols,
           });
-          setAlt(emptyLocalized());
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Upload failed';
+          if (message.includes('Invalid or expired token') || message.includes('Missing admin token')) {
+            toast.error('Session expired — please log in again');
+          } else {
+            toast.error(message);
+          }
         } finally {
           setUploading(false);
           e.target.value = '';
@@ -68,6 +90,24 @@ export default function AdminGalleryPage() {
   const handleDelete = async (id: string) => {
     if (await modal.confirm('Remove this image from the gallery?', 'Confirm Deletion')) {
       deleteGalleryImage(id);
+    }
+  };
+
+  const moveImage = async (id: string, direction: -1 | 1) => {
+    const index = gallery.findIndex((item) => item.id === id);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= gallery.length) return;
+
+    const orderedIds = gallery.map((item) => item.id);
+    [orderedIds[index], orderedIds[target]] = [orderedIds[target], orderedIds[index]];
+
+    try {
+      setReorderingId(id);
+      await reorderGallery(orderedIds);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not reorder images');
+    } finally {
+      setReorderingId(null);
     }
   };
 
@@ -92,14 +132,6 @@ export default function AdminGalleryPage() {
             </h3>
             
             <div className="space-y-4">
-              <BilingualField
-                label="Image Alt Text *"
-                value={alt}
-                onChange={setAlt}
-                required
-                hyPlaceholder="Պատկերի նկարագրություն"
-                enPlaceholder="Describe the image for accessibility"
-              />
               <div className="space-y-1.5">
                 <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Image Layout Span</label>
                 <div className="flex gap-2">
@@ -147,24 +179,48 @@ export default function AdminGalleryPage() {
         {/* Gallery Grid Preview */}
         <div className="lg:col-span-3 bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm min-h-[500px]">
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#EADFD8]">
-            <h3 className="text-[15px] font-bold text-[#2B2B2B]">Public Grid Preview</h3>
+            <div>
+              <h3 className="text-[15px] font-bold text-[#2B2B2B]">Public Grid Preview</h3>
+              <p className="text-[12px] text-[#AFAFAF] mt-1">Use the arrows on each image to change order.</p>
+            </div>
             <span className="text-[12px] text-[#AFAFAF] bg-[#F8F5F2] px-3 py-1 rounded-full">{gallery.length} Images</span>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-[160px]">
-            {gallery.map((img) => (
+            {gallery.map((img, index) => (
               <div 
                 key={img.id} 
                 className={`relative rounded-xl overflow-hidden group shadow-sm border border-[#EADFD8] ${img.cols === 2 ? 'col-span-2 row-span-2' : ''}`}
               >
                 <Image
                   src={brokenImageIds[img.id] ? FALLBACK_GALLERY_IMAGE : resolveGalleryImageSrc(img.src)}
-                  alt={pickLocalized(img.alt, 'hy')}
+                  alt={pickLocalized(img.alt, 'hy') || 'Gallery'}
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                   onError={() => setBrokenImageIds((prev) => ({ ...prev, [img.id]: true }))}
                 />
                 <div className="absolute inset-0 bg-[#2B2B2B]/0 group-hover:bg-[#2B2B2B]/40 transition-colors duration-300" />
+
+                <div className="absolute top-2 left-2 flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  <button
+                    type="button"
+                    disabled={index === 0 || reorderingId === img.id}
+                    onClick={() => void moveImage(img.id, -1)}
+                    className="w-8 h-8 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-[#2B2B2B] hover:bg-[#E6C97A] disabled:opacity-40 disabled:hover:bg-white/90 backdrop-blur-sm"
+                    aria-label="Move left"
+                  >
+                    {reorderingId === img.id ? <Loader2 size={14} className="animate-spin" /> : <ChevronLeft size={16} />}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={index === gallery.length - 1 || reorderingId === img.id}
+                    onClick={() => void moveImage(img.id, 1)}
+                    className="w-8 h-8 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-[#2B2B2B] hover:bg-[#E6C97A] disabled:opacity-40 disabled:hover:bg-white/90 backdrop-blur-sm"
+                    aria-label="Move right"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
                 
                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300">
                   <button 
@@ -177,7 +233,9 @@ export default function AdminGalleryPage() {
 
                 <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 duration-300 delay-75">
                    <div className="bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md shadow-sm">
-                     <p className="text-[10px] font-bold text-[#2B2B2B] uppercase tracking-wider">{img.cols === 2 ? 'Large Tile' : 'Standard Tile'}</p>
+                     <p className="text-[10px] font-bold text-[#2B2B2B] uppercase tracking-wider">
+                       #{index + 1} · {img.cols === 2 ? 'Large Tile' : 'Standard Tile'}
+                     </p>
                    </div>
                 </div>
               </div>

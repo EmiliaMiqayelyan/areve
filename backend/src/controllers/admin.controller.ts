@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { randomUUID } from "crypto";
 import { Admin, Category, Faq, Gallery, Order, OrderItem, Product, Review, Setting } from "../models";
 import { mergeSiteContent } from "../utils/mergeSiteContent";
+import { isDataUrlImage, persistDataUrlImage } from "../utils/persistUpload";
 import {
   formatCategory,
   formatFaq,
@@ -277,7 +278,7 @@ export async function replaceAdminFaqs(req: Request, res: Response) {
 }
 
 export async function getAdminGallery(_req: Request, res: Response) {
-  const rows = await Gallery.findAll({ order: [["createdAt", "DESC"]] });
+  const rows = await Gallery.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
   return res.json(rows.map((row) => formatGalleryItem(row, { bilingual: true })));
 }
 
@@ -285,12 +286,45 @@ export async function createAdminGallery(req: Request, res: Response) {
   const { id: clientId, src, alt, cols } = req.body as {
     id?: string;
     src: string;
-    alt: string;
+    alt: string | { hy: string; en?: string };
     cols: number;
   };
   const id = clientId?.trim() || randomUUID();
-  const row = await Gallery.create({ id, src, alt, cols });
+
+  let storedSrc = String(src || "").trim();
+  if (isDataUrlImage(storedSrc)) {
+    storedSrc = await persistDataUrlImage(storedSrc, "gallery", id);
+  }
+  if (!storedSrc) {
+    return res.status(400).json({ message: "Image is required" });
+  }
+
+  const minSort = await Gallery.min("sortOrder");
+  const sortOrder = Number.isFinite(Number(minSort)) ? Number(minSort) - 1 : 0;
+  const row = await Gallery.create({ id, src: storedSrc, alt, cols, sortOrder });
   return res.status(201).json(formatGalleryItem(row, { bilingual: true }));
+}
+
+export async function reorderAdminGallery(req: Request, res: Response) {
+  const ids = (req.body as { ids?: unknown }).ids;
+  if (!Array.isArray(ids) || ids.length === 0 || !ids.every((id) => typeof id === "string" && id.trim())) {
+    return res.status(400).json({ message: "ids must be a non-empty string array" });
+  }
+
+  const uniqueIds = [...new Set(ids.map((id) => String(id).trim()))];
+  const existing = await Gallery.findAll({ attributes: ["id"] });
+  const existingIds = new Set(existing.map((row) => String(row.get("id"))));
+
+  if (uniqueIds.length !== existingIds.size || uniqueIds.some((id) => !existingIds.has(id))) {
+    return res.status(400).json({ message: "ids must include every gallery image exactly once" });
+  }
+
+  await Promise.all(
+    uniqueIds.map((id, index) => Gallery.update({ sortOrder: index }, { where: { id } }))
+  );
+
+  const rows = await Gallery.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
+  return res.json(rows.map((row) => formatGalleryItem(row, { bilingual: true })));
 }
 
 export async function deleteAdminGallery(req: Request, res: Response) {

@@ -1,10 +1,11 @@
 import { Setting } from "../models";
+import { mergeSiteContent } from "./mergeSiteContent";
+import { repairLegacyHeroContent } from "./repairLegacyHeroContent";
 
 const MOJIBAKE_RE = /[ÕÔÃ][±°´€³]|Ã©|â€|AREVÃ/;
 
 const ARMENIAN_TAGLINE = "Արև՝ քո առօրյայում";
-const ARMENIAN_FOOTER =
-  "Յուրաքանչյուրը փոքրիկ արև է";
+const ARMENIAN_FOOTER = "Յուրաքանչյուրը փոքրիկ արև է";
 
 function hasMojibake(value: unknown): boolean {
   if (value == null) return false;
@@ -54,6 +55,13 @@ export async function repairCorruptedSettings() {
     patch.siteContent = null;
   } else if (isLegacyArmenianFooter(footer)) {
     patch.footerDescription = ARMENIAN_FOOTER;
+  }
+
+  if (!corrupted && siteContent != null) {
+    const repaired = repairLegacyHeroContent(siteContent);
+    if (JSON.stringify(repaired) !== JSON.stringify(siteContent)) {
+      patch.siteContent = mergeSiteContent(repaired);
+    }
   }
 
   if (Object.keys(patch).length === 0) return;

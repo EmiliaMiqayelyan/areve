@@ -53,6 +53,7 @@ export interface GalleryImage {
   src: string;
   alt: LocalizedText | string;
   cols: number;
+  sortOrder?: number;
 }
 
 export interface FAQ {
@@ -96,6 +97,7 @@ interface AdminStore {
   gallery: GalleryImage[];
   addGalleryImage: (image: GalleryImage) => Promise<void>;
   deleteGalleryImage: (id: string) => Promise<void>;
+  reorderGallery: (orderedIds: string[]) => Promise<void>;
 
   faqs: FAQ[];
   updateFaq: (index: number, faq: FAQ) => Promise<void>;
@@ -227,8 +229,10 @@ export const useAdminStore = create<AdminStore>()(
               : [],
           }));
           set({ products: normalizedProducts, orders: normalizedOrders, reviews, gallery, faqs, categories, loading: false });
-        } catch {
+        } catch (err) {
           set({ loading: false });
+          const message = err instanceof Error ? err.message : String(err);
+          if (isAuthErrorMessage(message)) get().logout();
         }
       },
 
@@ -358,12 +362,58 @@ export const useAdminStore = create<AdminStore>()(
       // Gallery
       gallery: [],
       addGalleryImage: async (image) => {
+        const previous = get().gallery;
         set((state) => ({ gallery: [image, ...state.gallery] }));
-        if (get().token) await apiFetch('/admin/gallery', { method: 'POST', body: JSON.stringify(image) }, get().token || undefined);
+        if (get().token) {
+          try {
+            await apiFetch('/admin/gallery', { method: 'POST', body: JSON.stringify(image) }, get().token || undefined);
+            await get().hydrateFromApi();
+          } catch (err) {
+            set({ gallery: previous });
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message)) get().logout();
+            throw err;
+          }
+        }
       },
       deleteGalleryImage: async (id) => {
+        const previous = get().gallery;
         set((state) => ({ gallery: state.gallery.filter((g) => g.id !== id) }));
-        if (get().token) await apiFetch(`/admin/gallery/${id}`, { method: 'DELETE' }, get().token || undefined);
+        if (get().token) {
+          try {
+            await apiFetch(`/admin/gallery/${id}`, { method: 'DELETE' }, get().token || undefined);
+          } catch (err) {
+            set({ gallery: previous });
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message)) get().logout();
+            throw err;
+          }
+        }
+      },
+      reorderGallery: async (orderedIds) => {
+        const previous = get().gallery;
+        const byId = new Map(get().gallery.map((item) => [item.id, item]));
+        const next: GalleryImage[] = [];
+        for (let index = 0; index < orderedIds.length; index++) {
+          const item = byId.get(orderedIds[index]);
+          if (item) next.push({ ...item, sortOrder: index });
+        }
+        set({ gallery: next });
+        if (get().token) {
+          try {
+            const rows = await apiFetch<GalleryImage[]>(
+              '/admin/gallery/reorder',
+              { method: 'PUT', body: JSON.stringify({ ids: orderedIds }) },
+              get().token || undefined
+            );
+            set({ gallery: rows });
+          } catch (err) {
+            set({ gallery: previous });
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message)) get().logout();
+            throw err;
+          }
+        }
       },
 
       // FAQs

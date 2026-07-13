@@ -31,5 +31,12 @@ export function errorHandler(err: unknown, _req: Request, res: Response, next: N
   }
 
   console.error("[API Error]", err);
-  return res.status(500).json({ message: "Internal server error" });
+  const message = err instanceof Error ? err.message : "Internal server error";
+  // Surface actionable upload/DB errors instead of a generic 500.
+  if (/image|upload|packet|data url|too large/i.test(message)) {
+    return res.status(400).json({ message });
+  }
+  return res.status(500).json({
+    message: process.env.NODE_ENV === "production" ? "Internal server error" : message,
+  });
 }

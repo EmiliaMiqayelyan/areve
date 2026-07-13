@@ -75,7 +75,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="bg-beige" style={{ padding: 'var(--section-padding)' }}>
         <div className="mx-auto max-w-[1280px]" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
           <motion.div
@@ -84,8 +83,7 @@ export default function AboutPage() {
             viewport={{ once: true }}
             className="mx-auto max-w-[640px] rounded-[28px] border border-white/80 bg-white px-6 py-10 text-center shadow-[0_8px_40px_rgba(180,156,140,0.1)] sm:px-10 sm:py-12"
           >
-            <h2 className="mb-3 font-serif text-[clamp(1.3rem,2.4vw,1.75rem)] font-medium text-heading">{about.closing.title}</h2>
-            <p className="mb-8 font-sans text-[15px] leading-relaxed text-subtle">{about.closing.subtitle}</p>
+            <h2 className="mb-3 font-serif text-[clamp(1.3rem,2.4vw,1.75rem)] font-medium text-heading mb-3">{about.closing.title}</h2>
             <Link href={about.closing.ctaHref} className="btn-primary no-underline">
               {about.closing.ctaLabel} <ArrowRight size={15} />
             </Link>

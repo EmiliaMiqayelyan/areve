@@ -102,8 +102,8 @@ export const SITE_CONTENT_EN = {
     },
     storySection: {
       image: "/images/about-light.png",
-      floatingStatValue: "40+",
-      floatingStatLabel: "hours per bag",
+      floatingStatValue: "",
+      floatingStatLabel: "",
       eyebrow: "AREVÉ",
       titleLine1: "Created",
       titleItalic: "for you",

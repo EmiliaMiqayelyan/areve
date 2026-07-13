@@ -14,6 +14,7 @@ const crypto_1 = require("crypto");
 const models_1 = require("../models");
 const mergeSiteContent_1 = require("../utils/mergeSiteContent");
 const serializers_1 = require("../utils/serializers");
+const resourceId_1 = require("../utils/resourceId");
 async function getHealth(_req, res) {
     return res.json({ status: "ok" });
 }
@@ -47,7 +48,7 @@ async function getProducts(req, res) {
 }
 async function getProductById(req, res) {
     const locale = (0, serializers_1.resolveRequestLocale)(req);
-    const id = String(req.params.id);
+    const id = (0, resourceId_1.normalizeResourceId)(String(req.params.id));
     const row = await models_1.Product.findByPk(id);
     if (!row)
         return res.status(404).json({ message: "Product not found" });
@@ -68,7 +69,7 @@ async function getFaqs(req, res) {
 }
 async function getGallery(req, res) {
     const locale = (0, serializers_1.resolveRequestLocale)(req);
-    const rows = await models_1.Gallery.findAll({ order: [["createdAt", "DESC"]] });
+    const rows = await models_1.Gallery.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
     return res.json(rows.map((row) => (0, serializers_1.formatGalleryItem)(row, { locale })));
 }
 async function getCategories(req, res) {

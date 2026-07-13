@@ -24,8 +24,8 @@ async function seed() {
         { id: "f2", question: "How long does delivery take?", answer: "Standard orders ship in 3–5 business days.", sortOrder: 2 },
     ]);
     await models_1.Gallery.bulkCreate([
-        { id: "g1", src: "/images/gallery-light-1.png", alt: "Collection flat lay", cols: 2 },
-        { id: "g2", src: "/images/gallery-light-2.png", alt: "Lifestyle shoot", cols: 1 },
+        { id: "g1", src: "/images/gallery-light-1.png", alt: "Collection flat lay", cols: 2, sortOrder: 0 },
+        { id: "g2", src: "/images/gallery-light-2.png", alt: "Lifestyle shoot", cols: 1, sortOrder: 1 },
     ]);
     await models_1.Order.bulkCreate([
         { id: "ORD-1004", customerName: "Emma Thornton", customerEmail: "emma@example.com", total: 58, status: "shipped", address: "123 Street", city: "London", state: "LDN", zipCode: "12345" },

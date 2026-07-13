@@ -5,7 +5,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.env = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
+const path_1 = __importDefault(require("path"));
+const candidates = [
+    path_1.default.resolve(__dirname, "../../.env"), // backend/.env (from src/config or dist/config)
+    path_1.default.resolve(__dirname, "../../../.env"), // repo root .env
+    path_1.default.resolve(process.cwd(), ".env"),
+    path_1.default.resolve(process.cwd(), "../.env"),
+];
+for (const file of candidates) {
+    dotenv_1.default.config({ path: file });
+}
 exports.env = {
     port: Number(process.env.PORT || 4000),
     dbHost: process.env.DB_HOST || "localhost",

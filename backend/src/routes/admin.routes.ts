@@ -19,6 +19,7 @@ import {
   getAdminSettings,
   getAdminUsers,
   replaceAdminFaqs,
+  reorderAdminGallery,
   updateAdminOrder,
   updateAdminOrderStatus,
   updateAdminProduct,
@@ -83,6 +84,7 @@ router.put("/admin/faqs", validateBody(faqReplaceSchema), asyncHandler(replaceAd
 
 router.get("/admin/gallery", asyncHandler(getAdminGallery));
 router.post("/admin/gallery", validateBody(gallerySchema), asyncHandler(createAdminGallery));
+router.put("/admin/gallery/reorder", asyncHandler(reorderAdminGallery));
 router.delete("/admin/gallery/:id", asyncHandler(deleteAdminGallery));
 
 router.get("/admin/categories", asyncHandler(getAdminCategories));

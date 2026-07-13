@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAdminProducts = getAdminProducts;
+exports.getAdminProduct = getAdminProduct;
 exports.createAdminProduct = createAdminProduct;
 exports.updateAdminProduct = updateAdminProduct;
 exports.deleteAdminProduct = deleteAdminProduct;
@@ -18,6 +19,7 @@ exports.getAdminFaqs = getAdminFaqs;
 exports.replaceAdminFaqs = replaceAdminFaqs;
 exports.getAdminGallery = getAdminGallery;
 exports.createAdminGallery = createAdminGallery;
+exports.reorderAdminGallery = reorderAdminGallery;
 exports.deleteAdminGallery = deleteAdminGallery;
 exports.getAdminSettings = getAdminSettings;
 exports.updateAdminSettings = updateAdminSettings;
@@ -29,7 +31,9 @@ exports.deleteAdminCategory = deleteAdminCategory;
 const crypto_1 = require("crypto");
 const models_1 = require("../models");
 const mergeSiteContent_1 = require("../utils/mergeSiteContent");
+const persistUpload_1 = require("../utils/persistUpload");
 const serializers_1 = require("../utils/serializers");
+const resourceId_1 = require("../utils/resourceId");
 const ORDER_PATCH_FIELDS = [
     "customerName",
     "customerEmail",
@@ -55,6 +59,13 @@ async function getAdminProducts(_req, res) {
     const rows = await models_1.Product.findAll({ order: [["createdAt", "DESC"]] });
     return res.json(rows.map((row) => (0, serializers_1.formatProduct)(row, { bilingual: true })));
 }
+async function getAdminProduct(req, res) {
+    const id = (0, resourceId_1.normalizeResourceId)(String(req.params.id));
+    const row = await models_1.Product.findByPk(id);
+    if (!row)
+        return res.status(404).json({ message: "Product not found" });
+    return res.json((0, serializers_1.formatProduct)(row, { bilingual: true }));
+}
 async function createAdminProduct(req, res) {
     const { id: clientId, ...data } = req.body;
     if (typeof data.category === "string" && !(await categoryExists(data.category))) {
@@ -65,7 +76,7 @@ async function createAdminProduct(req, res) {
     return res.status(201).json((0, serializers_1.formatProduct)(row, { bilingual: true }));
 }
 async function updateAdminProduct(req, res) {
-    const id = String(req.params.id);
+    const id = (0, resourceId_1.normalizeResourceId)(String(req.params.id));
     if (!Object.keys(req.body).length) {
         return res.status(400).json({ message: "No fields to update" });
     }
@@ -82,7 +93,7 @@ async function updateAdminProduct(req, res) {
     });
 }
 async function deleteAdminProduct(req, res) {
-    const id = String(req.params.id);
+    const id = (0, resourceId_1.normalizeResourceId)(String(req.params.id));
     const deleted = await models_1.Product.destroy({ where: { id } });
     if (!deleted)
         return res.status(404).json({ message: "Product not found" });
@@ -254,14 +265,38 @@ async function replaceAdminFaqs(req, res) {
     });
 }
 async function getAdminGallery(_req, res) {
-    const rows = await models_1.Gallery.findAll({ order: [["createdAt", "DESC"]] });
+    const rows = await models_1.Gallery.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
     return res.json(rows.map((row) => (0, serializers_1.formatGalleryItem)(row, { bilingual: true })));
 }
 async function createAdminGallery(req, res) {
     const { id: clientId, src, alt, cols } = req.body;
     const id = clientId?.trim() || (0, crypto_1.randomUUID)();
-    const row = await models_1.Gallery.create({ id, src, alt, cols });
+    let storedSrc = String(src || "").trim();
+    if ((0, persistUpload_1.isDataUrlImage)(storedSrc)) {
+        storedSrc = await (0, persistUpload_1.persistDataUrlImage)(storedSrc, "gallery", id);
+    }
+    if (!storedSrc) {
+        return res.status(400).json({ message: "Image is required" });
+    }
+    const minSort = await models_1.Gallery.min("sortOrder");
+    const sortOrder = Number.isFinite(Number(minSort)) ? Number(minSort) - 1 : 0;
+    const row = await models_1.Gallery.create({ id, src: storedSrc, alt, cols, sortOrder });
     return res.status(201).json((0, serializers_1.formatGalleryItem)(row, { bilingual: true }));
+}
+async function reorderAdminGallery(req, res) {
+    const ids = req.body.ids;
+    if (!Array.isArray(ids) || ids.length === 0 || !ids.every((id) => typeof id === "string" && id.trim())) {
+        return res.status(400).json({ message: "ids must be a non-empty string array" });
+    }
+    const uniqueIds = [...new Set(ids.map((id) => String(id).trim()))];
+    const existing = await models_1.Gallery.findAll({ attributes: ["id"] });
+    const existingIds = new Set(existing.map((row) => String(row.get("id"))));
+    if (uniqueIds.length !== existingIds.size || uniqueIds.some((id) => !existingIds.has(id))) {
+        return res.status(400).json({ message: "ids must include every gallery image exactly once" });
+    }
+    await Promise.all(uniqueIds.map((id, index) => models_1.Gallery.update({ sortOrder: index }, { where: { id } })));
+    const rows = await models_1.Gallery.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
+    return res.json(rows.map((row) => (0, serializers_1.formatGalleryItem)(row, { bilingual: true })));
 }
 async function deleteAdminGallery(req, res) {
     const id = String(req.params.id);

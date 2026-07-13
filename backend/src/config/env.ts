@@ -1,6 +1,16 @@
 import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config();
+const candidates = [
+  path.resolve(__dirname, "../../.env"), // backend/.env (from src/config or dist/config)
+  path.resolve(__dirname, "../../../.env"), // repo root .env
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(process.cwd(), "../.env"),
+];
+
+for (const file of candidates) {
+  dotenv.config({ path: file });
+}
 
 export const env = {
   port: Number(process.env.PORT || 4000),

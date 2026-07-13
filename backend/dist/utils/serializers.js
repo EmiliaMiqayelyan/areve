@@ -77,6 +77,7 @@ function formatGalleryItem(item, opts) {
         src: j.src,
         alt: formatLocalizedField(j.alt, opts),
         cols: Number(j.cols ?? 1),
+        sortOrder: Number(j.sortOrder ?? j.sort_order ?? 0),
         createdAt: j.createdAt ?? j.created_at ?? null,
     };
 }

@@ -12,7 +12,6 @@ exports.DEFAULT_SITE_CONTENT = {
         { href: '/products', label: 'Ապրանքներ' },
         { href: '/gallery', label: 'Պատկերասրահ' },
         { href: '/about', label: 'Մեր մասին' },
-        { href: '/reviews', label: 'Կարծիքներ' },
         { href: '/faq', label: 'ՀՏՀ' },
         { href: '/contact', label: 'Կապ' },
     ],
@@ -22,7 +21,6 @@ exports.DEFAULT_SITE_CONTENT = {
             ['/products', 'Ապրանքներ'],
             ['/gallery', 'Պատկերասրահ'],
             ['/about', 'Մեր պատմությունը'],
-            ['/reviews', 'Գնահատականներ'],
         ],
         support: [
             ['/faq', 'ՀՏՀ'],
@@ -35,15 +33,15 @@ exports.DEFAULT_SITE_CONTENT = {
     },
     productCategoryLabels: {
         all: 'Բոլորը',
-        bags: 'Բիջակապարց տոպրակներ',
+        bags: 'Ուլունքագործ պայուսակներ',
         toys: 'Ձեռագործ խաղալիքներ',
         accessories: 'Աքսեսուարներ',
     },
     pages: {
         shop: {
-            eyebrow: 'AREVÉ խանութ',
-            title: 'Մեր հավաքածուն',
-            subtitle: 'Յուրաքանչյուր կտոր ձեռագործ է — երկու նույնական չկան։ Գտեք ձեզ համար հարմարը։',
+            eyebrow: 'Ձեռագործ հավաքածու',
+            title: 'Քո հաջորդ պայուսակը',
+            subtitle: 'Ստեղծիր քեզ համար յուրահատուկը',
         },
         reviews: {
             eyebrow: 'Հաճախորդների գնահատականներ',
@@ -58,14 +56,14 @@ exports.DEFAULT_SITE_CONTENT = {
             featuredAuthor: '— Սոֆի Լորեն, Փարիզ',
         },
         gallery: {
-            eyebrow: 'Տեսողական պատմություններ',
-            title: 'Պատկերասրահ',
-            subtitle: 'AREVÉ-ի աշխարհը — ապրանքներ, գործընթաց և ձեռագործի գեղեցկությունը։',
+            eyebrow: 'AREVÉ',
+            title: 'Ստեղծման\nողջ ճանապարհը',
+            subtitle: 'Ստեղծագործություն • Ոճ • Արև',
         },
         faq: {
-            eyebrow: 'Օգնության կենտրոն',
+            eyebrow: '· ՀՏՀ',
             title: 'Հաճախ տրվող հարցեր',
-            subtitle: 'Ամեն ինչ, ինչ պետք է իմանաք AREVÉ-ի մասին — պատասխանված հոգատարությամբ։',
+            subtitle: 'Ամեն ինչ, ինչ պետք է իմանաք AREVÉ-ի մասին',
         },
         checkout: {
             title: 'Վճարում',
@@ -81,13 +79,13 @@ exports.DEFAULT_SITE_CONTENT = {
         hero: {
             image: '/images/hero-light.png',
             eyebrow: 'Նոր հավաքածու · 2026',
-            title: 'Ոճ, որը ստեղծվում է',
-            titleAccent: 'ձեռքով',
+            title: 'Ոճ, որը ստեղծում է',
+            titleAccent: 'AREVÉ-ն',
             subtitle: 'Եզակի դիզայն, որակյալ նյութեր և ձեռքի աշխատանք՝ ամեն օրվա և հատուկ պահերի համար',
             trustLine: '100% ձեռագործ • Պատրաստված Հայաստանում',
             badgePrefix: 'Նոր հավաքածու',
-            titleLine1: 'Ոճ, որը ստեղծվում է',
-            titleGold1: 'ձեռքով',
+            titleLine1: 'Ոճ, որը ստեղծում է',
+            titleGold1: 'AREVÉ-ն',
             conjunction: '',
             titleGold2: '',
             stats: [
@@ -105,8 +103,8 @@ exports.DEFAULT_SITE_CONTENT = {
         },
         storySection: {
             image: '/images/about-light.png',
-            floatingStatValue: '40+',
-            floatingStatLabel: 'ժամ մեկ տոպրակի',
+            floatingStatValue: '',
+            floatingStatLabel: '',
             eyebrow: 'AREVÉ',
             titleLine1: 'Ստեղծված է',
             titleItalic: 'քեզ համար',
@@ -145,20 +143,17 @@ exports.DEFAULT_SITE_CONTENT = {
         },
         collectionCards: [
             {
-                title: 'Բիջակապարց տոպրակներ',
-                desc: 'Կրելի արվեստ՝ բիջ առ բիջ, ձեռքով։',
+                title: 'Ուլունքագործ պայուսակներ',
                 img: '/images/prod-bag-a.png',
                 href: '/products?category=bags',
             },
             {
                 title: 'Ձեռագործ խաղալիքներ',
-                desc: 'Փափուկ, անվտանգ, սիրով ստեղծված։',
                 img: '/images/prod-toy-a.png',
                 href: '/products?category=toys',
             },
             {
                 title: 'Աքսեսուարներ',
-                desc: 'Փոքրիկ շող՝ ամեն օրվա համար։',
                 img: '/images/prod-acc-a.png',
                 href: '/products?category=accessories',
             },
@@ -167,18 +162,17 @@ exports.DEFAULT_SITE_CONTENT = {
     about: {
         hero: {
             emoji: '☀️',
-            eyebrow: 'Մեր պատմությունը',
+            eyebrow: 'AREVÉ · արև',
             titleLine1: 'Ստեղծված է',
-            titleItalic: 'սրտից',
-            intro: 'AREVÉ-ն ավելին է, քան բրենդը։ Դա սիրով նամակ է ձեռքով ստեղծելու արվեստին — դանդաղ, մտածված, գեղեցիկ։',
+            titleItalic: 'արևից',
+            intro: 'Ստեղծված Հայաստանում',
         },
         beginning: {
             eyebrow: 'Սկիզբ',
-            title: 'Պատմություն, պատմված բիջերով',
+            title: 'AREVÉ',
             paragraphs: [
-                'AREVÉ-ն սկսվել է պատուհանի մոտ փոքրիկ սեղանի վրա՝ բիջերի ամանով և արևի լույսով մի առավոտ։ Անձնական կիրքը դարձել է ընդհանուր։',
-                'AREVÉ անունը գալիս է հայերեն «արև» բառից, որովհետև արևի լույսը սովորականը դարձնում է լուսավոր։',
-                'Այսօր մենք ստեղծում ենք կտորներ, որոնք նախատեսված են պահպանվելու, ոչ թե սպառվելու։ Յուրաքանչյուր կտոր ունի իր պատմությունը, և երբ դուք այն կրում եք, այդ պատմությունը դառնում է ձերը։',
+                'AREVÉ անունը գալիս է «արև» բառից՝ լույսի գաղափարից, որը ընդգծում է գեղեցկությունը։',
+                'Այսօր մենք ստեղծում ենք ձեռագործ պայուսակներ և աքսեսուարներ՝ պարզ դիզայնով և բարձր որակով։',
             ],
             image: '/images/about-light.png',
         },
@@ -242,18 +236,31 @@ exports.DEFAULT_SITE_CONTENT = {
         },
         bannerImages: ['/images/gallery-light-3.png', '/images/gallery-light-4.png', '/images/gallery-light-1.png'],
         closing: {
-            title: 'Պատրա՞ստ եք գտնել ձեր կտորը',
-            subtitle: 'Դիտեք մեր ձեռագործ հավաքածուն — յուրաքանչյուրը սպասում է իր մարդուն։',
+            title: 'Շարունակիր փնտրել քոնը',
             ctaLabel: 'Գնել հավաքածուից',
             ctaHref: '/products',
         },
     },
     contact: {
         hero: {
-            eyebrow: 'Կապ մեզ հետ',
-            title: 'Ուրախ կլինենք լսել ձեզ',
-            subtitle: 'Կապվեք մեզ հետ անհատական պատվերների, խորհրդատվության կամ պարզապես ողջույնի համար։',
+            eyebrow: 'ԿԱՊ',
+            title: 'Եկեք ստեղծենք միասին',
+            subtitle: 'Հարցեր, անհատական պատվերներ կամ համագործակցություն։ Մենք միշտ ուրախ ենք լսել ձեզ։',
+            ctaLabel: 'Կապվել մեզ հետ',
         },
+        imageCaption: 'Յուրաքանչյուր ձեռագործ կտոր սկսվում է զրույցից։',
+        customOrder: {
+            title: 'Ցանկանու՞մ եք ինչ-որ յուրահատուկ',
+            subtitle: 'Մենք ստեղծում ենք անհատական ձեռագործ կտորներ՝ հատուկ ձեզ համար։',
+            ctaLabel: 'Սկսել անհատական պատվեր',
+        },
+        social: {
+            title: 'Հետևեք AREVÉ-ին',
+        },
+        closing: {
+            quote: 'Ձեռագործ սիրով։ Ստեղծված հոգավորության համար։',
+        },
+        image: '/images/prod-bag-a.png',
         card1: {
             title: 'Ընդհանուր հարց',
             subtitle: 'Ընդհանուր հարցերի և համագործակցության համար։',
@@ -273,7 +280,7 @@ exports.DEFAULT_SITE_CONTENT = {
         studio: {
             image: '/images/gallery-light-3.png',
             eyebrow: 'Արհեստանոցում',
-            quote: 'Յուրաքանչյուր կտոր փոքրիկ արև է — ստեղծված ջերմությամբ և լույսով։',
+            quote: 'Յուրաքանչյուրը փոքրիկ արև է',
         },
     },
 };

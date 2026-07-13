@@ -70,7 +70,7 @@ export async function getFaqs(req: Request, res: Response) {
 
 export async function getGallery(req: Request, res: Response) {
   const locale = resolveRequestLocale(req);
-  const rows = await Gallery.findAll({ order: [["createdAt", "DESC"]] });
+  const rows = await Gallery.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
   return res.json(rows.map((row) => formatGalleryItem(row, { locale })));
 }
 

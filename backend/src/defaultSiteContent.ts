@@ -102,8 +102,8 @@ export const DEFAULT_SITE_CONTENT = {
     },
     storySection: {
       image: '/images/about-light.png',
-      floatingStatValue: '40+',
-      floatingStatLabel: 'ժամ մեկ տոպրակի',
+      floatingStatValue: '',
+      floatingStatLabel: '',
       eyebrow: 'AREVÉ',
       titleLine1: 'Ստեղծված է',
       titleItalic: 'քեզ համար',
@@ -236,7 +236,6 @@ export const DEFAULT_SITE_CONTENT = {
     bannerImages: ['/images/gallery-light-3.png', '/images/gallery-light-4.png', '/images/gallery-light-1.png'],
     closing: {
       title: 'Շարունակիր փնտրել քոնը',
-      subtitle: 'Դիտեք մեր ձեռագործ հավաքածուները — յուրաքանչյուրը սպասում է',
       ctaLabel: 'Գնել հավաքածուից',
       ctaHref: '/products',
     },

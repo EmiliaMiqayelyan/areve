@@ -13,4 +13,5 @@ Gallery.init({
     src: { type: sequelize_1.DataTypes.TEXT('medium'), allowNull: false },
     alt: { type: sequelize_1.DataTypes.JSON, allowNull: false },
     cols: { type: sequelize_1.DataTypes.TINYINT, allowNull: false, defaultValue: 1 },
+    sortOrder: { type: sequelize_1.DataTypes.INTEGER, allowNull: false, defaultValue: 0, field: "sort_order" },
 }, { sequelize: sequelize_2.sequelize, tableName: "gallery", underscored: true, timestamps: true, updatedAt: false });

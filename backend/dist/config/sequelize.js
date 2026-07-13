@@ -8,8 +8,15 @@ exports.sequelize = new sequelize_1.Sequelize(env_1.env.dbName, env_1.env.dbUser
     port: env_1.env.dbPort,
     dialect: "mysql",
     logging: false,
+    pool: {
+        max: 5,
+        min: 0,
+        acquire: 10000,
+        idle: 10000,
+    },
     dialectOptions: {
         charset: "utf8mb4",
+        connectTimeout: 10000,
     },
     define: {
         charset: "utf8mb4",

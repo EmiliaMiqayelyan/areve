@@ -313,9 +313,7 @@ export default function Home() {
             <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-[20px] border-2 border-gold/30" />
 
             <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 3.5, repeat: Infinity }}
-              className="absolute -left-4 bottom-8 rounded-[16px] bg-white p-4 shadow-[0_8px_32px_rgba(180,156,140,0.22)] sm:p-5">
-              <p className="font-serif text-xl font-medium text-heading sm:text-2xl">{home.storySection.floatingStatValue}</p>
-              <p className="font-sans text-[11px] text-[#AFAFAF] sm:text-xs">{home.storySection.floatingStatLabel}</p>
+              className="absolute -left-4 bottom-8 rounded-[16px] border-1 border-[#E6C97A] p-4 shadow-[0_8px_32px_rgba(180,156,140,0.22)] sm:p-5">
             </motion.div>
           </motion.div>
 
@@ -333,7 +331,7 @@ export default function Home() {
             </h2>
             <div className="divider-gold mb-6" />
             {home.storySection.paragraphs.map((para, idx) => (
-              <p key={idx} className="mb-4 font-sans text-base leading-relaxed text-subtle sm:text-lg last:mb-8">
+              <p key={idx} className="mb-3 font-sans text-[13px] leading-relaxed text-subtle sm:text-sm last:mb-7">
                 {para}
               </p>
             ))}
@@ -341,8 +339,15 @@ export default function Home() {
             <div className="mb-10 grid grid-cols-3 gap-3">
               {home.storySection.pillars.map(({ icon, label }) => (
                 <div key={label} className="rounded-[14px] border border-beige bg-white p-4 text-center">
-                  <div className="mb-2 text-xl sm:text-2xl">{icon}</div>
-                  <p className="font-sans text-[11px] font-medium text-ink sm:text-[13px]">{label}</p>
+                  <div
+                    className={`mb-2 flex h-6 items-center justify-center leading-none ${
+                      icon === '☀️' ? 'text-[13px]' : 'text-[18px]'
+                    }`}
+                    aria-hidden
+                  >
+                    {icon}
+                  </div>
+                  <p className="font-sans text-[11px] font-medium text-ink sm:text-[12px]">{label}</p>
                 </div>
               ))}
             </div>

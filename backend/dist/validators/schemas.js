@@ -99,17 +99,25 @@ exports.loginSchema = zod_1.z.object({
 });
 exports.adminCredentialsUpdateSchema = zod_1.z
     .object({
-    currentPassword: zod_1.z.string().min(6).max(100),
+    currentPassword: zod_1.z.string().min(1).max(100),
     newEmail: zod_1.z.string().email().optional(),
     newPassword: zod_1.z.string().min(6).max(100).optional(),
-    confirmPassword: zod_1.z.string().min(6).max(100).optional(),
+    confirmPassword: zod_1.z.string().max(100).optional(),
 })
-    .refine((data) => !data.newPassword || data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-})
-    .refine((data) => Boolean(data.newEmail || data.newPassword), {
-    message: "Provide a new email and/or new password",
+    .superRefine((data, ctx) => {
+    if (!data.newEmail && !data.newPassword) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Provide a new email and/or new password",
+        });
+    }
+    if (data.newPassword && data.newPassword !== data.confirmPassword) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Passwords do not match",
+            path: ["confirmPassword"],
+        });
+    }
 });
 exports.orderStatusSchema = zod_1.z.object({
     status: zod_1.z.enum(["pending", "shipped", "delivered"]),

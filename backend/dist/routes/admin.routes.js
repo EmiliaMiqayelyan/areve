@@ -12,6 +12,7 @@ router.use(auth_1.requireAdminAuth);
 router.get("/admin/account", (0, asyncHandler_1.asyncHandler)(auth_controller_1.getAdminAccount));
 router.put("/admin/account/credentials", (0, validate_1.validateBody)(schemas_1.adminCredentialsUpdateSchema), (0, asyncHandler_1.asyncHandler)(auth_controller_1.updateAdminCredentials));
 router.get("/admin/products", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminProducts));
+router.get("/admin/products/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminProduct));
 router.post("/admin/products", (0, validate_1.validateBody)(schemas_1.productCreateSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminProduct));
 router.put("/admin/products/:id", (0, validate_1.validateBody)(schemas_1.productSchema.partial()), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminProduct));
 router.delete("/admin/products/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.deleteAdminProduct));
@@ -29,6 +30,7 @@ router.get("/admin/faqs", (0, asyncHandler_1.asyncHandler)(admin_controller_1.ge
 router.put("/admin/faqs", (0, validate_1.validateBody)(schemas_1.faqReplaceSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.replaceAdminFaqs));
 router.get("/admin/gallery", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminGallery));
 router.post("/admin/gallery", (0, validate_1.validateBody)(schemas_1.gallerySchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminGallery));
+router.put("/admin/gallery/reorder", (0, asyncHandler_1.asyncHandler)(admin_controller_1.reorderAdminGallery));
 router.delete("/admin/gallery/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.deleteAdminGallery));
 router.get("/admin/categories", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminCategories));
 router.post("/admin/categories", (0, validate_1.validateBody)(schemas_1.categoryCreateSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminCategory));

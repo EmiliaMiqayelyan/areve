@@ -12,13 +12,14 @@ const errorHandler_1 = require("./middlewares/errorHandler");
 const admin_routes_1 = __importDefault(require("./routes/admin.routes"));
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
 const public_routes_1 = __importDefault(require("./routes/public.routes"));
+const persistUpload_1 = require("./utils/persistUpload");
 const app = (0, express_1.default)();
-app.use((0, helmet_1.default)());
+app.use((0, helmet_1.default)({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use((0, cors_1.default)({ origin: env_1.env.corsOrigin === "*" ? "*" : env_1.env.corsOrigin.split(","), credentials: true }));
-// Admin UI sends image data URLs in JSON. Keep limit high enough
-// so uploads don't fail/truncate.
-app.use(express_1.default.json({ limit: "10mb" }));
+// Admin UI may still send compact data URLs; large images are written to disk.
+app.use(express_1.default.json({ limit: "25mb" }));
 app.use((0, morgan_1.default)("dev"));
+app.use("/uploads", express_1.default.static(persistUpload_1.UPLOAD_ROOT));
 app.use("/api", public_routes_1.default);
 app.use("/api", auth_routes_1.default);
 app.use("/api", admin_routes_1.default);
