@@ -24,7 +24,9 @@ export default function Header() {
   const pathname = usePathname();
   const { settings } = useSiteSettings();
   const { locale, setLocale, locales, localeLabels } = useTranslation();
-  const navLinks = settings.siteContent.nav.filter((link) => link.href !== '/reviews');
+  const navLinks = settings.siteContent.nav.filter(
+    (link) => String(link.href) !== '/reviews'
+  );
   const wishlistButtonRef = useRef<HTMLButtonElement>(null);
   const { count, toggleCart, isOpen: cartOpen } = useCartStore();
   const { items: wishlist, toggleWishlistPanel, closeWishlistPanel, isOpen: wishlistOpen } =
