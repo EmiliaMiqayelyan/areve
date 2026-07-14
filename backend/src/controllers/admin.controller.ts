@@ -346,8 +346,9 @@ export async function getAdminSettings(_req: Request, res: Response) {
 
 export async function updateAdminSettings(req: Request, res: Response) {
   const body = { ...req.body } as Record<string, unknown>;
+  // Storefront copy is code-owned; never persist admin JSON overrides.
   if (body.siteContent !== undefined) {
-    body.siteContent = mergeSiteContent(body.siteContent);
+    body.siteContent = mergeSiteContent();
   }
   if (body.tiktokUrl === "") body.tiktokUrl = "";
   if (body.youtubeUrl === "") body.youtubeUrl = "";

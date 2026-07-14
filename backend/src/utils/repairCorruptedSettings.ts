@@ -1,6 +1,5 @@
 import { Setting } from "../models";
-import { mergeSiteContent } from "./mergeSiteContent";
-import { repairLegacyHeroContent } from "./repairLegacyHeroContent";
+import { DEFAULT_SITE_CONTENT } from "../defaultSiteContent";
 
 const MOJIBAKE_RE = /[ÕÔÃ][±°´€³]|Ã©|â€|AREVÃ/;
 
@@ -31,6 +30,19 @@ function isLegacyArmenianFooter(footer: string): boolean {
   );
 }
 
+function siteContentLooksStale(siteContent: unknown): boolean {
+  if (siteContent == null) return false;
+  const text = JSON.stringify(siteContent);
+  return (
+    text.includes("Պատրաստ եք գտնել ձեր կտորը") ||
+    text.includes("Պատմություն, պատմված բիզերով") ||
+    text.includes("Ոճ, որը ստեղծվում է") ||
+    text.includes("/reviews") ||
+    text.includes("Կարծիքներ") ||
+    text.includes("ՏԵՍԱԿԱՆԻ")
+  );
+}
+
 /** Reset settings text that was saved with broken UTF-8 or legacy defaults. */
 export async function repairCorruptedSettings() {
   const row = await Setting.findByPk(1);
@@ -52,22 +64,14 @@ export async function repairCorruptedSettings() {
   if (corrupted) {
     patch.tagline = ARMENIAN_TAGLINE;
     patch.footerDescription = ARMENIAN_FOOTER;
-    patch.siteContent = null;
+    patch.siteContent = structuredClone(DEFAULT_SITE_CONTENT);
   } else if (isLegacyArmenianFooter(footer)) {
     patch.footerDescription = ARMENIAN_FOOTER;
   }
 
-  if (!corrupted && siteContent != null) {
-    const repaired = repairLegacyHeroContent(siteContent);
-    // Always persist canonical nav + about.beginning so production stops serving stale JSON.
-    const merged = mergeSiteContent(repaired);
-    const previous = JSON.stringify(siteContent);
-    const next = JSON.stringify(merged);
-    if (previous !== next) {
-      patch.siteContent = merged;
-    }
-  } else if (!corrupted && siteContent == null) {
-    // Ensure null DB content doesn't reopen legacy admin JSON later with stale partials.
+  // Replace stale storefront JSON so DB matches code (API also ignores DB copy).
+  if (siteContentLooksStale(siteContent)) {
+    patch.siteContent = structuredClone(DEFAULT_SITE_CONTENT);
   }
 
   if (Object.keys(patch).length === 0) return;
