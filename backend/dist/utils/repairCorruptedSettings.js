@@ -50,9 +50,16 @@ async function repairCorruptedSettings() {
     }
     if (!corrupted && siteContent != null) {
         const repaired = (0, repairLegacyHeroContent_1.repairLegacyHeroContent)(siteContent);
-        if (JSON.stringify(repaired) !== JSON.stringify(siteContent)) {
-            patch.siteContent = (0, mergeSiteContent_1.mergeSiteContent)(repaired);
+        // Always persist canonical nav + about.beginning so production stops serving stale JSON.
+        const merged = (0, mergeSiteContent_1.mergeSiteContent)(repaired);
+        const previous = JSON.stringify(siteContent);
+        const next = JSON.stringify(merged);
+        if (previous !== next) {
+            patch.siteContent = merged;
         }
+    }
+    else if (!corrupted && siteContent == null) {
+        // Ensure null DB content doesn't reopen legacy admin JSON later with stale partials.
     }
     if (Object.keys(patch).length === 0)
         return;
