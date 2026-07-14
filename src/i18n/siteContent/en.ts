@@ -249,7 +249,6 @@ export const SITE_CONTENT_EN = {
         "Questions, custom orders or collaborations? We're always happy to hear from you.",
       ctaLabel: "Contact us",
     },
-    imageCaption: "Every handmade piece begins with a conversation.",
     customOrder: {
       title: "Need something unique?",
       subtitle: "We create custom handmade pieces designed especially for you.",
@@ -261,7 +260,7 @@ export const SITE_CONTENT_EN = {
     closing: {
       quote: "Handmade with love. Created to be treasured.",
     },
-    image: "/images/prod-bag-a.png",
+    image: "/images/about-crafting.png",
     card1: {
       title: "General Inquiry",
       subtitle: "For general questions and collaborations.",

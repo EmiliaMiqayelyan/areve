@@ -248,7 +248,6 @@ export const DEFAULT_SITE_CONTENT = {
         'Հարցեր, անհատական պատվերներ կամ համագործակցություն։ Մենք միշտ ուրախ ենք լսել ձեզ։',
       ctaLabel: 'Կապվել մեզ հետ',
     },
-    imageCaption: 'Յուրաքանչյուր ձեռագործ կտոր սկսվում է զրույցից։',
     customOrder: {
       title: 'Ցանկանու՞մ եք ինչ-որ յուրահատուկ',
       subtitle: 'Մենք ստեղծում ենք անհատական ձեռագործ կտորներ՝ հատուկ ձեզ համար։',
@@ -260,7 +259,7 @@ export const DEFAULT_SITE_CONTENT = {
     closing: {
       quote: 'Ձեռագործ սիրով։ Ստեղծված հոգավորության համար։',
     },
-    image: '/images/prod-bag-a.png',
+    image: '/images/about-crafting.png',
     card1: {
       title: 'Ընդհանուր հարց',
       subtitle: 'Ընդհանուր հարցերի և համագործակցության համար։',
