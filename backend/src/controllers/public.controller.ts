@@ -40,8 +40,13 @@ export async function getPublicSettings(_req: Request, res: Response) {
 
 export async function getProducts(req: Request, res: Response) {
   const locale = resolveRequestLocale(req);
-  const where = req.query.active === "true" ? { status: "active" } : undefined;
-  const rows = await Product.findAll({ where, order: [["createdAt", "DESC"]] });
+  const where: Record<string, unknown> = {};
+  if (req.query.active === "true") where.status = "active";
+  if (req.query.favorite === "true") where.isFavorite = true;
+  const rows = await Product.findAll({
+    where: Object.keys(where).length ? where : undefined,
+    order: [["createdAt", "DESC"]],
+  });
   return res.json(rows.map((row) => formatProduct(row, { locale })));
 }
 

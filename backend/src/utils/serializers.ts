@@ -38,6 +38,7 @@ export function formatProduct(product: Product | JsonRecord, opts?: FormatOption
     badge: j.badge != null ? formatLocalizedField(j.badge, opts) : null,
     description: j.description != null ? formatLocalizedField(j.description, opts) : null,
     status: j.status ?? "active",
+    isFavorite: Boolean(j.isFavorite ?? j.is_favorite ?? false),
     createdAt: j.createdAt ?? j.created_at ?? null,
   };
 }

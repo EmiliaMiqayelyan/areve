@@ -15,6 +15,7 @@ export interface Product {
   badge?: LocalizedText | string | null;
   description?: LocalizedText | string | null;
   status?: 'active' | 'inactive';
+  isFavorite?: boolean;
 }
 
 export interface CategoryItem {

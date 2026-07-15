@@ -10,7 +10,7 @@ import { useTranslation } from '@/i18n/I18nProvider';
 
 const col: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 12 };
 const linkStyle: React.CSSProperties = { fontFamily: 'var(--font-sans)', fontSize: 14, color: '#7A7A7A', textDecoration: 'none', transition: 'color 0.2s' };
-const headStyle: React.CSSProperties = { fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 600, color: '#2B2B2B', marginBottom: 16 };
+const headStyle: React.CSSProperties = { fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 600, color: '#A8A09A', marginBottom: 16 };
 
 export default function Footer() {
   const pathname = usePathname();

@@ -2,7 +2,7 @@
 
 import { useAdminStore } from '@/lib/adminStore';
 import { modal } from '@/lib/uiStore';
-import { Plus, Search, Edit, Trash2, Filter } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Filter, Heart } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useMemo } from 'react';
@@ -152,7 +152,12 @@ export default function AdminProductsPage() {
                         )}
                       </div>
                       <div>
-                        <p className="text-[14px] font-bold text-[#2B2B2B]">{pickLocalized(product.name, 'hy')}</p>
+                        <p className="text-[14px] font-bold text-[#2B2B2B] flex items-center gap-1.5">
+                          {pickLocalized(product.name, 'hy')}
+                          {product.isFavorite ? (
+                            <Heart size={12} className="text-[#E6C97A] fill-[#E6C97A]" aria-label="Favorite" />
+                          ) : null}
+                        </p>
                         <p className="text-[11px] text-[#AFAFAF]">{pickLocalized(product.name, 'en')}</p>
                         <p className="text-[12px] text-[#AFAFAF] mt-0.5">ID: {product.id}</p>
                       </div>

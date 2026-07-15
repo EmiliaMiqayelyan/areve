@@ -46,6 +46,7 @@ export const productSchema = z.object({
   badge: optionalLocalizedTextSchema,
   description: optionalLocalizedTextSchema,
   status: z.enum(["active", "inactive"]).default("active"),
+  isFavorite: z.coerce.boolean().optional(),
 });
 
 export const productCreateSchema = productSchema.extend({

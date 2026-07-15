@@ -119,7 +119,7 @@ export default function Header() {
                 </button>
               ))}
             </div>
-            <div className="relative hidden sm:block">
+            <div className="relative">
               <button
                 ref={wishlistButtonRef}
                 type="button"
@@ -128,6 +128,7 @@ export default function Header() {
                 style={{ color: wishlistOpen ? '#E6C97A' : '#7A7A7A' }}
                 aria-expanded={wishlistOpen}
                 aria-haspopup="true"
+                aria-label="Wishlist"
               >
                 <Heart size={20} strokeWidth={1.6} fill={wishlistOpen ? '#E6C97A25' : 'none'} />
                 {mounted && wishlist.length > 0 && (

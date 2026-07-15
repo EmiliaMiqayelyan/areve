@@ -77,7 +77,7 @@ export default function Home() {
 
   useEffect(() => {
     void Promise.all([
-      localeFetch<Product[]>('/products?active=true'),
+      localeFetch<Product[]>('/products?active=true&favorite=true'),
       localeFetch<Array<{ id: string; name: string; location?: string; product?: string; comment: string; rating: number }>>('/reviews'),
       localeFetch<Array<{ id?: string; src: string; alt: string }>>('/gallery'),
     ])

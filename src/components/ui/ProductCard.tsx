@@ -127,9 +127,6 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
 
       {/* Content */}
       <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: '#AFAFAF', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 6 }}>
-          {product.category}
-        </p>
         <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 500, color: 'var(--color-heading)', marginBottom: 10, lineHeight: 1.35 }}>
           {pickLocalized(product.name, locale)}
         </h3>

@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS products (
   badge VARCHAR(40) NULL,
   description TEXT NULL,
   status ENUM('active','inactive') NOT NULL DEFAULT 'active',
+  is_favorite TINYINT(1) NOT NULL DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

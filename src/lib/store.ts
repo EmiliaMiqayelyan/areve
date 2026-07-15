@@ -10,6 +10,7 @@ export interface Product {
   cost?: number;
   badge?: string;
   description?: string;
+  isFavorite?: boolean;
 }
 
 interface CartItem extends Product {
