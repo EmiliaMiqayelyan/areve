@@ -1,10 +1,12 @@
 const ENV_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, '');
 
-/** Browser uses Next.js `/api` rewrite; server talks to backend directly. */
+/** Browser always uses same-origin `/api` (Next rewrite) to avoid CORS. */
 export function getApiBaseUrl(): string {
+  if (typeof window !== 'undefined') return '/api';
   if (ENV_API_BASE) return ENV_API_BASE;
-  if (typeof window === 'undefined') return 'http://localhost:4000/api';
-  return '/api';
+  return process.env.BACKEND_URL
+    ? `${process.env.BACKEND_URL.replace(/\/$/, '')}/api`
+    : 'http://localhost:4000/api';
 }
 
 export class ApiError extends Error {

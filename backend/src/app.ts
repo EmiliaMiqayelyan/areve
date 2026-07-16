@@ -13,7 +13,24 @@ import { UPLOAD_ROOT } from "./utils/persistUpload";
 const app = express();
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
-app.use(cors({ origin: env.corsOrigin === "*" ? "*" : env.corsOrigin.split(","), credentials: true }));
+
+/** Reflect request Origin when CORS_ORIGIN=* so credentials work in browsers. */
+const corsOrigins =
+  env.corsOrigin.trim() === "*"
+    ? true
+    : env.corsOrigin
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean);
+
+app.use(
+  cors({
+    origin: corsOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 // Admin UI may still send compact data URLs; large images are written to disk.
 app.use(express.json({ limit: "25mb" }));
 app.use(morgan("dev"));

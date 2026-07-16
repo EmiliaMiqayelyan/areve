@@ -48,6 +48,7 @@ export async function getProducts(req: Request, res: Response) {
     order: [["sortOrder", "ASC"], ["createdAt", "DESC"]],
   });
   res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+  res.setHeader("Vary", "Origin, Accept-Language");
   return res.json(rows.map((row) => formatProduct(row, { locale })));
 }
 
