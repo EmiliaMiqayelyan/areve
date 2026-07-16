@@ -9,6 +9,7 @@ const sequelize_1 = require("./config/sequelize");
 const ensureSchema_1 = require("./utils/ensureSchema");
 const ensureCategories_1 = require("./utils/ensureCategories");
 const migrateLocalizedColumns_1 = require("./utils/migrateLocalizedColumns");
+const migrateProductImages_1 = require("./utils/migrateProductImages");
 const repairCorruptedSettings_1 = require("./utils/repairCorruptedSettings");
 const syncDefaultSocialUrls_1 = require("./utils/syncDefaultSocialUrls");
 require("./models");
@@ -17,6 +18,7 @@ async function bootstrap() {
     await (0, ensureSchema_1.ensureSchemaColumns)();
     await (0, ensureCategories_1.ensureCategories)();
     await (0, migrateLocalizedColumns_1.migrateLocalizedColumns)();
+    await (0, migrateProductImages_1.migrateProductImages)();
     await (0, repairCorruptedSettings_1.repairCorruptedSettings)();
     await (0, syncDefaultSocialUrls_1.syncDefaultSocialUrls)();
     app_1.default.listen(env_1.env.port, () => {

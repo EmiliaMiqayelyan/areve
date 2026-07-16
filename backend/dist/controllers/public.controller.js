@@ -42,8 +42,16 @@ async function getPublicSettings(_req, res) {
 }
 async function getProducts(req, res) {
     const locale = (0, serializers_1.resolveRequestLocale)(req);
-    const where = req.query.active === "true" ? { status: "active" } : undefined;
-    const rows = await models_1.Product.findAll({ where, order: [["createdAt", "DESC"]] });
+    const where = {};
+    if (req.query.active === "true")
+        where.status = "active";
+    if (req.query.favorite === "true")
+        where.isFavorite = true;
+    const rows = await models_1.Product.findAll({
+        where: Object.keys(where).length ? where : undefined,
+        order: [["sortOrder", "ASC"], ["createdAt", "DESC"]],
+    });
+    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
     return res.json(rows.map((row) => (0, serializers_1.formatProduct)(row, { locale })));
 }
 async function getProductById(req, res) {

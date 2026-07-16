@@ -14,6 +14,7 @@ router.put("/admin/account/credentials", (0, validate_1.validateBody)(schemas_1.
 router.get("/admin/products", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminProducts));
 router.get("/admin/products/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminProduct));
 router.post("/admin/products", (0, validate_1.validateBody)(schemas_1.productCreateSchema), (0, asyncHandler_1.asyncHandler)(admin_controller_1.createAdminProduct));
+router.put("/admin/products/reorder", (0, asyncHandler_1.asyncHandler)(admin_controller_1.reorderAdminProducts));
 router.put("/admin/products/:id", (0, validate_1.validateBody)(schemas_1.productSchema.partial()), (0, asyncHandler_1.asyncHandler)(admin_controller_1.updateAdminProduct));
 router.delete("/admin/products/:id", (0, asyncHandler_1.asyncHandler)(admin_controller_1.deleteAdminProduct));
 router.get("/admin/reviews", (0, asyncHandler_1.asyncHandler)(admin_controller_1.getAdminReviews));

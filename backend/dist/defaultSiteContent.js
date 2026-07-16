@@ -145,17 +145,17 @@ exports.DEFAULT_SITE_CONTENT = {
             {
                 title: 'Ուլունքագործ պայուսակներ',
                 img: '/images/prod-bag-a.png',
-                href: '/products?category=bags',
+                href: '/products',
             },
             {
                 title: 'Ձեռագործ խաղալիքներ',
                 img: '/images/prod-toy-a.png',
-                href: '/products?category=toys',
+                href: '/products',
             },
             {
                 title: 'Աքսեսուարներ',
                 img: '/images/prod-acc-a.png',
-                href: '/products?category=accessories',
+                href: '/products',
             },
         ],
     },
@@ -248,7 +248,6 @@ exports.DEFAULT_SITE_CONTENT = {
             subtitle: 'Հարցեր, անհատական պատվերներ կամ համագործակցություն։ Մենք միշտ ուրախ ենք լսել ձեզ։',
             ctaLabel: 'Կապվել մեզ հետ',
         },
-        imageCaption: 'Յուրաքանչյուր ձեռագործ կտոր սկսվում է զրույցից։',
         customOrder: {
             title: 'Ցանկանու՞մ եք ինչ-որ յուրահատուկ',
             subtitle: 'Մենք ստեղծում ենք անհատական ձեռագործ կտորներ՝ հատուկ ձեզ համար։',
@@ -260,7 +259,7 @@ exports.DEFAULT_SITE_CONTENT = {
         closing: {
             quote: 'Ձեռագործ սիրով։ Ստեղծված հոգավորության համար։',
         },
-        image: '/images/prod-bag-a.png',
+        image: '/images/about-crafting.png',
         card1: {
             title: 'Ընդհանուր հարց',
             subtitle: 'Ընդհանուր հարցերի և համագործակցության համար։',

@@ -4,6 +4,7 @@ exports.getAdminProducts = getAdminProducts;
 exports.getAdminProduct = getAdminProduct;
 exports.createAdminProduct = createAdminProduct;
 exports.updateAdminProduct = updateAdminProduct;
+exports.reorderAdminProducts = reorderAdminProducts;
 exports.deleteAdminProduct = deleteAdminProduct;
 exports.getAdminReviews = getAdminReviews;
 exports.createAdminReview = createAdminReview;
@@ -56,7 +57,7 @@ async function categoryExists(categoryId) {
     return Boolean(await models_1.Category.findByPk(categoryId));
 }
 async function getAdminProducts(_req, res) {
-    const rows = await models_1.Product.findAll({ order: [["createdAt", "DESC"]] });
+    const rows = await models_1.Product.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
     return res.json(rows.map((row) => (0, serializers_1.formatProduct)(row, { bilingual: true })));
 }
 async function getAdminProduct(req, res) {
@@ -72,7 +73,21 @@ async function createAdminProduct(req, res) {
         return res.status(400).json({ message: "Category not found" });
     }
     const id = typeof clientId === "string" && clientId.trim() ? clientId.trim() : (0, crypto_1.randomUUID)();
-    const row = await models_1.Product.create({ id, ...data });
+    let image = String(data.image ?? "").trim();
+    if ((0, persistUpload_1.isDataUrlImage)(image)) {
+        image = await (0, persistUpload_1.persistDataUrlImage)(image, "products", id);
+    }
+    if (!image) {
+        return res.status(400).json({ message: "Image is required" });
+    }
+    const minSort = await models_1.Product.min("sortOrder");
+    const sortOrder = Number.isFinite(Number(minSort)) ? Number(minSort) - 1 : 0;
+    const row = await models_1.Product.create({
+        ...data,
+        id,
+        image,
+        sortOrder,
+    });
     return res.status(201).json((0, serializers_1.formatProduct)(row, { bilingual: true }));
 }
 async function updateAdminProduct(req, res) {
@@ -83,7 +98,11 @@ async function updateAdminProduct(req, res) {
     if (typeof req.body.category === "string" && !(await categoryExists(req.body.category))) {
         return res.status(400).json({ message: "Category not found" });
     }
-    const [affected] = await models_1.Product.update(req.body, { where: { id } });
+    const body = { ...req.body };
+    if (typeof body.image === "string" && (0, persistUpload_1.isDataUrlImage)(body.image)) {
+        body.image = await (0, persistUpload_1.persistDataUrlImage)(body.image, "products", id);
+    }
+    const [affected] = await models_1.Product.update(body, { where: { id } });
     if (!affected)
         return res.status(404).json({ message: "Product not found" });
     const row = await models_1.Product.findByPk(id);
@@ -91,6 +110,21 @@ async function updateAdminProduct(req, res) {
         message: "Product updated",
         product: row ? (0, serializers_1.formatProduct)(row, { bilingual: true }) : null,
     });
+}
+async function reorderAdminProducts(req, res) {
+    const ids = req.body.ids;
+    if (!Array.isArray(ids) || ids.length === 0 || !ids.every((id) => typeof id === "string" && id.trim())) {
+        return res.status(400).json({ message: "ids must be a non-empty string array" });
+    }
+    const uniqueIds = [...new Set(ids.map((id) => String(id).trim()))];
+    const existing = await models_1.Product.findAll({ attributes: ["id"] });
+    const existingIds = new Set(existing.map((row) => String(row.get("id"))));
+    if (uniqueIds.length !== existingIds.size || uniqueIds.some((id) => !existingIds.has(id))) {
+        return res.status(400).json({ message: "ids must include every product exactly once" });
+    }
+    await Promise.all(uniqueIds.map((productId, index) => models_1.Product.update({ sortOrder: index }, { where: { id: productId } })));
+    const rows = await models_1.Product.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
+    return res.json(rows.map((row) => (0, serializers_1.formatProduct)(row, { bilingual: true })));
 }
 async function deleteAdminProduct(req, res) {
     const id = (0, resourceId_1.normalizeResourceId)(String(req.params.id));
@@ -317,8 +351,9 @@ async function getAdminSettings(_req, res) {
 }
 async function updateAdminSettings(req, res) {
     const body = { ...req.body };
+    // Storefront copy is code-owned; never persist admin JSON overrides.
     if (body.siteContent !== undefined) {
-        body.siteContent = (0, mergeSiteContent_1.mergeSiteContent)(body.siteContent);
+        body.siteContent = (0, mergeSiteContent_1.mergeSiteContent)();
     }
     if (body.tiktokUrl === "")
         body.tiktokUrl = "";

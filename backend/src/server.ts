@@ -5,6 +5,7 @@ import { ensureSchemaColumns } from "./utils/ensureSchema";
 import { ensureCategories } from "./utils/ensureCategories";
 import { migrateLocalizedColumns } from "./utils/migrateLocalizedColumns";
 import { migrateProductImages } from "./utils/migrateProductImages";
+import { repairCorruptedSettings } from "./utils/repairCorruptedSettings";
 import { syncDefaultSocialUrls } from "./utils/syncDefaultSocialUrls";
 import "./models";
 

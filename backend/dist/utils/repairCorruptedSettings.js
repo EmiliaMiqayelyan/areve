@@ -2,8 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.repairCorruptedSettings = repairCorruptedSettings;
 const models_1 = require("../models");
-const mergeSiteContent_1 = require("./mergeSiteContent");
-const repairLegacyHeroContent_1 = require("./repairLegacyHeroContent");
+const defaultSiteContent_1 = require("../defaultSiteContent");
 const MOJIBAKE_RE = /[ÕÔÃ][±°´€³]|Ã©|â€|AREVÃ/;
 const ARMENIAN_TAGLINE = "Արև՝ քո առօրյայում";
 const ARMENIAN_FOOTER = "Յուրաքանչյուրը փոքրիկ արև է";
@@ -26,6 +25,17 @@ function isLegacyArmenianFooter(footer) {
     return (trimmed.startsWith("Ստեղծված ձեռքերով") ||
         trimmed.startsWith("Յուրաքանչյուր կտոր փոքրիկ արև է"));
 }
+function siteContentLooksStale(siteContent) {
+    if (siteContent == null)
+        return false;
+    const text = JSON.stringify(siteContent);
+    return (text.includes("Պատրաստ եք գտնել ձեր կտորը") ||
+        text.includes("Պատմություն, պատմված բիզերով") ||
+        text.includes("Ոճ, որը ստեղծվում է") ||
+        text.includes("/reviews") ||
+        text.includes("Կարծիքներ") ||
+        text.includes("ՏԵՍԱԿԱՆԻ"));
+}
 /** Reset settings text that was saved with broken UTF-8 or legacy defaults. */
 async function repairCorruptedSettings() {
     const row = await models_1.Setting.findByPk(1);
@@ -43,23 +53,14 @@ async function repairCorruptedSettings() {
     if (corrupted) {
         patch.tagline = ARMENIAN_TAGLINE;
         patch.footerDescription = ARMENIAN_FOOTER;
-        patch.siteContent = null;
+        patch.siteContent = structuredClone(defaultSiteContent_1.DEFAULT_SITE_CONTENT);
     }
     else if (isLegacyArmenianFooter(footer)) {
         patch.footerDescription = ARMENIAN_FOOTER;
     }
-    if (!corrupted && siteContent != null) {
-        const repaired = (0, repairLegacyHeroContent_1.repairLegacyHeroContent)(siteContent);
-        // Always persist canonical nav + about.beginning so production stops serving stale JSON.
-        const merged = (0, mergeSiteContent_1.mergeSiteContent)(repaired);
-        const previous = JSON.stringify(siteContent);
-        const next = JSON.stringify(merged);
-        if (previous !== next) {
-            patch.siteContent = merged;
-        }
-    }
-    else if (!corrupted && siteContent == null) {
-        // Ensure null DB content doesn't reopen legacy admin JSON later with stale partials.
+    // Replace stale storefront JSON so DB matches code (API also ignores DB copy).
+    if (siteContentLooksStale(siteContent)) {
+        patch.siteContent = structuredClone(defaultSiteContent_1.DEFAULT_SITE_CONTENT);
     }
     if (Object.keys(patch).length === 0)
         return;

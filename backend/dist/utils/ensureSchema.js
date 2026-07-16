@@ -11,6 +11,8 @@ const STATEMENTS = [
     `ALTER TABLE settings ADD COLUMN youtube_url VARCHAR(255) NOT NULL DEFAULT ''`,
     `ALTER TABLE settings ADD COLUMN site_content JSON NULL`,
     `ALTER TABLE products ADD COLUMN cost DECIMAL(10,2) NOT NULL DEFAULT 0`,
+    `ALTER TABLE products ADD COLUMN is_favorite TINYINT(1) NOT NULL DEFAULT 0`,
+    `ALTER TABLE products ADD COLUMN sort_order INT NOT NULL DEFAULT 0`,
     `ALTER TABLE order_items ADD COLUMN unit_cost DECIMAL(10,2) NOT NULL DEFAULT 0`,
 ];
 /** Idempotent schema adjustments for dev DBs created before newer columns. */
@@ -44,5 +46,24 @@ async function ensureSchemaColumns() {
     catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         console.warn(`ensureSchemaColumns: gallery sort backfill skipped (${message})`);
+    }
+    // Backfill product sort_order from created_at when all values are still 0.
+    try {
+        const [rows] = await sequelize_1.sequelize.query(`SELECT COUNT(*) AS total,
+              SUM(CASE WHEN sort_order = 0 THEN 1 ELSE 0 END) AS zeros
+       FROM products`);
+        const stats = rows[0];
+        const total = Number(stats?.total ?? 0);
+        const zeros = Number(stats?.zeros ?? 0);
+        if (total > 1 && zeros === total) {
+            await sequelize_1.sequelize.query(`SET @product_rn := -1`);
+            await sequelize_1.sequelize.query(`UPDATE products
+         SET sort_order = (@product_rn := @product_rn + 1)
+         ORDER BY created_at DESC`);
+        }
+    }
+    catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn(`ensureSchemaColumns: product sort backfill skipped (${message})`);
     }
 }

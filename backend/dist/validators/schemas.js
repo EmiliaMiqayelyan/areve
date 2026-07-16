@@ -46,6 +46,7 @@ exports.productSchema = zod_1.z.object({
     badge: optionalLocalizedTextSchema,
     description: optionalLocalizedTextSchema,
     status: zod_1.z.enum(["active", "inactive"]).default("active"),
+    isFavorite: zod_1.z.coerce.boolean().optional(),
 });
 exports.productCreateSchema = exports.productSchema.extend({
     id: zod_1.z.string().min(1).max(64).optional(),

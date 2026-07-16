@@ -18,4 +18,6 @@ Product.init({
     badge: { type: sequelize_1.DataTypes.JSON, allowNull: true },
     description: { type: sequelize_1.DataTypes.JSON, allowNull: true },
     status: { type: sequelize_1.DataTypes.ENUM("active", "inactive"), allowNull: false, defaultValue: "active" },
+    isFavorite: { type: sequelize_1.DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    sortOrder: { type: sequelize_1.DataTypes.INTEGER, allowNull: false, defaultValue: 0, field: "sort_order" },
 }, { sequelize: sequelize_2.sequelize, tableName: "products", underscored: true, timestamps: true, updatedAt: false });
