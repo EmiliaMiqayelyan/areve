@@ -16,6 +16,7 @@ export interface Product {
   description?: LocalizedText | string | null;
   status?: 'active' | 'inactive';
   isFavorite?: boolean;
+  sortOrder?: number;
 }
 
 export interface CategoryItem {
@@ -83,6 +84,7 @@ interface AdminStore {
   addProduct: (product: Product) => Promise<void>;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<void> | void;
   deleteProduct: (id: string) => Promise<void>;
+  reorderProducts: (orderedIds: string[]) => Promise<void>;
 
   orders: Order[];
   createOrder: (order: any) => Promise<void>;
@@ -287,6 +289,31 @@ export const useAdminStore = create<AdminStore>()(
               get().token || undefined
             );
           } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message)) get().logout();
+            throw err;
+          }
+        }
+      },
+      reorderProducts: async (orderedIds) => {
+        const previous = get().products;
+        const byId = new Map(get().products.map((item) => [item.id, item]));
+        const next: Product[] = [];
+        for (let index = 0; index < orderedIds.length; index++) {
+          const item = byId.get(orderedIds[index]);
+          if (item) next.push({ ...item, sortOrder: index });
+        }
+        set({ products: next });
+        if (get().token) {
+          try {
+            const rows = await apiFetch<Product[]>(
+              '/admin/products/reorder',
+              { method: 'PUT', body: JSON.stringify({ ids: orderedIds }) },
+              get().token || undefined
+            );
+            set({ products: rows });
+          } catch (err) {
+            set({ products: previous });
             const message = err instanceof Error ? err.message : String(err);
             if (isAuthErrorMessage(message)) get().logout();
             throw err;

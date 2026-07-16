@@ -23,7 +23,7 @@ function resolveProductImageSrc(image?: string): string {
   if (src.startsWith('data:image/')) {
     return src;
   }
-  if (src.startsWith('/uploads/')) return FALLBACK_PRODUCT_IMAGE;
+  if (src.startsWith('/uploads/')) return src;
   if (/^https?:\/\//i.test(src)) return src;
   if (src.startsWith('/')) return src;
   return `/${src.replace(/^\/+/, '')}`;
@@ -41,18 +41,44 @@ export default function ProductDetailPage() {
   const { toggleWishlist, isWishlisted } = useWishlistStore();
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setImgFailed(false);
-    void localeFetch<any[]>('/products?active=true')
-      .then((items) => {
-        setRelatedPool(items);
-        setProduct(findByResourceId(items, id) || null);
+    setRelatedPool([]);
+
+    void localeFetch<any>(`/products/${encodeURIComponent(String(id))}`)
+      .then((item) => {
+        if (!cancelled) {
+          setProduct(item);
+          setLoading(false);
+        }
       })
       .catch(() => {
-        setRelatedPool([]);
-        setProduct(null);
+        return localeFetch<any[]>('/products?active=true').then((items) => {
+          if (cancelled) return;
+          setRelatedPool(items);
+          setProduct(findByResourceId(items, id) || null);
+          setLoading(false);
+        });
       })
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled) {
+          setProduct(null);
+          setLoading(false);
+        }
+      });
+
+    void localeFetch<any[]>('/products?active=true')
+      .then((items) => {
+        if (!cancelled) setRelatedPool(Array.isArray(items) ? items : []);
+      })
+      .catch(() => {
+        if (!cancelled) setRelatedPool([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [id, locale, localeFetch]);
 
   if (loading) {

@@ -45,8 +45,9 @@ export async function getProducts(req: Request, res: Response) {
   if (req.query.favorite === "true") where.isFavorite = true;
   const rows = await Product.findAll({
     where: Object.keys(where).length ? where : undefined,
-    order: [["createdAt", "DESC"]],
+    order: [["sortOrder", "ASC"], ["createdAt", "DESC"]],
   });
+  res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
   return res.json(rows.map((row) => formatProduct(row, { locale })));
 }
 

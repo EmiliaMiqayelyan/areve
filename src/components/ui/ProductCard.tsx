@@ -17,12 +17,9 @@ function resolveProductImageSrc(image?: string): string {
   const src = String(image ?? '').trim();
   if (!src) return FALLBACK_PRODUCT_IMAGE;
 
-  // Uploaded images are stored as data URLs from the admin UI.
+  // Uploaded images are stored as data URLs or /uploads/products/... paths.
   if (src.startsWith('data:image/')) return src;
-
-  // We currently don't serve filesystem uploads from `/uploads/*`,
-  // so treat these URLs as broken and fall back to a placeholder.
-  if (src.startsWith('/uploads/')) return FALLBACK_PRODUCT_IMAGE;
+  if (src.startsWith('/uploads/')) return src;
 
   if (/^https?:\/\//i.test(src)) return src;
   if (src.startsWith('/')) return src;

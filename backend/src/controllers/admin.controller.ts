@@ -38,7 +38,7 @@ async function categoryExists(categoryId: string) {
 }
 
 export async function getAdminProducts(_req: Request, res: Response) {
-  const rows = await Product.findAll({ order: [["createdAt", "DESC"]] });
+  const rows = await Product.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
   return res.json(rows.map((row) => formatProduct(row, { bilingual: true })));
 }
 
@@ -55,7 +55,24 @@ export async function createAdminProduct(req: Request, res: Response) {
     return res.status(400).json({ message: "Category not found" });
   }
   const id = typeof clientId === "string" && clientId.trim() ? clientId.trim() : randomUUID();
-  const row = await Product.create({ id, ...data });
+
+  let image = String(data.image ?? "").trim();
+  if (isDataUrlImage(image)) {
+    image = await persistDataUrlImage(image, "products", id);
+  }
+  if (!image) {
+    return res.status(400).json({ message: "Image is required" });
+  }
+
+  const minSort = await Product.min("sortOrder");
+  const sortOrder = Number.isFinite(Number(minSort)) ? Number(minSort) - 1 : 0;
+
+  const row = await Product.create({
+    ...data,
+    id,
+    image,
+    sortOrder,
+  });
   return res.status(201).json(formatProduct(row, { bilingual: true }));
 }
 
@@ -67,13 +84,41 @@ export async function updateAdminProduct(req: Request, res: Response) {
   if (typeof req.body.category === "string" && !(await categoryExists(req.body.category))) {
     return res.status(400).json({ message: "Category not found" });
   }
-  const [affected] = await Product.update(req.body, { where: { id } });
+
+  const body = { ...req.body } as Record<string, unknown>;
+  if (typeof body.image === "string" && isDataUrlImage(body.image)) {
+    body.image = await persistDataUrlImage(body.image, "products", id);
+  }
+
+  const [affected] = await Product.update(body, { where: { id } });
   if (!affected) return res.status(404).json({ message: "Product not found" });
   const row = await Product.findByPk(id);
   return res.json({
     message: "Product updated",
     product: row ? formatProduct(row, { bilingual: true }) : null,
   });
+}
+
+export async function reorderAdminProducts(req: Request, res: Response) {
+  const ids = (req.body as { ids?: unknown }).ids;
+  if (!Array.isArray(ids) || ids.length === 0 || !ids.every((id) => typeof id === "string" && id.trim())) {
+    return res.status(400).json({ message: "ids must be a non-empty string array" });
+  }
+
+  const uniqueIds = [...new Set(ids.map((id) => String(id).trim()))];
+  const existing = await Product.findAll({ attributes: ["id"] });
+  const existingIds = new Set(existing.map((row) => String(row.get("id"))));
+
+  if (uniqueIds.length !== existingIds.size || uniqueIds.some((id) => !existingIds.has(id))) {
+    return res.status(400).json({ message: "ids must include every product exactly once" });
+  }
+
+  await Promise.all(
+    uniqueIds.map((productId, index) => Product.update({ sortOrder: index }, { where: { id: productId } }))
+  );
+
+  const rows = await Product.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
+  return res.json(rows.map((row) => formatProduct(row, { bilingual: true })));
 }
 
 export async function deleteAdminProduct(req: Request, res: Response) {

@@ -14,6 +14,26 @@ import { createProductId } from '@/lib/resourceId';
 import { CURRENCY_SYMBOL } from '@/lib/currency';
 
 async function fileToDataUrl(file: File): Promise<string> {
+  if (file.size > 1.5 * 1024 * 1024 && file.type.startsWith('image/')) {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const maxSide = 1800;
+      const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas unavailable');
+      ctx.drawImage(bitmap, 0, 0, width, height);
+      bitmap.close();
+      return canvas.toDataURL('image/jpeg', 0.82);
+    } catch {
+      // fall through
+    }
+  }
+
   return await new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error('Failed to read file'));
@@ -50,10 +70,6 @@ export default function AddProductPage() {
       setSaving(true);
       setError('');
       const nextImage = imagePreview || '/images/prod-bag-a.png';
-      if (typeof imagePreview === 'string' && imagePreview.startsWith('/uploads/')) {
-        setError('Your selected image saved as `/uploads/*`, but those files are missing. Please choose/upload the image again.');
-        return;
-      }
       await addProduct({
         id: createProductId(name),
         name: { hy: name.hy.trim(), en: name.en.trim() },
