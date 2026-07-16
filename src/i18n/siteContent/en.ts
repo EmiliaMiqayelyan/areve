@@ -144,17 +144,17 @@ export const SITE_CONTENT_EN = {
       {
         title: "Beaded Bags",
         img: "/images/prod-bag-a.png",
-        href: "/products?category=bags",
+        href: "/products",
       },
       {
         title: "Handmade Toys",
         img: "/images/prod-toy-a.png",
-        href: "/products?category=toys",
+        href: "/products",
       },
       {
         title: "Accessories",
         img: "/images/prod-acc-a.png",
-        href: "/products?category=accessories",
+        href: "/products",
       },
     ],
   },

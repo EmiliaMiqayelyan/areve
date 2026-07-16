@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS products (
   description TEXT NULL,
   status ENUM('active','inactive') NOT NULL DEFAULT 'active',
   is_favorite TINYINT(1) NOT NULL DEFAULT 0,
+  sort_order INT NOT NULL DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

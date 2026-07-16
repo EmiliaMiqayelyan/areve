@@ -144,17 +144,17 @@ export const DEFAULT_SITE_CONTENT = {
       {
         title: 'Ուլունքագործ պայուսակներ',
         img: '/images/prod-bag-a.png',
-        href: '/products?category=bags',
+        href: '/products',
       },
       {
         title: 'Ձեռագործ խաղալիքներ',
         img: '/images/prod-toy-a.png',
-        href: '/products?category=toys',
+        href: '/products',
       },
       {
         title: 'Աքսեսուարներ',
         img: '/images/prod-acc-a.png',
-        href: '/products?category=accessories',
+        href: '/products',
       },
     ],
   },

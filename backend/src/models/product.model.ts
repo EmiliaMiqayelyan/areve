@@ -17,6 +17,7 @@ Product.init(
     description: { type: DataTypes.JSON, allowNull: true },
     status: { type: DataTypes.ENUM("active", "inactive"), allowNull: false, defaultValue: "active" },
     isFavorite: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+    sortOrder: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0, field: "sort_order" },
   },
   { sequelize, tableName: "products", underscored: true, timestamps: true, updatedAt: false }
 );

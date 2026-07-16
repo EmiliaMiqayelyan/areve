@@ -4,7 +4,7 @@ import { sequelize } from "./config/sequelize";
 import { ensureSchemaColumns } from "./utils/ensureSchema";
 import { ensureCategories } from "./utils/ensureCategories";
 import { migrateLocalizedColumns } from "./utils/migrateLocalizedColumns";
-import { repairCorruptedSettings } from "./utils/repairCorruptedSettings";
+import { migrateProductImages } from "./utils/migrateProductImages";
 import { syncDefaultSocialUrls } from "./utils/syncDefaultSocialUrls";
 import "./models";
 
@@ -13,6 +13,7 @@ async function bootstrap() {
   await ensureSchemaColumns();
   await ensureCategories();
   await migrateLocalizedColumns();
+  await migrateProductImages();
   await repairCorruptedSettings();
   await syncDefaultSocialUrls();
   app.listen(env.port, () => {
