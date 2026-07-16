@@ -55,13 +55,11 @@ export default function CartDrawer() {
         itemCount,
         origin,
         {
-          intro: t('cart.orderIntro'),
+          introSingular: t('cart.orderIntroSingular'),
+          introPlural: t('cart.orderIntroPlural'),
           link: t('cart.orderLink'),
-          quantity: t('cart.orderQuantity'),
-          unitPrice: t('cart.orderUnitPrice'),
-          lineTotal: t('cart.orderLineTotal'),
+          price: t('cart.orderPrice'),
           orderTotal: t('cart.orderTotal'),
-          itemCount: t('cart.orderItemCount'),
           thanks: t('cart.orderThanks'),
         }
       );

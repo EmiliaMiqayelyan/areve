@@ -8,40 +8,39 @@ export type OrderLineItem = {
 };
 
 export type OrderMessageLabels = {
-  intro: string;
+  introSingular: string;
+  introPlural: string;
   link: string;
-  quantity: string;
-  unitPrice: string;
-  lineTotal: string;
+  price: string;
   orderTotal: string;
-  itemCount: string;
   thanks: string;
 };
 
 export function buildOrderMessage(
   items: OrderLineItem[],
   orderTotal: number,
-  totalItemCount: number,
+  _totalItemCount: number,
   siteOrigin: string,
   labels: OrderMessageLabels
 ): string {
-  const lines: string[] = [labels.intro, ''];
+  const isSingle = items.length === 1;
+  const lines: string[] = [isSingle ? labels.introSingular : labels.introPlural, ''];
 
   items.forEach((item, index) => {
-    const subtotal = item.price * item.quantity;
     const productUrl = `${siteOrigin}/products/${item.id}`;
+    const linePrice = item.price * item.quantity;
 
     lines.push(`${index + 1}. ${item.name}`);
     lines.push(`   ${labels.link}: ${productUrl}`);
-    lines.push(`   ${labels.quantity}: ${item.quantity}`);
-    lines.push(`   ${labels.unitPrice}: ${formatPrice(item.price)}`);
-    lines.push(`   ${labels.lineTotal}: ${formatPrice(subtotal)}`);
+    lines.push(`   ${labels.price}: ${formatPrice(linePrice)}`);
     lines.push('');
   });
 
-  lines.push(`${labels.orderTotal}: ${formatPrice(orderTotal)}`);
-  lines.push(labels.itemCount.replace('{count}', String(totalItemCount)));
-  lines.push('');
+  if (!isSingle) {
+    lines.push(`${labels.orderTotal} ${formatPrice(orderTotal)}`);
+    lines.push('');
+  }
+
   lines.push(labels.thanks);
 
   return lines.join('\n');

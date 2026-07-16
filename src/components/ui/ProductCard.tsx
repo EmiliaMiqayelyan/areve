@@ -52,6 +52,9 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
   const wishlisted = mounted && isWishlisted(product.id);
   const badge = product.badge ? (badgeColors[product.badge] ?? badgeColors.Handmade) : null;
 
+  const productHref = publicProductPath(product.id);
+  const productName = pickLocalized(product.name, locale);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 32 }}
@@ -63,26 +66,28 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
     >
       {/* Image */}
       <div style={{ position: 'relative', height: 260, overflow: 'hidden', flexShrink: 0 }}>
-        {String(product.image ?? '').startsWith('data:image/') ? (
-          <img
-            src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-            alt={pickLocalized(product.name, locale)}
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s' }}
-            className="group-hover:scale-105"
-            loading="lazy"
-            onError={() => setImgFailed(true)}
-          />
-        ) : (
-          <Image
-            src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-            alt={pickLocalized(product.name, locale)}
-            fill
-            style={{ objectFit: 'cover', transition: 'transform 0.6s' }}
-            className="group-hover:scale-105"
-            loading="lazy"
-            onError={() => setImgFailed(true)}
-          />
-        )}
+        <Link href={productHref} className="absolute inset-0 z-[1] block no-underline" aria-label={productName}>
+          {String(product.image ?? '').startsWith('data:image/') ? (
+            <img
+              src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
+              alt={productName}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s' }}
+              className="group-hover:scale-105"
+              loading="lazy"
+              onError={() => setImgFailed(true)}
+            />
+          ) : (
+            <Image
+              src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
+              alt={productName}
+              fill
+              style={{ objectFit: 'cover', transition: 'transform 0.6s' }}
+              className="group-hover:scale-105"
+              loading="lazy"
+              onError={() => setImgFailed(true)}
+            />
+          )}
+        </Link>
         {/* Soft overlay on hover */}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(248,245,242,0)', transition: 'background 0.3s' }} className="hover-overlay" />
 
@@ -95,8 +100,12 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
 
         {/* Wishlist */}
         <button
-          onClick={() => toggleWishlist(product)}
-          style={{ position: 'absolute', top: 12, right: 12, width: 34, height: 34, borderRadius: '50%', background: 'rgba(248,245,242,0.9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', backdropFilter: 'blur(4px)' }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleWishlist(product);
+          }}
+          style={{ position: 'absolute', top: 12, right: 12, zIndex: 2, width: 34, height: 34, borderRadius: '50%', background: 'rgba(248,245,242,0.9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', backdropFilter: 'blur(4px)' }}
         >
           <Heart 
             size={15} 
@@ -110,11 +119,15 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
         <motion.div
           initial={{ y: 12, opacity: 0 }}
           whileHover={{ y: 0, opacity: 1 }}
-          style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 12px 12px' }}
+          style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 12px 12px', zIndex: 2 }}
           className="quick-add"
         >
           <button
-            onClick={() => addItem({ ...product, name: pickLocalized(product.name, locale) })}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              addItem({ ...product, name: productName });
+            }}
             style={{ width: '100%', padding: '10px', background: '#E6C97A', border: 'none', borderRadius: 99, fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, letterSpacing: '1.2px', textTransform: 'uppercase', color: '#5a4a1e', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#F4D58D')}
             onMouseLeave={e => (e.currentTarget.style.background = '#E6C97A')}
@@ -127,13 +140,15 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
 
       {/* Content */}
       <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 500, color: 'var(--color-heading)', marginBottom: 10, lineHeight: 1.35 }}>
-          {pickLocalized(product.name, locale)}
-        </h3>
+        <Link href={productHref} className="no-underline" style={{ marginBottom: 10 }}>
+          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 500, color: 'var(--color-heading)', lineHeight: 1.35 }}>
+            {productName}
+          </h3>
+        </Link>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
           <span style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 500, color: 'var(--color-ink)' }}>{formatPrice(product.price)}</span>
           <Link
-            href={publicProductPath(product.id)}
+            href={productHref}
             style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: '#BFA6A0', textDecoration: 'none', borderBottom: '1px solid #BFA6A0', paddingBottom: 1, transition: 'color 0.2s, border-color 0.2s' }}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#E6C97A'; (e.currentTarget as HTMLElement).style.borderColor = '#E6C97A'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#BFA6A0'; (e.currentTarget as HTMLElement).style.borderColor = '#BFA6A0'; }}

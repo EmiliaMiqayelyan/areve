@@ -256,7 +256,7 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.06 }}
               >
-                <Link href={cat.href} className="group block no-underline">
+                <Link href={cat.href} className="group block no-underline" scroll>
                   <div className="relative mb-2 aspect-[3/4] overflow-hidden rounded-lg bg-ivory sm:mb-2.5">
                     <Image
                       src={cat.img}
