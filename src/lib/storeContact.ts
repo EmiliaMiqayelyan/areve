@@ -1,5 +1,5 @@
 /** WhatsApp number in international format (digits only), e.g. 37499123456 */
-export const STORE_WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_STORE_WHATSAPP_NUMBER ?? '37441832122';
+export const STORE_WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_STORE_WHATSAPP_NUMBER ?? '37441802122';
 
 /** Telegram username without @, used for optional direct links */
 export const STORE_TELEGRAM_USERNAME = process.env.NEXT_PUBLIC_STORE_TELEGRAM_USERNAME ?? '';
@@ -29,10 +29,11 @@ export function resolveStoreTelegramUsername(options?: { telegramUrl?: string })
   if (!raw) return '';
 
   const withoutAt = raw.replace(/^@/, '');
-  const fromTme = withoutAt.match(/(?:t\.me|telegram\.me)\/([A-Za-z0-9_]+)/i)?.[1];
+  const fromTme = withoutAt.match(/(?:t\.me|telegram\.me)\/(\+?[A-Za-z0-9_]+)/i)?.[1];
   if (fromTme) return fromTme;
 
   if (/^[A-Za-z0-9_]{5,32}$/.test(withoutAt)) return withoutAt;
+  if (/^\+\d{8,15}$/.test(withoutAt)) return withoutAt;
   return '';
 }
 
