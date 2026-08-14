@@ -4,10 +4,9 @@ const backendUrl = process.env.BACKEND_URL || "http://localhost:4000";
 
 const nextConfig: NextConfig = {
   images: {
-    formats: ["image/avif", "image/webp"],
-    deviceSizes: [640, 750, 828, 1080, 1200],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60 * 60 * 24 * 7,
+    // Product photos live on the Express /uploads rewrite. Next's optimizer
+    // cannot read those files from disk, so /_next/image returns 404.
+    unoptimized: true,
   },
   webpack: (config, { dev }) => {
     // Avoid corrupted PackFileCacheStrategy errors on Windows/slow disks.
