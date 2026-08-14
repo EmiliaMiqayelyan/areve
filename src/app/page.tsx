@@ -6,13 +6,11 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
-import ReviewCard from '@/components/ui/ReviewCard';
 import SectionHeader from '@/components/ui/SectionHeader';
-import type { Product } from '@/lib/store';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
-import { useLocaleApiFetch } from '@/lib/useLocaleApi';
 import { pickLocalized } from '@/lib/localizedText';
+import { useGalleryQuery, useProductsQuery } from '@/lib/useProductsQuery';
 
 const S = {
   page: { minHeight: '100vh' },
@@ -63,36 +61,20 @@ function HeroDecoSun({ className }: { className: string }) {
 
 export default function Home() {
   const { t, locale } = useTranslation();
-  const localeFetch = useLocaleApiFetch();
   const { settings } = useSiteSettings();
   const { siteContent: sc, instagramUrl } = settings;
   const home = sc.home;
 
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [reviewList, setReviewList] = useState<Array<{ id: string; name: string; location?: string; product?: string; comment: string; rating: number }>>([]);
-  const [galleryPreview, setGalleryPreview] = useState<Array<{ id?: string; src: string; alt: string }>>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: featuredProducts = [], isLoading: productsLoading } = useProductsQuery({
+    active: true,
+    favorite: true,
+    limit: 6,
+  });
+
+  const { data: galleryPreview = [], isLoading: galleryLoading } = useGalleryQuery(6);
+
   const [heroReady, setHeroReady] = useState(false);
   useEffect(() => { setHeroReady(true); }, []);
-
-  useEffect(() => {
-    void Promise.all([
-      localeFetch<Product[]>('/products?active=true&favorite=true'),
-      localeFetch<Array<{ id: string; name: string; location?: string; product?: string; comment: string; rating: number }>>('/reviews'),
-      localeFetch<Array<{ id?: string; src: string; alt: string }>>('/gallery'),
-    ])
-      .then(([p, r, g]) => {
-        setFeaturedProducts(p);
-        setReviewList(r);
-        setGalleryPreview(Array.isArray(g) ? g.slice(0, 6) : []);
-      })
-      .catch(() => {
-        setFeaturedProducts([]);
-        setReviewList([]);
-        setGalleryPreview([]);
-      })
-      .finally(() => setLoading(false));
-  }, [locale, localeFetch]);
 
   const hero = home.hero;
   const heroEyebrow =
@@ -286,15 +268,15 @@ export default function Home() {
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-5 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {loading && (
+            {productsLoading && (
               <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
                 {t('common.loadingProducts')}
               </div>
             )}
-            {!loading && featuredProducts.slice(0, 6).map((p, i) => (
+            {!productsLoading && featuredProducts.slice(0, 6).map((p, i) => (
               <ProductCard key={String(p.id)} product={p} index={i} />
             ))}
-            {!loading && featuredProducts.length === 0 && (
+            {!productsLoading && featuredProducts.length === 0 && (
               <div className="col-span-full py-10 text-center font-sans text-[#AFAFAF]">
                 {t('common.noProducts')}
               </div>
@@ -363,7 +345,7 @@ export default function Home() {
         <div style={{ ...S.wrap, padding: '0 var(--container-px)' }}>
           <SectionHeader eyebrow={home.instagramSection.eyebrow} title={home.instagramSection.title} subtitle={home.instagramSection.subtitle} centered />
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {!loading && galleryPreview.length === 0 && (
+            {!galleryLoading && galleryPreview.length === 0 && (
               <p className="col-span-full py-8 text-center font-sans text-[13px] text-[#AFAFAF]">
                 {t('common.noGalleryAdmin')}
               </p>

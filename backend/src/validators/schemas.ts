@@ -6,6 +6,7 @@ const optionalUrlOrEmpty = z.union([z.string().url(), z.literal("")]).optional()
 const telegramContactOrEmpty = z.union([
   z.string().url(),
   z.string().regex(/^@?[A-Za-z0-9_]{5,32}$/),
+  z.string().regex(/^\+?\d{8,15}$/),
   z.literal(""),
 ]).optional();
 

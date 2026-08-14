@@ -8,7 +8,17 @@ type FormatOptions = {
   locale?: Locale;
   /** Admin API: return { hy, en } objects instead of resolved strings. */
   bilingual?: boolean;
+  /** Public catalog cards: skip cost and long description. */
+  list?: boolean;
 };
+
+function publicImageSrc(image: unknown): string {
+  const src = String(image ?? "").trim();
+  if (!src || src.startsWith("data:") || src.startsWith("blob:")) {
+    return "/images/prod-bag-a.png";
+  }
+  return src;
+}
 
 function asRecord(value: unknown): JsonRecord {
   if (value && typeof value === "object" && !Array.isArray(value)) {
@@ -28,20 +38,28 @@ export function formatProduct(product: Product | JsonRecord, opts?: FormatOption
       ? ((product as Product).toJSON() as JsonRecord)
       : asRecord(product);
 
-  return {
+  const payload: Record<string, unknown> = {
     id: j.id,
     name: formatLocalizedField(j.name, opts),
     price: Number(j.price ?? 0),
-    cost: Number(j.cost ?? 0),
-    image: j.image,
+    image: opts?.bilingual ? j.image : publicImageSrc(j.image),
     category: j.category,
     badge: j.badge != null ? formatLocalizedField(j.badge, opts) : null,
-    description: j.description != null ? formatLocalizedField(j.description, opts) : null,
     status: j.status ?? "active",
     isFavorite: Boolean(j.isFavorite ?? j.is_favorite ?? false),
     sortOrder: Number(j.sortOrder ?? j.sort_order ?? 0),
     createdAt: j.createdAt ?? j.created_at ?? null,
   };
+
+  if (opts?.bilingual) {
+    payload.cost = Number(j.cost ?? 0);
+  }
+
+  if (!opts?.list) {
+    payload.description = j.description != null ? formatLocalizedField(j.description, opts) : null;
+  }
+
+  return payload;
 }
 
 export function formatReview(review: Review | JsonRecord, opts?: FormatOptions) {

@@ -17,8 +17,8 @@ function resolveProductImageSrc(image?: string): string {
   const src = String(image ?? '').trim();
   if (!src) return FALLBACK_PRODUCT_IMAGE;
 
-  // Uploaded images are stored as data URLs or /uploads/products/... paths.
-  if (src.startsWith('data:image/')) return src;
+  // Uploaded images are stored as /uploads/products/... paths.
+  if (src.startsWith('data:image/') || src.startsWith('blob:')) return FALLBACK_PRODUCT_IMAGE;
   if (src.startsWith('/uploads/')) return src;
 
   if (/^https?:\/\//i.test(src)) return src;
@@ -57,33 +57,23 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
       initial={{ opacity: 0, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
+      transition={{ duration: 0.4, delay: Math.min(index * 0.04, 0.16) }}
       className="card"
       style={{ display: 'flex', flexDirection: 'column' }}
     >
       {/* Image */}
       <div style={{ position: 'relative', height: 260, overflow: 'hidden', flexShrink: 0 }}>
         <Link href={productHref} className="absolute inset-0 z-[1] block no-underline" aria-label={productName}>
-          {String(product.image ?? '').startsWith('data:image/') ? (
-            <img
-              src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-              alt={productName}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s' }}
-              className="group-hover:scale-105"
-              loading="lazy"
-              onError={() => setImgFailed(true)}
-            />
-          ) : (
-            <Image
-              src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-              alt={productName}
-              fill
-              style={{ objectFit: 'cover', transition: 'transform 0.6s' }}
-              className="group-hover:scale-105"
-              loading="lazy"
-              onError={() => setImgFailed(true)}
-            />
-          )}
+          <Image
+            src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
+            alt={productName}
+            fill
+            style={{ objectFit: 'cover', transition: 'transform 0.6s' }}
+            className="group-hover:scale-105"
+            loading="lazy"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            onError={() => setImgFailed(true)}
+          />
         </Link>
         {/* Soft overlay on hover */}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(248,245,242,0)', transition: 'background 0.3s' }} className="hover-overlay" />

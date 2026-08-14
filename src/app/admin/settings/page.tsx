@@ -4,6 +4,7 @@ import { Info, Link as LinkIcon, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import { SOCIAL_URLS } from '@/lib/socialDefaults';
+import { STORE_PHONE_DISPLAY, STORE_TELEGRAM_URL, STORE_WHATSAPP_URL } from '@/lib/storeContact';
 import { useAdminStore } from '@/lib/adminStore';
 import { toast, modal } from '@/lib/uiStore';
 import AdminSaveButton from '@/components/admin/AdminSaveButton';
@@ -28,12 +29,12 @@ const defaultSettings: StoreSettingsForm = {
   tagline: 'Արև՝ քո առօրյայում',
   footerDescription: 'Յուրաքանչյուրը փոքրիկ արև է',
   supportEmail: 'care@areve.com',
-  businessPhone: '+374 41 80 21 22',
+  businessPhone: STORE_PHONE_DISPLAY,
   address: '123 Artisan Maker Way, Creative District, NY 10012',
   instagramUrl: SOCIAL_URLS.instagram,
   facebookUrl: SOCIAL_URLS.facebook,
-  whatsappUrl: 'https://wa.me/37441802122',
-  telegramUrl: '',
+  whatsappUrl: STORE_WHATSAPP_URL,
+  telegramUrl: STORE_TELEGRAM_URL,
   tiktokUrl: SOCIAL_URLS.tiktok,
   youtubeUrl: SOCIAL_URLS.youtube,
 };

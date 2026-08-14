@@ -3,29 +3,15 @@ import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Providers from "@/components/Providers";
-import { getApiBaseUrl } from "@/lib/api";
-import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
+import { getSiteContentForLocale } from "@/i18n/siteContent";
 import { fontVariables } from "@/lib/fonts";
 
-export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const res = await fetchWithTimeout(`${getApiBaseUrl()}/settings`, { next: { revalidate: 120 } });
-    if (!res.ok) throw new Error("unavailable");
-    const data = await res.json();
-    const title = data.siteContent?.metadata?.title as string | undefined;
-    const description = data.siteContent?.metadata?.description as string | undefined;
-    return {
-      title: title ?? "AREVÉ",
-      description: description ?? "",
-    };
-  } catch {
-    return {
-      title: 'AREVÉ — Ձեռագործ՝ ջերմությամբ և արևի լույսով',
-      description:
-        'Բացահայտեք AREVÉ-ի ձեռագործ բիջակապարց տոպրակները, եզակի խաղալիքներն ու արհեստավոր աքսեսուարները։',
-    };
-  }
-}
+const defaultMeta = getSiteContentForLocale("hy").metadata;
+
+export const metadata: Metadata = {
+  title: defaultMeta.title,
+  description: defaultMeta.description,
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

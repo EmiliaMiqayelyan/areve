@@ -4,25 +4,21 @@ import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, Heart, ShoppingBag, Star, Shield, Truck, Package } from 'lucide-react';
 import { useCartStore, useWishlistStore } from '@/lib/store';
 import ProductCard from '@/components/ui/ProductCard';
 import { useTranslation } from '@/i18n/I18nProvider';
-import { useLocaleApiFetch } from '@/lib/useLocaleApi';
 import { pickLocalized } from '@/lib/localizedText';
 import { formatPrice } from '@/lib/currency';
-import { findByResourceId } from '@/lib/resourceId';
+import { useProductQuery, useProductsQuery } from '@/lib/useProductsQuery';
 
 const FALLBACK_PRODUCT_IMAGE = '/images/prod-bag-a.png';
 
 function resolveProductImageSrc(image?: string): string {
   const src = String(image ?? '').trim();
   if (!src) return FALLBACK_PRODUCT_IMAGE;
-  if (src.startsWith('blob:')) return FALLBACK_PRODUCT_IMAGE;
-  if (src.startsWith('data:image/')) {
-    return src;
-  }
+  if (src.startsWith('blob:') || src.startsWith('data:image/')) return FALLBACK_PRODUCT_IMAGE;
   if (src.startsWith('/uploads/')) return src;
   if (/^https?:\/\//i.test(src)) return src;
   if (src.startsWith('/')) return src;
@@ -31,55 +27,25 @@ function resolveProductImageSrc(image?: string): string {
 
 export default function ProductDetailPage() {
   const { t, locale } = useTranslation();
-  const localeFetch = useLocaleApiFetch();
   const { id } = useParams<{ id: string }>();
-  const [product, setProduct] = useState<any | null>(null);
-  const [relatedPool, setRelatedPool] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const productId = String(id ?? '');
   const [imgFailed, setImgFailed] = useState(false);
   const { addItem } = useCartStore();
   const { toggleWishlist, isWishlisted } = useWishlistStore();
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setImgFailed(false);
-    setRelatedPool([]);
+  const { data: product, isLoading: productLoading } = useProductQuery(productId);
 
-    void localeFetch<any>(`/products/${encodeURIComponent(String(id))}`)
-      .then((item) => {
-        if (!cancelled) {
-          setProduct(item);
-          setLoading(false);
-        }
-      })
-      .catch(() => {
-        return localeFetch<any[]>('/products?active=true').then((items) => {
-          if (cancelled) return;
-          setRelatedPool(items);
-          setProduct(findByResourceId(items, id) || null);
-          setLoading(false);
-        });
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setProduct(null);
-          setLoading(false);
-        }
-      });
+  const { data: relatedPool = [] } = useProductsQuery(
+    {
+      active: true,
+      category: product?.category,
+      excludeId: productId,
+      limit: 4,
+    },
+    { enabled: Boolean(product?.category) }
+  );
 
-    void localeFetch<any[]>('/products?active=true')
-      .then((items) => {
-        if (!cancelled) setRelatedPool(Array.isArray(items) ? items : []);
-      })
-      .catch(() => {
-        if (!cancelled) setRelatedPool([]);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id, locale, localeFetch]);
+  const loading = productLoading;
 
   if (loading) {
     return (
@@ -96,7 +62,7 @@ export default function ProductDetailPage() {
     </div>
   );
 
-  const related = relatedPool.filter(p => p.category === product.category && p.id !== product.id).slice(0, 3);
+  const related = relatedPool.slice(0, 3);
   const wishlisted = isWishlisted(product.id);
   const displayName = pickLocalized(product.name, locale);
   const displayDescription = pickLocalized(product.description, locale);
@@ -113,32 +79,22 @@ export default function ProductDetailPage() {
         </Link>
 
         <div className="mb-16 grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16 lg:mb-24">
-          {/* Image */}
           <motion.div initial={{ opacity: 0, x: -32 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55 }}
             className="relative h-[380px] overflow-hidden rounded-[24px] bg-beige sm:h-[500px] lg:h-[600px]">
-            {String(product.image ?? '').startsWith('data:image/') ? (
-              <img
-                src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-                alt={displayName}
-                className="absolute inset-x-0 h-full w-full object-cover"
-                onError={() => setImgFailed(true)}
-              />
-            ) : (
-              <Image
-                src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-                alt={displayName}
-                fill
-                className="object-cover"
-                priority
-                onError={() => setImgFailed(true)}
-              />
-            )}
+            <Image
+              src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
+              alt={displayName}
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              onError={() => setImgFailed(true)}
+            />
             {badgeLabel && (
               <span className="badge badge-gold absolute left-4 top-4 sm:left-6 sm:top-6">{badgeLabel}</span>
             )}
           </motion.div>
 
-          {/* Info */}
           <motion.div initial={{ opacity: 0, x: 32 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55 }} className="flex flex-col justify-center">
             <p className="mb-1.5 font-sans text-[10px] uppercase tracking-[2px] text-[#AFAFAF]">{product.category}</p>
             <h1 className="mb-3 font-serif text-lg font-medium text-heading sm:text-xl lg:text-[22px] lg:leading-snug">{displayName}</h1>

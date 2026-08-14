@@ -66,4 +66,20 @@ async function ensureSchemaColumns() {
         const message = error instanceof Error ? error.message : String(error);
         console.warn(`ensureSchemaColumns: product sort backfill skipped (${message})`);
     }
+    const indexStatements = [
+        `CREATE INDEX idx_products_status_sort ON products (status, sort_order, created_at)`,
+        `CREATE INDEX idx_products_favorite ON products (status, is_favorite, sort_order)`,
+        `CREATE INDEX idx_products_category ON products (status, category, sort_order)`,
+    ];
+    for (const sql of indexStatements) {
+        try {
+            await sequelize_1.sequelize.query(sql);
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            if (!/Duplicate key name|already exists/i.test(message)) {
+                console.warn(`ensureSchemaColumns: index skipped (${message})`);
+            }
+        }
+    }
 }

@@ -2,29 +2,20 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { X } from 'lucide-react';
 import PageHero from '@/components/ui/PageHero';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
-import { useLocaleApiFetch } from '@/lib/useLocaleApi';
 import { pickLocalized } from '@/lib/localizedText';
+import { useGalleryQuery } from '@/lib/useProductsQuery';
 
 export default function GalleryPage() {
   const { t, locale } = useTranslation();
-  const localeFetch = useLocaleApiFetch();
   const { settings } = useSiteSettings();
   const pg = settings.siteContent.pages.gallery;
   const [lightbox, setLightbox] = useState<string | null>(null);
-  const [galleryItems, setGalleryItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    void localeFetch<any[]>('/gallery')
-      .then(setGalleryItems)
-      .catch(() => setGalleryItems([]))
-      .finally(() => setLoading(false));
-  }, [locale, localeFetch]);
+  const { data: galleryItems = [], isLoading: loading } = useGalleryQuery();
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
@@ -49,7 +40,7 @@ export default function GalleryPage() {
             <motion.div key={i}
               initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: (i % 6) * 0.06 }}
               onClick={() => setLightbox(img.src)}
-              style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', cursor: 'zoom-in', gridColumn: `span ${img.cols}` }}
+              style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', cursor: 'zoom-in', gridColumn: `span ${img.cols ?? 1}` }}
             >
               <Image
                 src={String(img.src).startsWith('blob:') ? '/images/gallery-light-1.png' : img.src}

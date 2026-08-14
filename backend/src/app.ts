@@ -33,7 +33,9 @@ app.use(
 );
 // Admin UI may still send compact data URLs; large images are written to disk.
 app.use(express.json({ limit: "25mb" }));
-app.use(morgan("dev"));
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("dev"));
+}
 
 app.use("/uploads", express.static(UPLOAD_ROOT));
 

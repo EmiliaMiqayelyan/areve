@@ -2,27 +2,17 @@
 
 import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import ReviewCard from '@/components/ui/ReviewCard';
 import SectionHeader from '@/components/ui/SectionHeader';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
-import { useLocaleApiFetch } from '@/lib/useLocaleApi';
+import { useReviewsQuery } from '@/lib/useProductsQuery';
 
 export default function ReviewsPage() {
-  const { t, locale } = useTranslation();
-  const localeFetch = useLocaleApiFetch();
+  const { t } = useTranslation();
   const { settings } = useSiteSettings();
   const pg = settings.siteContent.pages.reviews;
-  const [reviewList, setReviewList] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    void localeFetch<any[]>('/reviews')
-      .then(setReviewList)
-      .catch(() => setReviewList([]))
-      .finally(() => setLoading(false));
-  }, [locale, localeFetch]);
+  const { data: reviewList = [], isLoading: loading } = useReviewsQuery();
 
   return (
     <div style={{ minHeight: '100vh', paddingTop: 68 }}>
@@ -70,7 +60,9 @@ export default function ReviewsPage() {
           </div>
         )}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: 20 }}>
-          {reviewList.map((r, i) => <ReviewCard key={r.id} review={r} index={i} />)}
+          {reviewList.map((r, i) => (
+            <ReviewCard key={r.id} review={{ ...r, location: r.location ?? '' }} index={i} />
+          ))}
         </div>
 
         {!loading && reviewList.length === 0 && (

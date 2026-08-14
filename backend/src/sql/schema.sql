@@ -114,11 +114,12 @@ INSERT IGNORE INTO settings (
 ) VALUES (
   1, 'AREVÉ', 'Արև՝ քո առօրյայում',
   'Յուրաքանչյուրը փոքրիկ արև է',
-  'care@areve.com', '+374 41 80 21 22',
+  'care@areve.com', '041802122',
   '123 Artisan Maker Way, Creative District, NY 10012',
   'https://www.instagram.com/areve_collections?igsh=MXRkNW9rdnZhaTd6cA%3D%3D&utm_source=qr',
   'https://www.facebook.com/share/18mdNprAXw/?mibextid=wwXIfr',
   'https://wa.me/37441802122',
+  'https://t.me/+37441802122',
   'https://www.tiktok.com/@areve_collections?_r=1&_t=ZS-9791ZS0NSEu',
   'https://youtube.com/@areve_collections?si=XM4HvU8cfXMTbN5I',
   NULL

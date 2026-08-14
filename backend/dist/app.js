@@ -15,10 +15,24 @@ const public_routes_1 = __importDefault(require("./routes/public.routes"));
 const persistUpload_1 = require("./utils/persistUpload");
 const app = (0, express_1.default)();
 app.use((0, helmet_1.default)({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
-app.use((0, cors_1.default)({ origin: env_1.env.corsOrigin === "*" ? "*" : env_1.env.corsOrigin.split(","), credentials: true }));
+/** Reflect request Origin when CORS_ORIGIN=* so credentials work in browsers. */
+const corsOrigins = env_1.env.corsOrigin.trim() === "*"
+    ? true
+    : env_1.env.corsOrigin
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean);
+app.use((0, cors_1.default)({
+    origin: corsOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+}));
 // Admin UI may still send compact data URLs; large images are written to disk.
 app.use(express_1.default.json({ limit: "25mb" }));
-app.use((0, morgan_1.default)("dev"));
+if (process.env.NODE_ENV !== "production") {
+    app.use((0, morgan_1.default)("dev"));
+}
 app.use("/uploads", express_1.default.static(persistUpload_1.UPLOAD_ROOT));
 app.use("/api", public_routes_1.default);
 app.use("/api", auth_routes_1.default);

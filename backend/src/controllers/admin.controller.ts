@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { randomUUID } from "crypto";
 import { Admin, Category, Faq, Gallery, Order, OrderItem, Product, Review, Setting } from "../models";
+import { invalidatePublicSettingsCache } from "../utils/publicCache";
 import { mergeSiteContent } from "../utils/mergeSiteContent";
 import { isDataUrlImage, persistDataUrlImage } from "../utils/persistUpload";
 import {
@@ -401,6 +402,7 @@ export async function updateAdminSettings(req: Request, res: Response) {
 
   const [affected] = await Setting.update(body, { where: { id: 1 } });
   if (!affected) return res.status(404).json({ message: "Settings not found" });
+  invalidatePublicSettingsCache();
   return res.json({ message: "Settings updated" });
 }
 

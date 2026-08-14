@@ -31,6 +31,7 @@ exports.updateAdminCategory = updateAdminCategory;
 exports.deleteAdminCategory = deleteAdminCategory;
 const crypto_1 = require("crypto");
 const models_1 = require("../models");
+const publicCache_1 = require("../utils/publicCache");
 const mergeSiteContent_1 = require("../utils/mergeSiteContent");
 const persistUpload_1 = require("../utils/persistUpload");
 const serializers_1 = require("../utils/serializers");
@@ -364,6 +365,7 @@ async function updateAdminSettings(req, res) {
     const [affected] = await models_1.Setting.update(body, { where: { id: 1 } });
     if (!affected)
         return res.status(404).json({ message: "Settings not found" });
+    (0, publicCache_1.invalidatePublicSettingsCache)();
     return res.json({ message: "Settings updated" });
 }
 async function getAdminUsers(_req, res) {

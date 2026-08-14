@@ -25,7 +25,7 @@ console.log('BEFORE:', {
   telegramUrl: settings.telegramUrl,
 });
 
-settings.businessPhone = '+374 41 80 21 22';
+settings.businessPhone = '041802122';
 settings.whatsappUrl = 'https://wa.me/37441802122';
 settings.telegramUrl = 'https://t.me/+37441802122';
 

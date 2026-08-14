@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useI18n } from '@/i18n/I18nProvider';
 import { hasArmenianScript } from '@/i18n/localeContent';
 import { mergeSiteContentForLocale } from '@/i18n/mergeSiteContent';
@@ -9,6 +10,7 @@ import type { Locale } from '@/i18n/types';
 import { apiFetch } from '@/lib/api';
 import type { PublicSettings, SiteContent } from '@/lib/siteContentDefaults';
 import { SOCIAL_URLS } from '@/lib/socialDefaults';
+import { STORE_PHONE_DISPLAY, STORE_TELEGRAM_URL, STORE_WHATSAPP_URL } from '@/lib/storeContact';
 
 const MOJIBAKE_RE = /[ÕÔÃ][±°´€³]|Ã©|â€|AREVÃ/;
 
@@ -62,12 +64,12 @@ function buildSettings(locale: Locale, data?: Partial<PublicSettings> | null): P
       m.settings.footerHy
     ),
     supportEmail: data?.supportEmail ?? '',
-    businessPhone: data?.businessPhone ?? '',
+    businessPhone: STORE_PHONE_DISPLAY,
     address: data?.address ?? '',
     instagramUrl: data?.instagramUrl ?? SOCIAL_URLS.instagram,
     facebookUrl: data?.facebookUrl ?? SOCIAL_URLS.facebook,
-    whatsappUrl: data?.whatsappUrl ?? 'https://wa.me/37441802122',
-    telegramUrl: data?.telegramUrl ?? '',
+    whatsappUrl: STORE_WHATSAPP_URL,
+    telegramUrl: STORE_TELEGRAM_URL,
     tiktokUrl: data?.tiktokUrl ?? SOCIAL_URLS.tiktok,
     youtubeUrl: data?.youtubeUrl ?? SOCIAL_URLS.youtube,
     siteContent,
@@ -84,23 +86,14 @@ const SiteSettingsContext = createContext<SiteSettingsContextValue | null>(null)
 
 export function SiteSettingsProvider({ children }: { children: ReactNode }) {
   const { locale } = useI18n();
-  const [raw, setRaw] = useState<Partial<PublicSettings> | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
-    void apiFetch<PublicSettings>('/settings')
-      .then((data) => {
-        setRaw(data);
-        setError(false);
-      })
-      .catch(() => {
-        setRaw(null);
-        setError(true);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: raw, isLoading: loading, isError: error } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => apiFetch<Partial<PublicSettings>>('/settings'),
+    staleTime: 120_000,
+    gcTime: 300_000,
+    retry: 1,
+  });
 
   const settings = useMemo(() => buildSettings(locale, raw), [locale, raw]);
 

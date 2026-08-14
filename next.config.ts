@@ -4,7 +4,10 @@ const backendUrl = process.env.BACKEND_URL || "http://localhost:4000";
 
 const nextConfig: NextConfig = {
   images: {
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 7,
   },
   webpack: (config, { dev }) => {
     // Avoid corrupted PackFileCacheStrategy errors on Windows/slow disks.

@@ -127,7 +127,7 @@ export default function ContactPage() {
     {
       key: 'phone',
       href: `tel:${businessPhone.replace(/\s/g, '')}`,
-      label: locale === 'hy' ? 'Հեռախոս' : 'Phone',
+      label: businessPhone || (locale === 'hy' ? 'Հեռախոս' : 'Phone'),
       icon: <Phone size={16} strokeWidth={1.5} />,
     },
     telegramHref && {

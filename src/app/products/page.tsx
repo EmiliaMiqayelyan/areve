@@ -9,8 +9,8 @@ import PageHero from '@/components/ui/PageHero';
 import SortDropdown from '@/components/ui/SortDropdown';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
-import { useLocaleApiFetch } from '@/lib/useLocaleApi';
 import { pickLocalized } from '@/lib/localizedText';
+import { useCategoriesQuery, useProductsQuery } from '@/lib/useProductsQuery';
 import type { Product } from '@/lib/store';
 
 type CategoryOption = { id: string; label: string };
@@ -19,7 +19,6 @@ const PAGE_SIZE = 12;
 
 function ProductsContent() {
   const { t, locale } = useTranslation();
-  const localeFetch = useLocaleApiFetch();
   const router = useRouter();
   const pathname = usePathname();
   const { settings } = useSiteSettings();
@@ -30,10 +29,17 @@ function ProductsContent() {
   const [cat, setCat] = useState(initialCategory);
   const [sort, setSort] = useState<'default' | 'price-asc' | 'price-desc'>('default');
   const [page, setPage] = useState(1);
-  const [productList, setProductList] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<CategoryOption[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
+
+  const {
+    data: productList = [],
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useProductsQuery({ active: true });
+
+  const { data: categoryRows = [], isLoading: categoriesLoading } = useCategoriesQuery();
+
+  const loading = productsLoading || categoriesLoading;
+  const loadError = productsError;
 
   useEffect(() => {
     const category = sp.get('category') || 'all';
@@ -59,29 +65,14 @@ function ProductsContent() {
     setPage(1);
   }, []);
 
-  useEffect(() => {
-    setLoading(true);
-    setLoadError(false);
-    void Promise.all([
-      localeFetch<Product[]>('/products?active=true'),
-      localeFetch<Array<{ id: string; name: string }>>('/categories'),
-    ])
-      .then(([products, categoryRows]) => {
-        setProductList(products);
-        setCategories(
-          categoryRows.map((row) => ({
-            id: row.id,
-            label: typeof row.name === 'string' ? row.name : pickLocalized(row.name, locale),
-          }))
-        );
-      })
-      .catch(() => {
-        setProductList([]);
-        setCategories([]);
-        setLoadError(true);
-      })
-      .finally(() => setLoading(false));
-  }, [locale, localeFetch]);
+  const categories = useMemo<CategoryOption[]>(
+    () =>
+      categoryRows.map((row) => ({
+        id: row.id,
+        label: typeof row.name === 'string' ? row.name : pickLocalized(row.name, locale),
+      })),
+    [categoryRows, locale]
+  );
 
   const catOptions = useMemo<CategoryOption[]>(
     () => [{ id: 'all', label: L.all }, ...categories],
@@ -91,9 +82,9 @@ function ProductsContent() {
   const activeCategoryLabel = catOptions.find((item) => item.id === cat)?.label ?? cat;
 
   const filtered = useMemo(() => {
-    let list = cat === 'all' ? productList : productList.filter((p) => p.category === cat);
+    let list: Product[] = cat === 'all' ? productList : productList.filter((p) => p.category === cat);
     if (sort === 'price-asc') list = [...list].sort((a, b) => a.price - b.price);
-    if (sort === 'price-desc') list = [...list].sort((a, b) => b.price - a.price);
+    if (sort === 'price-desc') list = [...list].sort((a, b) => a.price - b.price);
     return list;
   }, [cat, sort, productList]);
 
