@@ -4,7 +4,7 @@ import { useAdminStore } from '@/lib/adminStore';
 import { modal, toast } from '@/lib/uiStore';
 import { Plus, Search, Edit, Trash2, Filter, Heart, ChevronUp, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import StoreImage from '@/components/ui/StoreImage';
 import { useState, useMemo } from 'react';
 import { pickLocalized } from '@/lib/localizedText';
 import { adminProductEditPath } from '@/lib/resourceId';
@@ -200,40 +200,18 @@ export default function AdminProductsPage() {
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl border border-[#EADFD8] overflow-hidden relative bg-[#F8F5F2] shrink-0">
-                          {String(product.image ?? '').startsWith('data:image/') ? (
-                            <img
-                              src={
-                                brokenImageIds[product.id]
-                                  ? FALLBACK_PRODUCT_IMAGE
-                                  : resolveProductImageSrc(product.image)
-                              }
-                              alt={pickLocalized(product.name, 'hy')}
-                              style={{
-                                position: 'absolute',
-                                inset: 0,
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                              }}
-                              onError={() => {
-                                setBrokenImageIds((prev) => ({ ...prev, [product.id]: true }));
-                              }}
-                            />
-                          ) : (
-                            <Image
-                              src={
-                                brokenImageIds[product.id]
-                                  ? FALLBACK_PRODUCT_IMAGE
-                                  : resolveProductImageSrc(product.image)
-                              }
-                              alt={pickLocalized(product.name, 'hy')}
-                              fill
-                              className="object-cover"
-                              onError={() => {
-                                setBrokenImageIds((prev) => ({ ...prev, [product.id]: true }));
-                              }}
-                            />
-                          )}
+                          <StoreImage
+                            src={
+                              brokenImageIds[product.id]
+                                ? FALLBACK_PRODUCT_IMAGE
+                                : resolveProductImageSrc(product.image)
+                            }
+                            alt={pickLocalized(product.name, 'hy')}
+                            fill
+                            onError={() => {
+                              setBrokenImageIds((prev) => ({ ...prev, [product.id]: true }));
+                            }}
+                          />
                         </div>
                         <div>
                           <p className="text-[14px] font-bold text-[#2B2B2B] flex items-center gap-1.5">

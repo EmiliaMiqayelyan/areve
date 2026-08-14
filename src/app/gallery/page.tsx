@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { useState } from 'react';
+import StoreImage from '@/components/ui/StoreImage';
 import { X } from 'lucide-react';
 import PageHero from '@/components/ui/PageHero';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
@@ -42,12 +42,11 @@ export default function GalleryPage() {
               onClick={() => setLightbox(img.src)}
               style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', cursor: 'zoom-in', gridColumn: `span ${img.cols ?? 1}` }}
             >
-              <Image
+              <StoreImage
                 src={String(img.src).startsWith('blob:') ? '/images/gallery-light-1.png' : img.src}
                 alt={altText}
                 fill
-                style={{ objectFit: 'cover', transition: 'transform 0.5s' }}
-                loading="lazy"
+                style={{ transition: 'transform 0.5s' }}
               />
               <div style={{ position: 'absolute', inset: 0, background: 'rgba(248,245,242,0)', transition: 'background 0.3s', display: 'flex', alignItems: 'flex-end', padding: 14 }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(230,201,122,0.15)'; }}
@@ -79,7 +78,7 @@ export default function GalleryPage() {
           </button>
           <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} onClick={e => e.stopPropagation()}
             style={{ position: 'relative', width: '100%', maxWidth: 720, aspectRatio: '4/3', borderRadius: 20, overflow: 'hidden', boxShadow: '0 24px 80px rgba(180,156,140,0.3)' }}>
-            <Image src={lightbox} alt="" fill style={{ objectFit: 'contain', background: '#fff' }} />
+            <StoreImage src={lightbox} alt="" fill objectFit="contain" style={{ background: '#fff' }} />
           </motion.div>
         </motion.div>
       )}

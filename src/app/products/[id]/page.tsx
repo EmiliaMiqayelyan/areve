@@ -2,8 +2,8 @@
 
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
+import StoreImage from '@/components/ui/StoreImage';
 import { useState } from 'react';
 import { ArrowLeft, Heart, ShoppingBag, Star, Shield, Truck, Package } from 'lucide-react';
 import { useCartStore, useWishlistStore } from '@/lib/store';
@@ -81,13 +81,11 @@ export default function ProductDetailPage() {
         <div className="mb-16 grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16 lg:mb-24">
           <motion.div initial={{ opacity: 0, x: -32 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55 }}
             className="relative h-[380px] overflow-hidden rounded-[24px] bg-beige sm:h-[500px] lg:h-[600px]">
-            <Image
+            <StoreImage
               src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
               alt={displayName}
               fill
-              className="object-cover"
               priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
               onError={() => setImgFailed(true)}
             />
             {badgeLabel && (

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
+import StoreImage from '@/components/ui/StoreImage';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { Product, useCartStore, useWishlistStore } from '@/lib/store';
 import { useTranslation } from '@/i18n/I18nProvider';
@@ -64,14 +64,12 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
       {/* Image */}
       <div style={{ position: 'relative', height: 260, overflow: 'hidden', flexShrink: 0 }}>
         <Link href={productHref} className="absolute inset-0 z-[1] block no-underline" aria-label={productName}>
-          <Image
+          <StoreImage
             src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
             alt={productName}
             fill
-            style={{ objectFit: 'cover', transition: 'transform 0.6s' }}
+            style={{ transition: 'transform 0.6s' }}
             className="group-hover:scale-105"
-            loading="lazy"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             onError={() => setImgFailed(true)}
           />
         </Link>

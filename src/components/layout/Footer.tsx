@@ -28,7 +28,7 @@ export default function Footer() {
           {/* Column 1: Brand */}
           <div style={{ ...col }} className="max-w-xs">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <Image src={areve} alt={storeName} width="90" height="90" />
+              <Image src={areve} alt={storeName} width="90" height="90" unoptimized />
             </div>
             <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: '#7A7A7A', lineHeight: 1.7 }}>
               {footerDescription}

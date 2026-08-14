@@ -35,7 +35,7 @@ export default function AdminLogin() {
     <div className="admin-shell min-h-screen bg-ivory flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-[0_8px_40px_rgba(180,156,140,0.15)] text-center">
         <div className="mx-auto mb-6 flex justify-center">
-          <Image src={areveMark} alt="AREVÉ" width={72} height={72} className="h-16 w-16 object-contain" priority />
+          <Image src={areveMark} alt="AREVÉ" width={72} height={72} className="h-16 w-16 object-contain" priority unoptimized />
         </div>
         <h3 className="font-serif mb-2">{t('adminLogin.title')}</h3>
         <p className="text-subtle font-sans text-sm mb-6">{t('adminLogin.subtitle')}</p>

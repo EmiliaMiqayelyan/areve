@@ -1,8 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
+import StoreImage from '@/components/ui/StoreImage';
 import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
@@ -240,13 +240,11 @@ export default function Home() {
               >
                 <Link href={cat.href} className="group block no-underline" scroll>
                   <div className="relative mb-2 aspect-[3/4] overflow-hidden rounded-lg bg-ivory sm:mb-2.5">
-                    <Image
+                    <StoreImage
                       src={cat.img}
                       alt={cat.title}
                       fill
-                      className="object-cover transition-opacity duration-300 group-hover:opacity-90"
-                      loading="lazy"
-                      sizes="(max-width: 760px) 30vw, 220px"
+                      className="transition-opacity duration-300 group-hover:opacity-90"
                     />
                   </div>
                   <p className="text-center font-sans text-[11px] leading-snug text-subtle transition-colors group-hover:text-ink sm:text-xs">
@@ -289,7 +287,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-12 items-center px-4 sm:px-6 lg:grid-cols-2 lg:gap-16">
           <motion.div initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.65 }} className="relative">
             <div className="relative h-[400px] overflow-hidden rounded-[24px] sm:h-[500px]">
-              <Image src={home.storySection.image} alt="" fill className="object-cover" loading="lazy" />
+              <StoreImage src={home.storySection.image} alt="" fill />
             </div>
 
             <div className="absolute -bottom-4 -right-4 h-24 w-24 rounded-[20px] border-2 border-gold/30" />
@@ -359,7 +357,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.92 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.07 }}
                 className="group relative block aspect-square overflow-hidden rounded-[14px]"
               >
-                <Image src={item.src} alt={pickLocalized(item.alt, locale)} fill className="object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+                <StoreImage src={item.src} alt={pickLocalized(item.alt, locale)} fill className="transition-transform duration-500 group-hover:scale-110" />
                 <div className="absolute inset-0 bg-gold/0 transition-colors group-hover:bg-gold/10" />
               </motion.a>
             ))}

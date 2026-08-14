@@ -135,7 +135,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       >
         <div className="h-14 flex items-center justify-between px-4 border-b border-[#EADFD8] sm:px-6">
           <Link href="/" className="flex items-center gap-2 no-underline min-w-0">
-            <Image src={areveMark} alt="AREVÉ" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
+            <Image src={areveMark} alt="AREVÉ" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" unoptimized />
           </Link>
           <button
             type="button"
@@ -198,7 +198,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <p className="text-[10px] text-[#AFAFAF]">Store Manager</p>
               </div>
               <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shrink-0">
-                <Image src={areveMark} alt="AREVÉ" width={32} height={32} className="h-full w-full object-contain" />
+                <Image src={areveMark} alt="AREVÉ" width={32} height={32} className="h-full w-full object-contain" unoptimized />
               </div>
             </div>
           </div>

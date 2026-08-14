@@ -3,7 +3,7 @@
 import { useAdminStore } from '@/lib/adminStore';
 import { modal, toast } from '@/lib/uiStore';
 import { UploadCloud, Trash2, Image as ImageIcon, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
+import StoreImage from '@/components/ui/StoreImage';
 import { useState } from 'react';
 import { pickLocalized } from '@/lib/localizedText';
 
@@ -192,12 +192,14 @@ export default function AdminGalleryPage() {
                 key={img.id} 
                 className={`relative rounded-xl overflow-hidden group shadow-sm border border-[#EADFD8] ${img.cols === 2 ? 'col-span-2 row-span-2' : ''}`}
               >
-                <Image
+                <StoreImage
                   src={brokenImageIds[img.id] ? FALLBACK_GALLERY_IMAGE : resolveGalleryImageSrc(img.src)}
                   alt={pickLocalized(img.alt, 'hy') || 'Gallery'}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  onError={() => setBrokenImageIds((prev) => ({ ...prev, [img.id]: true }))}
+                  className="transition-transform duration-700 group-hover:scale-105"
+                  onError={() => {
+                    setBrokenImageIds((prev) => ({ ...prev, [img.id]: true }));
+                  }}
                 />
                 <div className="absolute inset-0 bg-[#2B2B2B]/0 group-hover:bg-[#2B2B2B]/40 transition-colors duration-300" />
 

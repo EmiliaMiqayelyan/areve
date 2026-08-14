@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAdminStore } from '@/lib/adminStore';
 import { ArrowLeft, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import StoreImage from '@/components/ui/StoreImage';
 import BilingualField from '@/components/admin/BilingualField';
 import AdminSelect from '@/components/admin/AdminSelect';
 import AdminSaveButton from '@/components/admin/AdminSaveButton';
@@ -142,7 +142,7 @@ export default function AddProductPage() {
               >
                 {imagePreview ? (
                   <div className="absolute inset-2 rounded-lg overflow-hidden border border-[#EADFD8]">
-                    <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+                    <StoreImage src={imagePreview} alt="Preview" fill />
                   </div>
                 ) : (
                   <>

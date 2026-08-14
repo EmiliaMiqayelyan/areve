@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode } from 'react';
-import Image from 'next/image';
+import StoreImage from '@/components/ui/StoreImage';
 import { motion } from 'framer-motion';
 import { Cormorant_Garamond, Inter } from 'next/font/google';
 import { ArrowUpRight, Phone, Send } from 'lucide-react';
@@ -180,13 +180,11 @@ export default function ContactPage() {
             className="relative"
           >
             <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-[#EFE8E0] lg:min-h-[480px]">
-              <Image
+              <StoreImage
                 src={CONTACT_IMAGE}
                 alt=""
                 fill
                 priority
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 42vw"
               />
               <div
                 aria-hidden

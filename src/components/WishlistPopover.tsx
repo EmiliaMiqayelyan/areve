@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, X } from 'lucide-react';
-import Image from 'next/image';
+import StoreImage from '@/components/ui/StoreImage';
 import Link from 'next/link';
 import { useWishlistStore } from '@/lib/store';
 import { useTranslation } from '@/i18n/I18nProvider';
@@ -232,7 +232,7 @@ export default function WishlistPopover({ anchorRef }: WishlistPopoverProps) {
                       flexShrink: 0,
                     }}
                   >
-                    <Image src={item.image} alt={item.name} fill style={{ objectFit: 'cover' }} />
+                    <StoreImage src={item.image} alt={item.name} fill />
                   </Link>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <Link

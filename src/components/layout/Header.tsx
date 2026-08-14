@@ -70,7 +70,7 @@ export default function Header() {
         <div className="mx-auto flex h-[68px] min-h-[68px] max-h-[68px] items-center justify-between gap-3 px-4 sm:px-6 lg:max-w-[1280px]">
 
           <Link href="/" className="flex shrink-0 items-center no-underline">
-            <Image src={areve} alt="areve" width={120} height={48} className="h-10 w-auto sm:h-11" priority />
+            <Image src={areve} alt="areve" width={120} height={48} className="h-10 w-auto sm:h-11" priority unoptimized />
           </Link>
 
           <nav className="hidden min-w-0 flex-1 items-center justify-center gap-3 xl:gap-5 lg:flex px-2">

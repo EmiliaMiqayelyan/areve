@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
+import StoreImage from '@/components/ui/StoreImage';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import PageHero from '@/components/ui/PageHero';
@@ -37,7 +37,7 @@ export default function AboutPage() {
             className="relative order-2 lg:order-1"
           >
             <div className="relative aspect-[4/5] max-h-[520px] overflow-hidden rounded-[28px] bg-beige sm:aspect-auto sm:h-[480px]">
-              <Image src={about.beginning.image} alt="" fill className="object-cover" loading="lazy" />
+              <StoreImage src={about.beginning.image} alt="" fill />
             </div>
             <div className="absolute -bottom-3 -right-3 hidden h-20 w-20 rounded-[18px] border-2 border-gold/35 sm:block" />
             <motion.div

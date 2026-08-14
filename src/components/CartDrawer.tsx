@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ShoppingBag, Minus, Plus, Trash2, ChevronLeft } from 'lucide-react';
-import Image from 'next/image';
+import StoreImage from '@/components/ui/StoreImage';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/store';
 import { useTranslation } from '@/i18n/I18nProvider';
@@ -293,11 +293,10 @@ export default function CartDrawer() {
                             flexShrink: 0,
                           }}
                         >
-                          <Image
+                          <StoreImage
                             src={item.image}
                             alt={item.name}
                             fill
-                            style={{ objectFit: 'cover' }}
                           />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
