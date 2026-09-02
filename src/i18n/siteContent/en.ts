@@ -27,7 +27,7 @@ export const SITE_CONTENT_EN = {
       ["/faq", "Care Guide"],
       ["/faq", "Shipping"],
     ] as [string, string][],
-    copyrightSuffix: "All rights reserved. Made with ☀️ and love.",
+    copyrightSuffix: 'All rights reserved.',
   },
   productCategoryLabels: {
     all: "All",
@@ -136,7 +136,7 @@ export const SITE_CONTENT_EN = {
       emoji: "☀️",
       titleLine1: "Make it",
       titleItalic: "unique",
-      paragraph: "Custom orders created just for you",
+      paragraph: '',
       buttonLabel: "Order Custom",
       buttonHref: "/contact",
     },

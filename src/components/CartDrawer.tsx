@@ -248,15 +248,6 @@ export default function CartDrawer() {
                       >
                         {t('cart.empty')}
                       </p>
-                      <p
-                        style={{
-                          fontFamily: 'var(--font-sans)',
-                          fontSize: 14,
-                          color: '#AFAFAF',
-                        }}
-                      >
-                        {t('cart.emptyHint')}
-                      </p>
                       <Link
                         href="/products"
                         onClick={toggleCart}

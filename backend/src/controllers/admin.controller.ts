@@ -207,12 +207,19 @@ export async function updateAdminOrder(req: Request, res: Response) {
         productName: String(row.name ?? row.productName ?? "Item"),
         quantity: Number(row.quantity ?? 1),
         unitPrice: Number(row.price ?? row.unitPrice ?? 0),
+        unitCost: Number(row.unitCost ?? 0),
+        stoneType: String(row.stoneType ?? ""),
+        stoneMm: String(row.stoneMm ?? ""),
+        bagSize: String(row.bagSize ?? ""),
+        stonePrice: Number(row.stonePrice ?? 0),
+        bagPrice: Number(row.bagPrice ?? 0),
       });
     }
     const total = items.reduce((sum: number, item: Record<string, unknown>) => {
+      const bagPrice = Number(item.bagPrice ?? 0);
       const qty = Number(item.quantity ?? 1);
       const price = Number(item.price ?? item.unitPrice ?? 0);
-      return sum + qty * price;
+      return sum + (bagPrice || qty * price);
     }, 0);
     await Order.update({ total }, { where: { id } });
   }
@@ -243,19 +250,24 @@ export async function createAdminOrder(req: Request, res: Response) {
     items: Array<{
       id: string;
       name: string;
-      quantity: number;
-      price: number;
+      quantity?: number;
+      price?: number;
       unitCost?: number;
+      stoneType?: string;
+      stoneMm?: string;
+      bagSize?: string;
+      stonePrice?: number;
+      bagPrice?: number;
     }>;
   };
   const id = `ADM-${Date.now()}`;
   const customerName =
-    body.customerName || `${body.firstName || ""} ${body.lastName || ""}`.trim() || "Customer";
+    (body.customerName || `${body.firstName || ""} ${body.lastName || ""}`.trim() || "—").trim();
   const customerEmail = "sale@areve.com";
-  const total = body.items.reduce(
-    (sum, item) => sum + Number(item.price ?? 0) * Number(item.quantity ?? 1),
-    0
-  );
+  const total = body.items.reduce((sum, item) => {
+    const bagPrice = Number(item.bagPrice ?? 0);
+    return sum + (bagPrice || Number(item.price ?? 0) * Number(item.quantity ?? 1));
+  }, 0);
   const soldAt = body.soldAt ? new Date(body.soldAt) : new Date();
 
   await Order.create({
@@ -272,21 +284,31 @@ export async function createAdminOrder(req: Request, res: Response) {
   });
 
   for (const item of body.items) {
+    const stonePrice = Number(item.stonePrice ?? 0);
+    const bagPrice = Number(item.bagPrice ?? 0);
+    const quantity = Number(item.quantity ?? 1) || 1;
+    const unitPrice = bagPrice || Number(item.price ?? 0);
     const product = await Product.findByPk(String(item.id));
     const unitCost =
-      item.unitCost !== undefined
+      stonePrice ||
+      (item.unitCost !== undefined
         ? Number(item.unitCost)
         : product
           ? Number((product.toJSON() as Record<string, unknown>).cost ?? 0)
-          : 0;
+          : 0);
     await OrderItem.create({
       id: randomUUID(),
       orderId: id,
       productId: item.id,
       productName: item.name,
-      quantity: item.quantity,
-      unitPrice: item.price,
+      quantity,
+      unitPrice,
       unitCost,
+      stoneType: (item.stoneType || "").trim(),
+      stoneMm: (item.stoneMm || "").trim(),
+      bagSize: (item.bagSize || "").trim(),
+      stonePrice,
+      bagPrice,
     });
   }
 

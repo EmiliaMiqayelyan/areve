@@ -178,20 +178,10 @@ export default function WishlistPopover({ anchorRef }: WishlistPopoverProps) {
                     fontFamily: 'var(--font-serif)',
                     fontSize: 16,
                     color: '#2B2B2B',
-                    marginBottom: 4,
-                  }}
-                >
-                  {t('wishlist.empty')}
-                </p>
-                <p
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: 13,
-                    color: '#AFAFAF',
                     marginBottom: 14,
                   }}
                 >
-                  {t('wishlist.emptyHint')}
+                  {t('wishlist.empty')}
                 </p>
                 <Link
                   href="/products"

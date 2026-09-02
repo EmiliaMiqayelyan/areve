@@ -92,7 +92,7 @@ export default function Home() {
   return (
     <div style={S.page}>
 
-      <section className="relative min-h-[min(88vh,820px)] overflow-hidden pt-[68px]">
+      <section className="relative min-h-[min(76vh,700px)] overflow-hidden pt-[68px]">
         <div className="hero-aesthetic" aria-hidden>
           <div className="hero-aesthetic__mesh" />
           <div className="hero-aesthetic__sun hero-aesthetic__sun--right" />
@@ -134,7 +134,7 @@ export default function Home() {
           <div className="hero-aesthetic__bead hero-aesthetic__bead--6" />
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-[1280px] px-4 pt-10 pb-16 sm:px-6 sm:pt-14 lg:pt-16 lg:pb-20 text-center lg:text-left">
+        <div className="relative z-10 mx-auto w-full max-w-[1280px] px-4 pt-10 pb-14 sm:px-6 sm:pt-14 lg:pt-16 lg:pb-16 text-center lg:text-left">
           <motion.p
             initial={heroReady ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -318,7 +318,7 @@ export default function Home() {
 
             <div className="mb-10 grid grid-cols-3 gap-3">
               {home.storySection.pillars.map(({ icon, label }) => (
-                <div key={label} className="rounded-[14px] border border-beige bg-white p-4 text-center">
+                <div key={label} className="p-4 text-center">
                   <div
                     className={`mb-2 flex h-6 items-center justify-center leading-none ${
                       icon === '☀️' ? 'text-[13px]' : 'text-[18px]'
@@ -373,13 +373,10 @@ export default function Home() {
       <section className="border-t border-beige text-center" style={{ padding: 'var(--section-padding)', background: 'rgb(245, 240, 236)' }}>
         <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.55 }} className="mx-auto max-w-[600px]">
           <span className="mb-5 block text-[40px]">{home.ctaSection.emoji}</span>
-          <h2 className="mb-4 font-serif text-[clamp(1.35rem,2.6vw,1.85rem)] font-medium leading-snug text-heading">
+          <h2 className="mb-10 font-serif text-[clamp(1.35rem,2.6vw,1.85rem)] font-medium leading-snug text-heading">
             {home.ctaSection.titleLine1}{' '}
             <span className="italic text-gold">{home.ctaSection.titleItalic}</span>
           </h2>
-          <p className="mb-10 font-sans text-base leading-relaxed text-subtle sm:text-lg">
-            {home.ctaSection.paragraph}
-          </p>
           <Link href={home.ctaSection.buttonHref} className="btn-primary no-underline">
             {home.ctaSection.buttonLabel} <ArrowRight size={15} />
           </Link>

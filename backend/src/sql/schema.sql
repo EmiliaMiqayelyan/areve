@@ -80,6 +80,11 @@ CREATE TABLE IF NOT EXISTS order_items (
   quantity INT NOT NULL,
   unit_price DECIMAL(10,2) NOT NULL,
   unit_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
+  stone_type VARCHAR(120) NOT NULL DEFAULT '',
+  stone_mm VARCHAR(40) NOT NULL DEFAULT '',
+  bag_size VARCHAR(80) NOT NULL DEFAULT '',
+  stone_price DECIMAL(10,2) NOT NULL DEFAULT 0,
+  bag_price DECIMAL(10,2) NOT NULL DEFAULT 0,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 

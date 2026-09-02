@@ -12,6 +12,11 @@ OrderItem.init(
     quantity: { type: DataTypes.INTEGER, allowNull: false },
     unitPrice: { type: DataTypes.DECIMAL(10, 2), allowNull: false, field: "unit_price" },
     unitCost: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0, field: "unit_cost" },
+    stoneType: { type: DataTypes.STRING(120), allowNull: false, defaultValue: "", field: "stone_type" },
+    stoneMm: { type: DataTypes.STRING(40), allowNull: false, defaultValue: "", field: "stone_mm" },
+    bagSize: { type: DataTypes.STRING(80), allowNull: false, defaultValue: "", field: "bag_size" },
+    stonePrice: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0, field: "stone_price" },
+    bagPrice: { type: DataTypes.DECIMAL(10, 2), allowNull: false, defaultValue: 0, field: "bag_price" },
   },
   { sequelize, tableName: "order_items", underscored: true, timestamps: false }
 );

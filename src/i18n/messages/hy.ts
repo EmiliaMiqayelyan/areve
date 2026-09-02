@@ -8,7 +8,7 @@ export const messagesHy = {
     noProducts: 'Ապրանքներ դեռ չկան։',
     noReviews: 'Գնահատականներ դեռ չկան։',
     noFaqs: 'ՀՏՀ դեռ չկա։',
-    noGalleryAdmin: 'Պատկերներ դեռ չկան։ Ավելացրեք ադմին Պատկերասրահում։',
+    noGalleryAdmin: 'Պատկերներ դեռ չկան։',
     noProductsFound: 'Ապրանք չի գտնվել։',
     explore: 'Դիտել',
     scroll: 'Ոլորել',
@@ -25,7 +25,6 @@ export const messagesHy = {
   cart: {
     yourBag: 'Ձեր զամբյուղը',
     empty: 'Զամբյուղը դատարկ է',
-    emptyHint: 'Գտեք ինչ-որ գեղեցիկ',
     shopNow: 'Գնել հիմա',
     sendYourOrder: 'Ուղարկել պատվերը',
     chooseMessenger: 'Ընտրեք պատվերի գրանցման տարբերակը',
@@ -52,8 +51,7 @@ export const messagesHy = {
   },
   wishlist: {
     title: 'Նախընտրածներ',
-    empty: 'Դեռ ոչինչ չեք պահել',
-    emptyHint: 'Սեղմեք սրտիկը՝ ապրանքը պահելու համար',
+    empty: 'Նախընտրածներ դեռ չկան',
     shopNow: 'Դիտել ապրանքները',
     viewProduct: 'Մանրամասներ',
     remove: 'Հեռացնել',

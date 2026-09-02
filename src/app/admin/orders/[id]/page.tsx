@@ -134,30 +134,56 @@ export default function OrderDetailsPage() {
                <Package size={18} className="text-[#AFAFAF]" /> Ordered Items
              </h3>
              <div className="space-y-4">
-                {(order.items || []).map((item, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-[#EADFD8] last:border-0 pl-2">
+                {(order.items || []).map((item, i) => {
+                  const stonePrice = Number(item.stonePrice ?? 0);
+                  const bagPrice = Number(item.bagPrice ?? 0);
+                  const netIncome = bagPrice - stonePrice;
+                  return (
+                  <div key={i} className="flex items-start justify-between gap-4 py-2 border-b border-[#EADFD8] last:border-0 pl-2">
                     <div>
-                      <p className="text-[14px] font-bold text-[#2B2B2B]">{item.name}</p>
-                      <p className="text-[13px] text-[#AFAFAF] mt-0.5">Quantity: {item.quantity}</p>
+                      <p className="text-[14px] font-bold text-[#2B2B2B]">
+                        {item.stoneType || item.name || 'Տող'}
+                      </p>
+                      <p className="text-[13px] text-[#AFAFAF] mt-0.5">
+                        {[
+                          item.stoneMm ? `${item.stoneMm}մմ` : '',
+                          item.bagSize || '',
+                        ].filter(Boolean).join(' · ') || `Quantity: ${item.quantity}`}
+                      </p>
+                      {(stonePrice > 0 || bagPrice > 0) && (
+                        <p className="text-[12px] text-[#7A7A7A] mt-1">
+                          Քարի գին {formatPrice(stonePrice)} · Պայուսակի գին {formatPrice(bagPrice)}
+                        </p>
+                      )}
                     </div>
-                    <p className="text-[14px] font-bold text-[#2B2B2B]">{formatPrice(item.price * item.quantity)}</p>
+                    <p className={`text-[14px] font-bold shrink-0 ${netIncome >= 0 ? 'text-[#166534]' : 'text-red-600'}`}>{formatPrice(netIncome)}</p>
                   </div>
-                ))}
+                  );
+                })}
              </div>
              
              <div className="mt-6 border-t border-[#EADFD8] pt-4 space-y-2 text-right">
-                <div className="flex justify-end gap-12 text-[13px] text-[#7A7A7A]">
-                  <span>Subtotal</span>
-                  <span className="w-20 text-[#2B2B2B] font-medium">{formatPrice(order.total)}</span>
-                </div>
-                <div className="flex justify-end gap-12 text-[13px] text-[#7A7A7A]">
-                   <span>Shipping</span>
-                   <span className="w-20 text-[#2B2B2B] font-medium">{formatPrice(0)}</span>
-                </div>
-                <div className="flex justify-end gap-12 text-[15px] font-bold text-[#2B2B2B] pt-2">
-                   <span>Total</span>
-                   <span className="w-20">{formatPrice(order.total)}</span>
-                </div>
+                {(() => {
+                  const stone = (order.items || []).reduce((s, item) => s + Number(item.stonePrice ?? 0), 0);
+                  const bag = (order.items || []).reduce((s, item) => s + Number(item.bagPrice ?? 0), 0);
+                  const net = bag - stone;
+                  return (
+                    <>
+                      <div className="flex justify-end gap-12 text-[13px] text-[#7A7A7A]">
+                        <span>Քարի գին</span>
+                        <span className="w-28 text-[#2B2B2B] font-medium">{formatPrice(stone)}</span>
+                      </div>
+                      <div className="flex justify-end gap-12 text-[13px] text-[#7A7A7A]">
+                        <span>Պայուսակի գին</span>
+                        <span className="w-28 text-[#2B2B2B] font-medium">{formatPrice(bag)}</span>
+                      </div>
+                      <div className="flex justify-end gap-12 text-[15px] font-bold pt-2">
+                        <span>Մաքուր եկամուտ</span>
+                        <span className={`w-28 ${net >= 0 ? 'text-[#166534]' : 'text-red-600'}`}>{formatPrice(net)}</span>
+                      </div>
+                    </>
+                  );
+                })()}
              </div>
           </div>
         </div>

@@ -138,7 +138,7 @@ export const orderStatusSchema = z.object({
 });
 
 export const adminOrderCreateSchema = z.object({
-  customerName: z.string().min(1).max(160),
+  customerName: z.string().max(160).optional(),
   delivery: z.string().max(100).optional(),
   packaging: z.string().max(100).optional(),
   soldAt: z.string().min(1).optional(),
@@ -147,9 +147,14 @@ export const adminOrderCreateSchema = z.object({
       z.object({
         id: z.string().min(1),
         name: z.string().min(1).max(120),
-        quantity: z.coerce.number().int().min(1),
-        price: z.coerce.number().nonnegative(),
+        quantity: z.coerce.number().int().min(1).optional(),
+        price: z.coerce.number().nonnegative().optional(),
         unitCost: z.coerce.number().nonnegative().optional(),
+        stoneType: z.string().max(120).optional(),
+        stoneMm: z.string().max(40).optional(),
+        bagSize: z.string().max(80).optional(),
+        stonePrice: z.coerce.number().nonnegative().optional(),
+        bagPrice: z.coerce.number().nonnegative().optional(),
       })
     )
     .min(1),

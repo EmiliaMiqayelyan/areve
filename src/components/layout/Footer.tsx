@@ -16,7 +16,7 @@ export default function Footer() {
   const pathname = usePathname();
   const { t } = useTranslation();
   const { settings } = useSiteSettings();
-  const { storeName, tagline, footerDescription, instagramUrl, facebookUrl, tiktokUrl, youtubeUrl, siteContent } = settings;
+  const { storeName, instagramUrl, facebookUrl, tiktokUrl, youtubeUrl, siteContent } = settings;
 
   if (pathname.startsWith('/admin')) return null;
 
@@ -30,9 +30,6 @@ export default function Footer() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <Image src={areve} alt={storeName} width="90" height="90" unoptimized />
             </div>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: '#7A7A7A', lineHeight: 1.7 }}>
-              {footerDescription}
-            </p>
             <SocialLinks
               className="mt-2"
               size="sm"
@@ -68,12 +65,9 @@ export default function Footer() {
 
         </div>
 
-        <div className="border-t border-[#E5D9D2] pt-6 flex flex-wrap gap-4 items-center justify-between">
+        <div className="border-t border-[#E5D9D2] pt-6">
           <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#AFAFAF' }}>
             © {new Date().getFullYear()} {storeName}. {siteContent.footer.copyrightSuffix}
-          </p>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: '#AFAFAF' }} className="hidden sm:block">
-            {tagline}
           </p>
         </div>
       </div>

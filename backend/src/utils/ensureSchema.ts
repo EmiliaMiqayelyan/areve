@@ -12,6 +12,11 @@ const STATEMENTS = [
   `ALTER TABLE products ADD COLUMN is_favorite TINYINT(1) NOT NULL DEFAULT 0`,
   `ALTER TABLE products ADD COLUMN sort_order INT NOT NULL DEFAULT 0`,
   `ALTER TABLE order_items ADD COLUMN unit_cost DECIMAL(10,2) NOT NULL DEFAULT 0`,
+  `ALTER TABLE order_items ADD COLUMN stone_type VARCHAR(120) NOT NULL DEFAULT ''`,
+  `ALTER TABLE order_items ADD COLUMN stone_mm VARCHAR(40) NOT NULL DEFAULT ''`,
+  `ALTER TABLE order_items ADD COLUMN bag_size VARCHAR(80) NOT NULL DEFAULT ''`,
+  `ALTER TABLE order_items ADD COLUMN stone_price DECIMAL(10,2) NOT NULL DEFAULT 0`,
+  `ALTER TABLE order_items ADD COLUMN bag_price DECIMAL(10,2) NOT NULL DEFAULT 0`,
 ];
 
 /** Idempotent schema adjustments for dev DBs created before newer columns. */

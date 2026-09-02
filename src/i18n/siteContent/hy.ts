@@ -27,7 +27,7 @@ export const SITE_CONTENT_HY = {
       ['/faq', 'Խնամքի ուղեցույց'],
       ['/faq', 'Առաքում'],
     ] as [string, string][],
-    copyrightSuffix: 'Բոլոր իրավունքները պաշտպանված են։ Ստեղծված է ☀️-ով և սիրով։',
+    copyrightSuffix: 'Բոլոր իրավունքները պաշտպանված են։',
   },
   productCategoryLabels: {
     all: 'Բոլորը',
@@ -136,7 +136,7 @@ export const SITE_CONTENT_HY = {
       emoji: '☀️',
       titleLine1: 'Դարձրու այն',
       titleItalic: 'եզակի',
-      paragraph: 'Անհատական պատվերներ՝ ստեղծված հենց քեզ համար',
+      paragraph: '',
       buttonLabel: 'Պատվիրել',
       buttonHref: '/contact',
     },

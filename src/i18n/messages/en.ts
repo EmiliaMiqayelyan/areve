@@ -8,7 +8,7 @@ export const messagesEn = {
     noProducts: 'No products yet.',
     noReviews: 'No reviews yet.',
     noFaqs: 'No FAQs yet.',
-    noGalleryAdmin: 'No gallery images yet. Add them in the admin Gallery.',
+    noGalleryAdmin: 'No images yet.',
     noProductsFound: 'No products found.',
     explore: 'Explore',
     scroll: 'Scroll',
@@ -25,7 +25,6 @@ export const messagesEn = {
   cart: {
     yourBag: 'Your Bag',
     empty: 'Your bag is empty',
-    emptyHint: 'Discover something beautiful',
     shopNow: 'Shop Now',
     sendYourOrder: 'Send Your Order',
     chooseMessenger: 'Choose how to register your order',
@@ -52,8 +51,7 @@ export const messagesEn = {
   },
   wishlist: {
     title: 'Favorites',
-    empty: 'Nothing saved yet',
-    emptyHint: 'Tap the heart to save an item',
+    empty: 'No favorites yet',
     shopNow: 'Browse products',
     viewProduct: 'View details',
     remove: 'Remove',

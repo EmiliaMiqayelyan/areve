@@ -47,7 +47,18 @@ export interface Order {
   city?: string;
   state?: string;
   zipCode?: string;
-  items: Array<{ id: string; name: string; quantity: number; price: number; unitCost?: number }>;
+  items: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+    price: number;
+    unitCost?: number;
+    stoneType?: string;
+    stoneMm?: string;
+    bagSize?: string;
+    stonePrice?: number;
+    bagPrice?: number;
+  }>;
 }
 
 export interface GalleryImage {
@@ -228,6 +239,11 @@ export const useAdminStore = create<AdminStore>()(
                   price: Number(item.price ?? 0),
                   quantity: Number(item.quantity ?? 0),
                   unitCost: Number(item.unitCost ?? 0),
+                  stoneType: String(item.stoneType ?? ''),
+                  stoneMm: String(item.stoneMm ?? ''),
+                  bagSize: String(item.bagSize ?? ''),
+                  stonePrice: Number(item.stonePrice ?? 0),
+                  bagPrice: Number(item.bagPrice ?? 0),
                 }))
               : [],
           }));

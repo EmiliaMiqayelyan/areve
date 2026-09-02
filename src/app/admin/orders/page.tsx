@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useState, useMemo } from 'react';
 import AdminSelect from '@/components/admin/AdminSelect';
 import { formatPrice } from '@/lib/currency';
+import { orderNetIncome } from '@/lib/orderTotals';
 
 const STATUS_FILTER_OPTIONS = [
   { value: 'All', label: 'All Statuses' },
@@ -109,7 +110,7 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="py-4 px-6">
                     <p className="text-[14px] font-bold text-[#2B2B2B]">
-                      {formatPrice(order.total)}
+                      {formatPrice(orderNetIncome(order))}
                     </p>
                   </td>
                   <td className="py-4 px-6">
