@@ -210,12 +210,19 @@ async function updateAdminOrder(req, res) {
                 productName: String(row.name ?? row.productName ?? "Item"),
                 quantity: Number(row.quantity ?? 1),
                 unitPrice: Number(row.price ?? row.unitPrice ?? 0),
+                unitCost: Number(row.unitCost ?? 0),
+                stoneType: String(row.stoneType ?? ""),
+                stoneMm: String(row.stoneMm ?? ""),
+                bagSize: String(row.bagSize ?? ""),
+                stonePrice: Number(row.stonePrice ?? 0),
+                bagPrice: Number(row.bagPrice ?? 0),
             });
         }
         const total = items.reduce((sum, item) => {
+            const bagPrice = Number(item.bagPrice ?? 0);
             const qty = Number(item.quantity ?? 1);
             const price = Number(item.price ?? item.unitPrice ?? 0);
-            return sum + qty * price;
+            return sum + (bagPrice || qty * price);
         }, 0);
         await models_1.Order.update({ total }, { where: { id } });
     }
@@ -236,9 +243,12 @@ async function deleteAdminOrder(req, res) {
 async function createAdminOrder(req, res) {
     const body = req.body;
     const id = `ADM-${Date.now()}`;
-    const customerName = body.customerName || `${body.firstName || ""} ${body.lastName || ""}`.trim() || "Customer";
+    const customerName = (body.customerName || `${body.firstName || ""} ${body.lastName || ""}`.trim() || "—").trim();
     const customerEmail = "sale@areve.com";
-    const total = body.items.reduce((sum, item) => sum + Number(item.price ?? 0) * Number(item.quantity ?? 1), 0);
+    const total = body.items.reduce((sum, item) => {
+        const bagPrice = Number(item.bagPrice ?? 0);
+        return sum + (bagPrice || Number(item.price ?? 0) * Number(item.quantity ?? 1));
+    }, 0);
     const soldAt = body.soldAt ? new Date(body.soldAt) : new Date();
     await models_1.Order.create({
         id,
@@ -253,20 +263,30 @@ async function createAdminOrder(req, res) {
         createdAt: soldAt,
     });
     for (const item of body.items) {
+        const stonePrice = Number(item.stonePrice ?? 0);
+        const bagPrice = Number(item.bagPrice ?? 0);
+        const quantity = Number(item.quantity ?? 1) || 1;
+        const unitPrice = bagPrice || Number(item.price ?? 0);
         const product = await models_1.Product.findByPk(String(item.id));
-        const unitCost = item.unitCost !== undefined
-            ? Number(item.unitCost)
-            : product
-                ? Number(product.toJSON().cost ?? 0)
-                : 0;
+        const unitCost = stonePrice ||
+            (item.unitCost !== undefined
+                ? Number(item.unitCost)
+                : product
+                    ? Number(product.toJSON().cost ?? 0)
+                    : 0);
         await models_1.OrderItem.create({
             id: (0, crypto_1.randomUUID)(),
             orderId: id,
             productId: item.id,
             productName: item.name,
-            quantity: item.quantity,
-            unitPrice: item.price,
+            quantity,
+            unitPrice,
             unitCost,
+            stoneType: (item.stoneType || "").trim(),
+            stoneMm: (item.stoneMm || "").trim(),
+            bagSize: (item.bagSize || "").trim(),
+            stonePrice,
+            bagPrice,
         });
     }
     const created = await models_1.Order.findByPk(id, {

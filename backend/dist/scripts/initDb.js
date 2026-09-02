@@ -34,6 +34,11 @@ async function run() {
         `ALTER TABLE settings ADD COLUMN tiktok_url VARCHAR(255) NOT NULL DEFAULT ''`,
         `ALTER TABLE settings ADD COLUMN youtube_url VARCHAR(255) NOT NULL DEFAULT ''`,
         `ALTER TABLE settings ADD COLUMN site_content JSON NULL`,
+        `ALTER TABLE order_items ADD COLUMN stone_type VARCHAR(120) NOT NULL DEFAULT ''`,
+        `ALTER TABLE order_items ADD COLUMN stone_mm VARCHAR(40) NOT NULL DEFAULT ''`,
+        `ALTER TABLE order_items ADD COLUMN bag_size VARCHAR(80) NOT NULL DEFAULT ''`,
+        `ALTER TABLE order_items ADD COLUMN stone_price DECIMAL(10,2) NOT NULL DEFAULT 0`,
+        `ALTER TABLE order_items ADD COLUMN bag_price DECIMAL(10,2) NOT NULL DEFAULT 0`,
     ];
     for (const sql of migrations) {
         try {

@@ -7,6 +7,7 @@ const optionalUrlOrEmpty = zod_1.z.union([zod_1.z.string().url(), zod_1.z.litera
 const telegramContactOrEmpty = zod_1.z.union([
     zod_1.z.string().url(),
     zod_1.z.string().regex(/^@?[A-Za-z0-9_]{5,32}$/),
+    zod_1.z.string().regex(/^\+?\d{8,15}$/),
     zod_1.z.literal(""),
 ]).optional();
 const localizedTextSchema = zod_1.z
@@ -124,7 +125,7 @@ exports.orderStatusSchema = zod_1.z.object({
     status: zod_1.z.enum(["pending", "shipped", "delivered"]),
 });
 exports.adminOrderCreateSchema = zod_1.z.object({
-    customerName: zod_1.z.string().min(1).max(160),
+    customerName: zod_1.z.string().max(160).optional(),
     delivery: zod_1.z.string().max(100).optional(),
     packaging: zod_1.z.string().max(100).optional(),
     soldAt: zod_1.z.string().min(1).optional(),
@@ -132,9 +133,14 @@ exports.adminOrderCreateSchema = zod_1.z.object({
         .array(zod_1.z.object({
         id: zod_1.z.string().min(1),
         name: zod_1.z.string().min(1).max(120),
-        quantity: zod_1.z.coerce.number().int().min(1),
-        price: zod_1.z.coerce.number().nonnegative(),
+        quantity: zod_1.z.coerce.number().int().min(1).optional(),
+        price: zod_1.z.coerce.number().nonnegative().optional(),
         unitCost: zod_1.z.coerce.number().nonnegative().optional(),
+        stoneType: zod_1.z.string().max(120).optional(),
+        stoneMm: zod_1.z.string().max(40).optional(),
+        bagSize: zod_1.z.string().max(80).optional(),
+        stonePrice: zod_1.z.coerce.number().nonnegative().optional(),
+        bagPrice: zod_1.z.coerce.number().nonnegative().optional(),
     }))
         .min(1),
 });

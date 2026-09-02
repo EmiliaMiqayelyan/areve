@@ -105,6 +105,11 @@ function formatOrderItem(item) {
         quantity: Number(j.quantity ?? 0),
         price: Number(j.unitPrice ?? j.unit_price ?? 0),
         unitCost: Number(j.unitCost ?? j.unit_cost ?? 0),
+        stoneType: String(j.stoneType ?? j.stone_type ?? ""),
+        stoneMm: String(j.stoneMm ?? j.stone_mm ?? ""),
+        bagSize: String(j.bagSize ?? j.bag_size ?? ""),
+        stonePrice: Number(j.stonePrice ?? j.stone_price ?? 0),
+        bagPrice: Number(j.bagPrice ?? j.bag_price ?? 0),
     };
 }
 function formatOrder(order) {

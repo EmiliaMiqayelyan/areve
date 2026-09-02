@@ -29,7 +29,7 @@ exports.DEFAULT_SITE_CONTENT = {
             ['/faq', 'Խնամքի ուղեցույց'],
             ['/faq', 'Առաքում'],
         ],
-        copyrightSuffix: 'Բոլոր իրավունքները պաշտպանված են։ Ստեղծված է ☀️-ով և սիրով։',
+        copyrightSuffix: 'Բոլոր իրավունքները պաշտպանված են։',
     },
     productCategoryLabels: {
         all: 'Բոլորը',
@@ -137,7 +137,7 @@ exports.DEFAULT_SITE_CONTENT = {
             emoji: '☀️',
             titleLine1: 'Դարձրու այն',
             titleItalic: 'եզակի',
-            paragraph: 'Անհատական պատվերներ՝ ստեղծված հենց քեզ համար',
+            paragraph: '',
             buttonLabel: 'Պատվիրել',
             buttonHref: '/contact',
         },
