@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
-import { apiFetch } from './api';
+import { ApiError, apiFetch } from './api';
+import { storeExtraImages } from './extraProductImages';
 import { adminProductApiPath, normalizeResourceId, resourceIdsMatch } from './resourceId';
 import type { LocalizedText } from './localizedText';
 
@@ -10,6 +11,7 @@ export interface Product {
   name: LocalizedText | string;
   price: number | string;
   image: string;
+  images?: string[];
   category: string;
   cost?: number | string;
   badge?: LocalizedText | string | null;
@@ -258,9 +260,22 @@ export const useAdminStore = create<AdminStore>()(
       // Products
       products: [],
       addProduct: async (product) => {
-        if (get().token) {
+        const token = get().token;
+        if (token) {
           try {
-            await apiFetch('/admin/products', { method: 'POST', body: JSON.stringify(product) }, get().token || undefined);
+            const { images, ...rest } = product;
+            const created = await apiFetch<Product>('/admin/products', { method: 'POST', body: JSON.stringify(rest) }, token);
+            if (images?.length) {
+              const mainImage = created.image || product.image;
+              await storeExtraImages({
+                id: created.id || product.id,
+                token,
+                mainImage,
+                previousImage: mainImage,
+                extras: images,
+                updates: { image: mainImage },
+              });
+            }
             await get().hydrateFromApi();
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
@@ -273,17 +288,39 @@ export const useAdminStore = create<AdminStore>()(
       },
       updateProduct: async (id, updates) => {
         const normalizedId = normalizeResourceId(id);
+        const token = get().token;
+        if (token && Array.isArray(updates.images)) {
+          try {
+            const current = get().products.find((item) => resourceIdsMatch(item.id, normalizedId));
+            const mainImage = typeof updates.image === 'string' ? updates.image : current?.image || '';
+            await storeExtraImages({
+              id: normalizedId,
+              token,
+              mainImage,
+              previousImage: current?.image || mainImage,
+              extras: updates.images,
+              updates,
+            });
+            await get().hydrateFromApi();
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            if (isAuthErrorMessage(message) || (err instanceof ApiError && err.status === 401)) get().logout();
+            throw err;
+          }
+          return;
+        }
+
         set((state) => ({
           products: state.products.map((p) =>
             resourceIdsMatch(p.id, normalizedId) ? { ...p, ...updates } : p
           ),
         }));
-        if (get().token) {
+        if (token) {
           try {
             await apiFetch(
               adminProductApiPath(normalizedId),
               { method: 'PUT', body: JSON.stringify(updates) },
-              get().token || undefined
+              token
             );
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err);

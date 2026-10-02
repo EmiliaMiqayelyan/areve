@@ -9,6 +9,7 @@ import StoreImage from '@/components/ui/StoreImage';
 import BilingualField from '@/components/admin/BilingualField';
 import AdminSelect from '@/components/admin/AdminSelect';
 import AdminSaveButton from '@/components/admin/AdminSaveButton';
+import ExtraProductImages, { emptyExtraImages } from '@/components/admin/ExtraProductImages';
 import { emptyLocalized, pickLocalized, type LocalizedText } from '@/lib/localizedText';
 import { createProductId } from '@/lib/resourceId';
 import { CURRENCY_SYMBOL } from '@/lib/currency';
@@ -53,6 +54,7 @@ export default function AddProductPage() {
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [isFavorite, setIsFavorite] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [extraImages, setExtraImages] = useState<string[]>(emptyExtraImages);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -80,6 +82,7 @@ export default function AddProductPage() {
         status,
         isFavorite,
         image: nextImage,
+        images: extraImages.map((src) => src.trim()).filter(Boolean),
       });
 
       router.push('/admin/products');
@@ -135,7 +138,7 @@ export default function AddProductPage() {
           <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm space-y-5">
             <h3 className="text-[15px] font-bold text-[#2B2B2B] border-b border-[#EADFD8] pb-4">Media</h3>
             <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Product Images</label>
+              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Main photo</label>
               <div
                 className="border-2 border-dashed border-[#EADFD8] bg-[#F8F5F2] rounded-xl p-8 flex flex-col items-center justify-center text-center relative hover:bg-[#EADFD8]/30 transition-colors cursor-pointer"
                 onClick={() => document.getElementById('image-upload')?.click()}
@@ -160,6 +163,7 @@ export default function AddProductPage() {
                 />
               </div>
             </div>
+            <ExtraProductImages values={extraImages} onChange={setExtraImages} />
           </div>
         </div>
 

@@ -26,7 +26,7 @@ const PUBLIC_LIST_ATTRIBUTES = [
   "createdAt",
 ] as const;
 
-const PUBLIC_DETAIL_ATTRIBUTES = [...PUBLIC_LIST_ATTRIBUTES, "description"] as const;
+const PUBLIC_DETAIL_ATTRIBUTES = [...PUBLIC_LIST_ATTRIBUTES, "description", "images"] as const;
 
 function setPublicCache(res: Response, maxAge = 60) {
   res.setHeader("Cache-Control", `public, max-age=${maxAge}, stale-while-revalidate=${maxAge * 5}`);

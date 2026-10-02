@@ -20,6 +20,20 @@ function publicImageSrc(image: unknown): string {
   return src;
 }
 
+function publicExtraImages(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<string>();
+  const images: string[] = [];
+  for (const item of value) {
+    const src = String(item ?? "").trim();
+    if (!src || src.startsWith("data:") || src.startsWith("blob:") || seen.has(src)) continue;
+    seen.add(src);
+    images.push(src);
+    if (images.length === 3) break;
+  }
+  return images;
+}
+
 function asRecord(value: unknown): JsonRecord {
   if (value && typeof value === "object" && !Array.isArray(value)) {
     return value as JsonRecord;
@@ -57,6 +71,7 @@ export function formatProduct(product: Product | JsonRecord, opts?: FormatOption
 
   if (!opts?.list) {
     payload.description = j.description != null ? formatLocalizedField(j.description, opts) : null;
+    payload.images = publicExtraImages(j.images);
   }
 
   return payload;

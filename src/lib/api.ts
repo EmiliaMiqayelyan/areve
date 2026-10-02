@@ -6,7 +6,7 @@ export function getApiBaseUrl(): string {
   if (ENV_API_BASE) return ENV_API_BASE;
   return process.env.BACKEND_URL
     ? `${process.env.BACKEND_URL.replace(/\/$/, '')}/api`
-    : 'http://localhost:4000/api';
+    : 'https://arevecollections.am/api';
 }
 
 export class ApiError extends Error {

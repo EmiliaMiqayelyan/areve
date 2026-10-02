@@ -12,6 +12,8 @@ import StoreImage from '@/components/ui/StoreImage';
 import BilingualField from '@/components/admin/BilingualField';
 import AdminSelect from '@/components/admin/AdminSelect';
 import AdminSaveButton from '@/components/admin/AdminSaveButton';
+import ExtraProductImages, { emptyExtraImages, padExtraImages } from '@/components/admin/ExtraProductImages';
+import { readExtraImages } from '@/lib/extraProductImages';
 import { emptyLocalized, parseLocalized, pickLocalized, type LocalizedText } from '@/lib/localizedText';
 
 async function fileToDataUrl(file: File): Promise<string> {
@@ -58,12 +60,14 @@ export default function EditProductPage() {
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [isFavorite, setIsFavorite] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [extraImages, setExtraImages] = useState<string[]>(emptyExtraImages);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const formProduct = fetchedProduct ?? product;
+
   useEffect(() => {
-    if (product || !id || loading) return;
-    if (!token) return;
+    if (!id || !token || loading) return;
 
     let cancelled = false;
     setFetching(true);
@@ -81,29 +85,29 @@ export default function EditProductPage() {
     return () => {
       cancelled = true;
     };
-  }, [product, id, loading, token]);
+  }, [id, loading, token]);
 
   useEffect(() => {
-    if (product) {
-      setName(parseLocalized(product.name));
-      setPrice(product.price.toString());
-      setCost(String(product.cost ?? 0));
-      setCategory(product.category);
-      setStatus(product.status || 'active');
-      setIsFavorite(Boolean(product.isFavorite));
-      setImagePreview(product.image);
-    }
-  }, [product]);
+    if (!formProduct) return;
+    setName(parseLocalized(formProduct.name));
+    setPrice(formProduct.price.toString());
+    setCost(String(formProduct.cost ?? 0));
+    setCategory(formProduct.category);
+    setStatus(formProduct.status || 'active');
+    setIsFavorite(Boolean(formProduct.isFavorite));
+    setImagePreview(formProduct.image);
+    setExtraImages(padExtraImages(readExtraImages(formProduct)));
+  }, [formProduct]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!product || !name.hy.trim() || !price || !category) return;
+    if (!formProduct || !name.hy.trim() || !price || !category) return;
 
     try {
       setSaving(true);
       setError('');
-      const nextImage = imagePreview || product.image;
-      await updateProduct(product.id, {
+      const nextImage = imagePreview || formProduct.image;
+      await updateProduct(formProduct.id, {
         name: { hy: name.hy.trim(), en: name.en.trim() },
         price: parseFloat(price),
         cost: cost ? parseFloat(cost) : 0,
@@ -111,6 +115,7 @@ export default function EditProductPage() {
         status,
         isFavorite,
         image: nextImage,
+        images: extraImages.map((src) => src.trim()).filter(Boolean),
       });
 
       router.push('/admin/products');
@@ -129,7 +134,7 @@ export default function EditProductPage() {
     }
   };
 
-  if (loading || fetching) {
+  if (loading || (Boolean(token) && fetching)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-[#7A7A7A] text-[14px]">
         Loading product...
@@ -137,7 +142,7 @@ export default function EditProductPage() {
     );
   }
 
-  if (!product) {
+  if (!formProduct) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <h2 className="text-xl font-bold mb-4 font-serif text-[#2B2B2B]">Product not found</h2>
@@ -155,7 +160,7 @@ export default function EditProductPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-serif font-bold text-[#2B2B2B]">Edit Product</h1>
-          <p className="text-[13px] text-[#7A7A7A] mt-0.5">Editing {product.id}</p>
+          <p className="text-[13px] text-[#7A7A7A] mt-0.5">Editing {formProduct.id}</p>
         </div>
       </div>
 
@@ -177,7 +182,7 @@ export default function EditProductPage() {
           <div className="bg-white p-6 rounded-2xl border border-[#EADFD8] shadow-sm space-y-5">
             <h3 className="text-[15px] font-bold text-[#2B2B2B] border-b border-[#EADFD8] pb-4">Media</h3>
             <div className="space-y-1.5">
-              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Product Images</label>
+              <label className="text-[12px] font-bold text-[#7A7A7A] uppercase tracking-wider">Main photo</label>
               <div
                 className="border-2 border-dashed border-[#EADFD8] bg-[#F8F5F2] rounded-xl p-8 flex flex-col items-center justify-center text-center relative hover:bg-[#EADFD8]/30 transition-colors cursor-pointer"
                 onClick={() => document.getElementById('image-upload')?.click()}
@@ -201,6 +206,7 @@ export default function EditProductPage() {
                 />
               </div>
             </div>
+            <ExtraProductImages values={extraImages} onChange={setExtraImages} />
           </div>
         </div>
 

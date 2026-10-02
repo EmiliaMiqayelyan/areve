@@ -42,6 +42,7 @@ export const productSchema = z.object({
   name: localizedTextSchema,
   price: z.coerce.number().positive(),
   image: z.string().min(1),
+  images: z.array(z.string().min(1)).max(3).optional(),
   category: z.string().min(1).max(64),
   cost: z.coerce.number().nonnegative().optional(),
   badge: optionalLocalizedTextSchema,

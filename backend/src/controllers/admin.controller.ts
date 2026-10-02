@@ -38,6 +38,21 @@ async function categoryExists(categoryId: string) {
   return Boolean(await Category.findByPk(categoryId));
 }
 
+async function persistExtraImages(images: unknown, productId: string): Promise<string[]> {
+  if (!Array.isArray(images)) return [];
+  const stored: string[] = [];
+  for (let index = 0; index < Math.min(images.length, 3); index += 1) {
+    const raw = String(images[index] ?? "").trim();
+    if (!raw) continue;
+    stored.push(
+      isDataUrlImage(raw)
+        ? await persistDataUrlImage(raw, "products", `${productId}-x${index}`)
+        : raw
+    );
+  }
+  return stored;
+}
+
 export async function getAdminProducts(_req: Request, res: Response) {
   const rows = await Product.findAll({ order: [["sortOrder", "ASC"], ["createdAt", "DESC"]] });
   return res.json(rows.map((row) => formatProduct(row, { bilingual: true })));
@@ -51,7 +66,7 @@ export async function getAdminProduct(req: Request, res: Response) {
 }
 
 export async function createAdminProduct(req: Request, res: Response) {
-  const { id: clientId, ...data } = req.body as Record<string, unknown>;
+  const { id: clientId, images: rawImages, ...data } = req.body as Record<string, unknown>;
   if (typeof data.category === "string" && !(await categoryExists(data.category))) {
     return res.status(400).json({ message: "Category not found" });
   }
@@ -65,6 +80,7 @@ export async function createAdminProduct(req: Request, res: Response) {
     return res.status(400).json({ message: "Image is required" });
   }
 
+  const extraImages = await persistExtraImages(rawImages, id);
   const minSort = await Product.min("sortOrder");
   const sortOrder = Number.isFinite(Number(minSort)) ? Number(minSort) - 1 : 0;
 
@@ -72,6 +88,7 @@ export async function createAdminProduct(req: Request, res: Response) {
     ...data,
     id,
     image,
+    images: extraImages.length ? extraImages : null,
     sortOrder,
   });
   return res.status(201).json(formatProduct(row, { bilingual: true }));
@@ -90,9 +107,14 @@ export async function updateAdminProduct(req: Request, res: Response) {
   if (typeof body.image === "string" && isDataUrlImage(body.image)) {
     body.image = await persistDataUrlImage(body.image, "products", id);
   }
+  if (Array.isArray(body.images)) {
+    const extraImages = await persistExtraImages(body.images, id);
+    body.images = extraImages.length ? extraImages : null;
+  }
 
-  const [affected] = await Product.update(body, { where: { id } });
-  if (!affected) return res.status(404).json({ message: "Product not found" });
+  const existing = await Product.findByPk(id);
+  if (!existing) return res.status(404).json({ message: "Product not found" });
+  await Product.update(body, { where: { id } });
   const row = await Product.findByPk(id);
   return res.json({
     message: "Product updated",
