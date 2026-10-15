@@ -274,7 +274,9 @@ html.locale-en .section-title {
 }
 
 /* ── Buttons ──────────────────────────── */
-.btn {
+.btn,
+.btn-dark,
+.btn-ghost-light {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -296,7 +298,9 @@ html.locale-en .section-title {
     border-color 0.3s var(--ease-brand);
 }
 
-.btn:disabled {
+.btn:disabled,
+.btn-dark:disabled,
+.btn-ghost-light:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }

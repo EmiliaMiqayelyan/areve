@@ -10,16 +10,16 @@ import { InstagramIcon, WhatsAppIcon } from '@/components/ui/BrandIcons';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
 import type { Locale } from '@/i18n/types';
-import type { CatalogCategory } from '@/lib/useCatalog';
+
+const LOCALE_NAMES: Partial<Record<Locale, string>> = { hy: 'Հայերեն', en: 'English' };
 
 type Props = {
   navLinks: ReadonlyArray<{ href: string; label: string }>;
-  categories: CatalogCategory[];
   isActive: (href: string) => boolean;
   onClose: () => void;
 };
 
-export default function MobileMenu({ navLinks, categories, isActive, onClose }: Props) {
+export default function MobileMenu({ navLinks, isActive, onClose }: Props) {
   const { t, locale, setLocale, locales, localeLabels } = useTranslation();
   const { settings } = useSiteSettings();
 
@@ -54,79 +54,66 @@ export default function MobileMenu({ navLinks, categories, isActive, onClose }: 
       >
         <div className="flex h-[var(--header-h)] items-center justify-between border-b border-border px-5">
           <Link href="/" onClick={onClose} aria-label="AREVÉ Collections">
-            <Image src={areve} alt="AREVÉ Collections" className="h-9 w-auto" unoptimized />
+            <Image src={areve} alt="AREVÉ Collections" className="h-8 w-auto" unoptimized />
           </Link>
           <button type="button" className="icon-btn -mr-2" onClick={onClose} aria-label={t('header.close')}>
-            <X size={22} strokeWidth={1.4} />
+            <X size={19} strokeWidth={1.4} />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pb-8">
-          <nav aria-label="Mobile" className="border-b border-border py-4">
+          <nav aria-label="Mobile" className="border-b border-border py-3">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={onClose}
                 aria-current={isActive(link.href) ? 'page' : undefined}
-                className={`flex items-center justify-between py-3 font-display text-[22px] no-underline ${
+                className={`flex items-center justify-between py-2 text-[15px] no-underline ${
                   isActive(link.href) ? 'text-primary-deep' : 'text-text'
                 }`}
               >
                 {link.label}
-                <ArrowRight size={16} strokeWidth={1.3} className="text-muted" />
+                <ArrowRight size={14} strokeWidth={1.3} className="text-muted" />
               </Link>
             ))}
           </nav>
 
-          {categories.length > 0 && (
-            <div className="border-b border-border py-5">
-              <p className="eyebrow mb-3">{t('footer.shop')}</p>
-              <ul className="grid grid-cols-1 gap-0.5">
-                {categories.map((cat) => (
-                  <li key={cat.id}>
-                    <Link
-                      href={`/products?category=${encodeURIComponent(cat.id)}`}
-                      onClick={onClose}
-                      className="flex items-center justify-between py-2 text-[15px] text-text no-underline"
+          <div className="flex items-center justify-between border-b border-border py-4">
+            <span className="text-[11px] uppercase tracking-[0.16em] text-muted">{t('header.language')}</span>
+            <div className="flex items-center gap-3" role="group" aria-label={t('header.language')}>
+              {locales.map((code, i) => {
+                const active = locale === code;
+                return (
+                  <span key={code} className="flex items-center gap-3">
+                    {i > 0 && <span aria-hidden className="h-3 w-px bg-border" />}
+                    <button
+                      type="button"
+                      onClick={() => setLocale(code as Locale)}
+                      aria-pressed={active}
+                      className={`cursor-pointer border-none bg-transparent px-0 py-1 text-[13px] transition-colors ${
+                        active
+                          ? 'text-text underline decoration-primary decoration-1 underline-offset-[6px]'
+                          : 'text-muted hover:text-text'
+                      }`}
                     >
-                      <span>{cat.label}</span>
-                      <span className="text-[12px] tabular-nums text-muted">{cat.count}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="border-b border-border py-5">
-            <p className="eyebrow mb-3">{t('header.language')}</p>
-            <div className="inline-flex border border-border">
-              {locales.map((code) => (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => setLocale(code as Locale)}
-                  aria-pressed={locale === code}
-                  className={`min-w-[64px] cursor-pointer border-none px-4 py-2.5 text-[13px] transition-colors ${
-                    locale === code ? 'bg-secondary text-background' : 'bg-transparent text-text'
-                  }`}
-                >
-                  {localeLabels[code as Locale]}
-                </button>
-              ))}
+                      {LOCALE_NAMES[code as Locale] ?? localeLabels[code as Locale]}
+                    </button>
+                  </span>
+                );
+              })}
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 py-5">
+          <div className="flex flex-col gap-2.5 py-4">
             {settings.whatsappUrl && (
-              <a href={settings.whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-[14px] text-text no-underline">
-                <WhatsAppIcon size={17} className="text-primary-deep" /> WhatsApp
+              <a href={settings.whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-[13px] text-text no-underline">
+                <WhatsAppIcon size={15} className="text-primary-deep" /> WhatsApp
               </a>
             )}
             {settings.instagramUrl && (
-              <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-[14px] text-text no-underline">
-                <InstagramIcon size={17} className="text-primary-deep" /> Instagram
+              <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-[13px] text-text no-underline">
+                <InstagramIcon size={15} className="text-primary-deep" /> Instagram
               </a>
             )}
           </div>

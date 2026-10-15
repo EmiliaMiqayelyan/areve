@@ -23,9 +23,6 @@ export const SITE_CONTENT_HY = {
     support: [
       ['/faq', 'ՀՏՀ'],
       ['/contact', 'Կապ մեզ հետ'],
-      ['/contact', 'Անհատական պատվերներ'],
-      ['/faq', 'Խնամքի ուղեցույց'],
-      ['/faq', 'Առաքում'],
     ] as [string, string][],
     copyrightSuffix: 'Բոլոր իրավունքները պաշտպանված են։',
   },

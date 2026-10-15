@@ -23,9 +23,6 @@ export const SITE_CONTENT_EN = {
     support: [
       ["/faq", "FAQ"],
       ["/contact", "Contact Us"],
-      ["/contact", "Custom Orders"],
-      ["/faq", "Care Guide"],
-      ["/faq", "Shipping"],
     ] as [string, string][],
     copyrightSuffix: 'All rights reserved.',
   },

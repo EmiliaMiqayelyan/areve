@@ -51,9 +51,8 @@ export default function Footer() {
             <Link href="/" aria-label={storeName.trim() || 'AREVÉ'} className="inline-block">
               <Image src={areve} alt="AREVÉ Collections" className="h-16 w-auto lg:h-20" unoptimized />
             </Link>
-            <p className="mt-6 max-w-xs font-display text-[18px] leading-snug text-background/90">{tagline}</p>
             {footerDescription && footerDescription !== tagline && (
-              <p className="mt-2 max-w-xs text-[14px] text-background/60">{footerDescription}</p>
+              <p className="mt-6 max-w-xs text-[14px] text-background/60">{footerDescription}</p>
             )}
             <SocialLinks
               className="mt-7"
@@ -66,10 +65,10 @@ export default function Footer() {
           </div>
 
           {categories.length > 0 && (
-            <div className="lg:col-span-3">
+            <div className="hidden md:block lg:col-span-3">
               <h2 className={headingClass}>{t('footer.shop')}</h2>
               <ul className="flex flex-col gap-3">
-                {categories.map((cat) => (
+                {categories.filter((cat) => cat.id !== 'crochet-toys').map((cat) => (
                   <li key={cat.id}>
                     <Link href={`/products?category=${encodeURIComponent(cat.id)}`} className={linkClass}>
                       {cat.label}
@@ -80,7 +79,7 @@ export default function Footer() {
             </div>
           )}
 
-          <div className="lg:col-span-2">
+          <div className="col-span-2 md:col-span-1 lg:col-span-2">
             <h2 className={headingClass}>{t('footer.explore')}</h2>
             <ul className="flex flex-col gap-3">
               {infoLinks.map(([href, label], i) => (

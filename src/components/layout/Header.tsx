@@ -21,6 +21,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [catMenuSuppressed, setCatMenuSuppressed] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
@@ -60,6 +61,11 @@ export default function Header() {
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+
+  const closeCatMenu = () => {
+    setCatMenuSuppressed(true);
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  };
 
   const cartCount = mounted ? count() : 0;
   const wishCount = mounted ? wishlist.length : 0;
@@ -118,7 +124,11 @@ export default function Header() {
                 const active = isActive(link.href);
                 const isShop = link.href === '/products';
                 return (
-                  <div key={`${link.href}-${locale}`} className={isShop ? 'group relative' : undefined}>
+                  <div
+                    key={`${link.href}-${locale}`}
+                    className={isShop ? 'group relative' : undefined}
+                    onMouseLeave={isShop ? () => setCatMenuSuppressed(false) : undefined}
+                  >
                     <Link
                       href={link.href}
                       aria-current={active ? 'page' : undefined}
@@ -130,18 +140,25 @@ export default function Header() {
                     >
                       {link.label}
                       {isShop && categories.length > 0 && (
-                        <ChevronDown size={13} strokeWidth={1.6} className="transition-transform duration-300 group-hover:rotate-180" />
+                        <ChevronDown size={13} strokeWidth={1.6} className={`transition-transform duration-300 ${catMenuSuppressed ? '' : 'group-hover:rotate-180'}`} />
                       )}
                     </Link>
 
                     {isShop && categories.length > 0 && (
-                      <div className="invisible absolute left-[-24px] top-full z-50 pt-3 opacity-0 transition-all duration-200 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                      <div
+                        className={`invisible absolute left-[-24px] top-full z-50 pt-3 opacity-0 transition-all duration-200 ${
+                          catMenuSuppressed
+                            ? ''
+                            : 'group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100'
+                        }`}
+                      >
                         <div className="w-[300px] border border-border bg-background p-2 shadow-[0_18px_40px_-20px_rgba(21,18,15,0.25)]">
                           <ul className="py-1">
                             {categories.map((cat) => (
                               <li key={cat.id}>
                                 <Link
                                   href={`/products?category=${encodeURIComponent(cat.id)}`}
+                                  onClick={closeCatMenu}
                                   className="flex items-center justify-between gap-4 px-4 py-2.5 text-[14px] text-text no-underline transition-colors hover:bg-surface"
                                 >
                                   <span>{cat.label}</span>
@@ -152,6 +169,7 @@ export default function Header() {
                           </ul>
                           <Link
                             href="/products"
+                            onClick={closeCatMenu}
                             className="mt-1 flex items-center justify-between border-t border-border px-4 py-3 text-[12px] font-medium uppercase tracking-[0.12em] text-primary-deep no-underline hover:text-text"
                           >
                             {t('header.allProducts')}
@@ -246,7 +264,6 @@ export default function Header() {
         {mobileOpen && (
           <MobileMenu
             navLinks={navLinks}
-            categories={categories}
             isActive={isActive}
             onClose={() => setMobileOpen(false)}
           />
