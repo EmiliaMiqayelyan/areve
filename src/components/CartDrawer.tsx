@@ -2,14 +2,17 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingBag, Minus, Plus, Trash2, ChevronLeft } from 'lucide-react';
+import { X, ShoppingBag, Minus, Plus, ChevronLeft, ArrowRight } from 'lucide-react';
 import StoreImage from '@/components/ui/StoreImage';
+import { TelegramIcon, WhatsAppIcon } from '@/components/ui/BrandIcons';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/store';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { buildOrderMessage } from '@/lib/buildOrderMessage';
 import { formatPrice } from '@/lib/currency';
+import { resolveProductImageSrc } from '@/lib/productImage';
+import { publicProductPath } from '@/lib/resourceId';
 import {
   buildTelegramOrderUrl,
   buildWhatsAppOrderUrl,
@@ -37,6 +40,20 @@ export default function CartDrawer() {
       setSending(false);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') toggleCart();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [isOpen, toggleCart]);
 
   const cartTotal = total();
   const itemCount = count();
@@ -95,8 +112,7 @@ export default function CartDrawer() {
     }
   }, [items, sending, cartTotal, itemCount, channel, settings, t]);
 
-  const headerTitle =
-    step === 'review' ? t('cart.yourBag') : t('cart.chooseMessenger');
+  const headerTitle = step === 'review' ? t('cart.yourBag') : t('cart.chooseMessenger');
 
   return (
     <AnimatePresence>
@@ -107,349 +123,140 @@ export default function CartDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={toggleCart}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(43,43,43,0.25)',
-              backdropFilter: 'blur(4px)',
-              zIndex: 60,
-            }}
+            className="fixed inset-0 z-[60] bg-secondary/40"
           />
-          <motion.div
+          <motion.aside
+            role="dialog"
+            aria-modal="true"
+            aria-label={headerTitle}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-            style={{
-              position: 'fixed',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              width: '100%',
-              maxWidth: 400,
-              background: '#F8F5F2',
-              zIndex: 70,
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '-8px 0 40px rgba(180,156,140,0.18)',
-            }}
+            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[440px] flex-col bg-background"
           >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-                padding: '16px 20px',
-                borderBottom: '1px solid #EADFD8',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+            <div className="flex h-[var(--header-h)] shrink-0 items-center justify-between gap-3 border-b border-border px-5 sm:px-6">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
                 {step === 'messenger' && (
                   <button
                     type="button"
                     onClick={() => setStep('review')}
                     aria-label={t('cart.back')}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: '#7A7A7A',
-                      padding: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      flexShrink: 0,
-                    }}
+                    className="icon-btn -ml-2.5 shrink-0"
                   >
-                    <ChevronLeft size={18} />
+                    <ChevronLeft size={20} strokeWidth={1.4} />
                   </button>
                 )}
-                <ShoppingBag size={16} color="#E6C97A" strokeWidth={1.8} style={{ flexShrink: 0 }} />
-                <span
-                  style={{
-                    fontFamily: step === 'messenger' ? 'var(--font-sans)' : 'var(--font-serif)',
-                    fontSize: step === 'messenger' ? 13 : 17,
-                    fontWeight: step === 'messenger' ? 500 : 400,
-                    lineHeight: 1.35,
-                    color: '#2B2B2B',
-                    minWidth: 0,
-                  }}
-                >
+                <span className={`min-w-0 ${step === 'messenger' ? 'text-[14px] font-medium leading-snug' : 'truncate font-display text-[20px]'}`}>
                   {headerTitle}
                 </span>
-                {step === 'review' && items.length > 0 && (
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: 12,
-                      color: '#AFAFAF',
-                      flexShrink: 0,
-                    }}
-                  >
-                    ({items.length})
-                  </span>
+                {step === 'review' && itemCount > 0 && (
+                  <span className="shrink-0 text-[13px] tabular-nums text-muted">({itemCount})</span>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={toggleCart}
-                aria-label={t('cart.back')}
-                style={{
-                  background: '#EDE6DF',
-                  border: 'none',
-                  borderRadius: '9999px',
-                  width: 36,
-                  height: 36,
-                  minWidth: 36,
-                  minHeight: 36,
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: '#7A7A7A',
-                }}
-              >
-                <X size={14} />
+              <button type="button" onClick={toggleCart} aria-label={t('header.close')} className="icon-btn -mr-2.5 shrink-0">
+                <X size={20} strokeWidth={1.4} />
               </button>
             </div>
 
             {step === 'review' ? (
               <>
-                <div
-                  style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: '20px 24px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 12,
-                  }}
-                >
+                <div className="flex-1 overflow-y-auto px-5 sm:px-6">
                   {items.length === 0 ? (
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '100%',
-                        gap: 12,
-                        textAlign: 'center',
-                      }}
-                    >
-                      <ShoppingBag size={48} color="#D6C3B3" strokeWidth={1.2} />
-                      <p
-                        style={{
-                          fontFamily: 'var(--font-serif)',
-                          fontSize: 20,
-                          color: '#2B2B2B',
-                        }}
-                      >
-                        {t('cart.empty')}
-                      </p>
-                      <Link
-                        href="/products"
-                        onClick={toggleCart}
-                        className="btn-primary"
-                        style={{ marginTop: 8, textDecoration: 'none' }}
-                      >
-                        {t('cart.shopNow')}
+                    <div className="flex h-full flex-col items-center justify-center py-16 text-center">
+                      <ShoppingBag size={40} strokeWidth={1} className="text-primary" />
+                      <p className="mt-5 font-display text-[22px] text-text">{t('cart.empty')}</p>
+                      <p className="mt-2 max-w-[260px] text-[14px] text-muted">{t('cart.emptyHint')}</p>
+                      <Link href="/products" onClick={toggleCart} className="btn-primary mt-8">
+                        {t('cart.shopNow')} <ArrowRight size={14} />
                       </Link>
                     </div>
                   ) : (
-                    items.map((item) => (
-                      <motion.div
-                        key={item.id}
-                        layout
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, x: 40 }}
-                        style={{
-                          display: 'flex',
-                          gap: 12,
-                          background: '#fff',
-                          borderRadius: 14,
-                          padding: 12,
-                          border: '1px solid #EADFD8',
-                        }}
-                      >
-                        <div
-                          style={{
-                            position: 'relative',
-                            width: 72,
-                            height: 72,
-                            borderRadius: 10,
-                            overflow: 'hidden',
-                            flexShrink: 0,
-                          }}
-                        >
-                          <StoreImage
-                            src={item.image}
-                            alt={item.name}
-                            fill
-                          />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div
-                            style={{
-                              display: 'flex',
-                              alignItems: 'flex-start',
-                              justifyContent: 'space-between',
-                              gap: 8,
-                            }}
-                          >
-                            <p
-                              style={{
-                                fontFamily: 'var(--font-sans)',
-                                fontSize: 14,
-                                fontWeight: 500,
-                                color: '#2B2B2B',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                                flex: 1,
-                              }}
+                    <ul className="divide-y divide-border">
+                      <AnimatePresence initial={false}>
+                        {items.map((item) => {
+                          const src = resolveProductImageSrc(item.image);
+                          return (
+                            <motion.li
+                              key={item.id}
+                              layout
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0, x: 30 }}
+                              className="flex gap-4 py-5"
                             >
-                              {item.name}
-                            </p>
-                            <p
-                              style={{
-                                fontFamily: 'var(--font-serif)',
-                                fontSize: 15,
-                                fontWeight: 600,
-                                color: '#2B2B2B',
-                                flexShrink: 0,
-                              }}
-                            >
-                              {formatPrice(item.price * item.quantity)}
-                            </p>
-                          </div>
-                          <p
-                            style={{
-                              fontFamily: 'var(--font-sans)',
-                              fontSize: 12,
-                              color: '#AFAFAF',
-                              marginTop: 2,
-                            }}
-                          >
-                            {formatPrice(item.price)} × {item.quantity}
-                          </p>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
-                            <button
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              style={{
-                                width: 26,
-                                height: 26,
-                                borderRadius: '50%',
-                                background: '#F5F0EC',
-                                border: '1px solid #EADFD8',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: '#7A7A7A',
-                              }}
-                            >
-                              <Minus size={11} />
-                            </button>
-                            <span
-                              style={{
-                                fontFamily: 'var(--font-sans)',
-                                fontSize: 13,
-                                fontWeight: 500,
-                                color: '#2B2B2B',
-                                minWidth: 16,
-                                textAlign: 'center',
-                              }}
-                            >
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              style={{
-                                width: 26,
-                                height: 26,
-                                borderRadius: '50%',
-                                background: '#F5F0EC',
-                                border: '1px solid #EADFD8',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: '#7A7A7A',
-                              }}
-                            >
-                              <Plus size={11} />
-                            </button>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            color: '#AFAFAF',
-                            padding: 4,
-                            alignSelf: 'flex-start',
-                          }}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </motion.div>
-                    ))
+                              <Link
+                                href={publicProductPath(item.id)}
+                                onClick={toggleCart}
+                                className="relative block aspect-[3/4] w-20 shrink-0 overflow-hidden bg-surface-deep"
+                              >
+                                {src && <StoreImage src={src} alt={item.name} fill />}
+                              </Link>
+                              <div className="flex min-w-0 flex-1 flex-col">
+                                <div className="flex items-start justify-between gap-3">
+                                  <Link
+                                    href={publicProductPath(item.id)}
+                                    onClick={toggleCart}
+                                    className="line-clamp-2 font-display text-[15px] leading-snug text-text no-underline hover:text-primary-deep"
+                                  >
+                                    {item.name}
+                                  </Link>
+                                  <p className="price shrink-0 text-[14px] text-text">{formatPrice(item.price * item.quantity)}</p>
+                                </div>
+                                <p className="mt-1 text-[12px] tabular-nums text-muted">
+                                  {formatPrice(item.price)} × {item.quantity}
+                                </p>
+                                <div className="mt-auto flex items-center justify-between pt-3">
+                                  <div className="flex h-9 items-center border border-border">
+                                    <button
+                                      type="button"
+                                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                      aria-label={t('cart.decrease')}
+                                      className="flex h-full w-9 cursor-pointer items-center justify-center border-none bg-transparent text-text"
+                                    >
+                                      <Minus size={12} strokeWidth={1.6} />
+                                    </button>
+                                    <span className="w-7 text-center text-[13px] tabular-nums">{item.quantity}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                      aria-label={t('cart.increase')}
+                                      className="flex h-full w-9 cursor-pointer items-center justify-center border-none bg-transparent text-text"
+                                    >
+                                      <Plus size={12} strokeWidth={1.6} />
+                                    </button>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeItem(item.id)}
+                                    className="cursor-pointer border-none bg-transparent p-1 text-[12px] text-muted underline-offset-4 transition-colors hover:text-text hover:underline"
+                                  >
+                                    {t('cart.remove')}
+                                  </button>
+                                </div>
+                              </div>
+                            </motion.li>
+                          );
+                        })}
+                      </AnimatePresence>
+                    </ul>
                   )}
                 </div>
 
                 {items.length > 0 && (
-                  <div
-                    style={{
-                      padding: '20px 24px',
-                      borderTop: '1px solid #EADFD8',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 12,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-sans)',
-                          fontSize: 14,
-                          color: '#7A7A7A',
-                        }}
-                      >
-                        {t('common.total')}
-                      </span>
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-serif)',
-                          fontSize: 24,
-                          color: '#2B2B2B',
-                        }}
-                      >
-                        {formatPrice(cartTotal)}
-                      </span>
+                  <div className="shrink-0 border-t border-border bg-surface px-5 pb-5 pt-5 sm:px-6" style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-[13px] uppercase tracking-[0.12em] text-muted">{t('common.total')}</span>
+                      <span className="price text-[22px] text-text">{formatPrice(cartTotal)}</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setStep('messenger')}
-                      className="btn-primary"
-                      style={{ width: '100%', justifyContent: 'center' }}
-                    >
-                      {t('cart.sendYourOrder')}
+                    <p className="mt-2 text-[12.5px] leading-relaxed text-muted">{t('cart.orderNote')}</p>
+                    <button type="button" onClick={() => setStep('messenger')} className="btn-primary mt-5 w-full">
+                      {t('cart.sendYourOrder')} <ArrowRight size={14} />
                     </button>
                     <button
+                      type="button"
                       onClick={clearCart}
-                      className="btn-outline"
-                      style={{ width: '100%', justifyContent: 'center' }}
+                      className="mt-3 w-full cursor-pointer border-none bg-transparent py-2 text-[12.5px] text-muted underline-offset-4 transition-colors hover:text-text hover:underline"
                     >
                       {t('cart.clearBag')}
                     </button>
@@ -458,130 +265,53 @@ export default function CartDrawer() {
               </>
             ) : (
               <>
-                <div
-                  style={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    padding: '20px 24px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 12,
-                  }}
-                >
-                  <p
-                    style={{
-                      fontFamily: 'var(--font-sans)',
-                      fontSize: 14,
-                      color: '#7A7A7A',
-                      marginBottom: 4,
-                    }}
-                  >
-                    {t('cart.chooseMessenger')}
-                  </p>
-
+                <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-5 py-6 sm:px-6">
                   <MessengerOption
                     label={t('cart.sendViaWhatsApp')}
                     selected={channel === 'whatsapp'}
                     onSelect={() => setChannel('whatsapp')}
+                    icon={<WhatsAppIcon size={20} />}
                     accent="#25D366"
                   />
                   <MessengerOption
                     label={t('cart.sendViaTelegram')}
                     selected={channel === 'telegram'}
                     onSelect={() => setChannel('telegram')}
+                    icon={<TelegramIcon size={20} />}
                     accent="#229ED9"
                   />
 
-                  <div
-                    style={{
-                      marginTop: 8,
-                      padding: 14,
-                      background: '#fff',
-                      borderRadius: 12,
-                      border: '1px solid #EADFD8',
-                    }}
-                  >
-                    <p
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 12,
-                        color: '#AFAFAF',
-                        marginBottom: 8,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.08em',
-                      }}
-                    >
-                      {t('common.total')}
-                    </p>
-                    <p
-                      style={{
-                        fontFamily: 'var(--font-serif)',
-                        fontSize: 22,
-                        color: '#2B2B2B',
-                      }}
-                    >
-                      {formatPrice(cartTotal)}
-                    </p>
-                    <p
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 13,
-                        color: '#7A7A7A',
-                        marginTop: 4,
-                      }}
-                    >
+                  <div className="mt-3 border border-border bg-surface p-5">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-muted">{t('common.total')}</p>
+                    <p className="price mt-1 text-[24px] text-text">{formatPrice(cartTotal)}</p>
+                    <p className="mt-1 text-[13px] text-muted">
                       {t('cart.orderItemCount').replace('{count}', String(itemCount))}
                     </p>
                   </div>
 
                   {sendError && (
-                    <p
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 13,
-                        color: '#c0392b',
-                      }}
-                    >
+                    <p role="alert" className="text-[13px] text-[#a33a2b]">
                       {sendError}
                     </p>
                   )}
                 </div>
 
-                <div
-                  style={{
-                    padding: '20px 24px',
-                    borderTop: '1px solid #EADFD8',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 12,
-                  }}
-                >
+                <div className="shrink-0 border-t border-border px-5 pt-5 sm:px-6" style={{ paddingBottom: 'max(20px, env(safe-area-inset-bottom))' }}>
                   <button
                     type="button"
                     onClick={handleSendOrder}
                     disabled={items.length === 0 || sending}
-                    className="btn-primary"
-                    style={{
-                      width: '100%',
-                      justifyContent: 'center',
-                      opacity: items.length === 0 || sending ? 0.65 : 1,
-                      cursor: items.length === 0 || sending ? 'not-allowed' : 'pointer',
-                    }}
+                    className="btn-primary w-full"
                   >
                     {sending ? t('cart.openingMessenger') : t('cart.sendOrder')}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setStep('review')}
-                    className="btn-outline"
-                    style={{ width: '100%', justifyContent: 'center' }}
-                  >
+                  <button type="button" onClick={() => setStep('review')} className="btn-outline mt-3 w-full">
                     {t('cart.back')}
                   </button>
                 </div>
               </>
             )}
-          </motion.div>
+          </motion.aside>
         </>
       )}
     </AnimatePresence>
@@ -592,64 +322,32 @@ function MessengerOption({
   label,
   selected,
   onSelect,
+  icon,
   accent,
 }: {
   label: string;
   selected: boolean;
   onSelect: () => void;
+  icon: React.ReactNode;
   accent: string;
 }) {
   return (
     <button
       type="button"
+      role="radio"
+      aria-checked={selected}
       onClick={onSelect}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        width: '100%',
-        padding: '14px 16px',
-        background: selected ? '#fff' : 'transparent',
-        border: `2px solid ${selected ? accent : '#EADFD8'}`,
-        borderRadius: 14,
-        cursor: 'pointer',
-        textAlign: 'left',
-        transition: 'border-color 0.2s, background 0.2s',
-      }}
+      className={`flex w-full cursor-pointer items-center gap-4 border bg-white px-4 py-4 text-left transition-colors ${
+        selected ? 'border-text' : 'border-border hover:border-muted'
+      }`}
     >
-      <span
-        style={{
-          width: 20,
-          height: 20,
-          borderRadius: '50%',
-          border: `2px solid ${selected ? accent : '#D6C3B3'}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
-        {selected && (
-          <span
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              background: accent,
-            }}
-          />
-        )}
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-text/60">
+        {selected && <span className="h-2.5 w-2.5 rounded-full bg-text" />}
       </span>
-      <span
-        style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 15,
-          fontWeight: 500,
-          color: '#2B2B2B',
-        }}
-      >
-        {label}
+      <span style={{ color: accent }} className="shrink-0">
+        {icon}
       </span>
+      <span className="text-[15px] text-text">{label}</span>
     </button>
   );
 }

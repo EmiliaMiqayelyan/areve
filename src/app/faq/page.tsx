@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ArrowRight } from 'lucide-react';
+import { ArrowRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import PageHero from '@/components/ui/PageHero';
+import Reveal from '@/components/ui/Reveal';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { useLocaleApiFetch } from '@/lib/useLocaleApi';
@@ -28,63 +28,81 @@ export default function FAQPage() {
   }, [locale, localeFetch]);
 
   return (
-    <div style={{ minHeight: '100vh', paddingTop: 68 }}>
-      <PageHero
-        variant="faq"
-        eyebrow={pg.eyebrow}
-        title={pg.title}
-        subtitle={pg.subtitle}
-      />
+    <div className="min-h-screen">
+      <PageHero eyebrow={pg.eyebrow} title={pg.title} subtitle={pg.subtitle} />
 
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '64px 24px' }}>
-        {loading && (
-          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>
-            {t('common.loadingFaqs')}
-          </div>
-        )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {faqList.map((faq, i) => (
-            <motion.div key={i}
-              initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.05 }}
-              style={{ background: '#fff', borderRadius: 16, border: `1.5px solid ${open === i ? '#E6C97A' : '#EADFD8'}`, overflow: 'hidden', transition: 'border-color 0.25s' }}>
-              <button onClick={() => setOpen(open === i ? null : i)}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  <span style={{ width: 28, height: 28, borderRadius: '50%', background: open === i ? '#E6C97A' : '#EADFD8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-serif)', fontSize: 13, fontWeight: 700, color: open === i ? '#5a4a1e' : '#AFAFAF', flexShrink: 0 }}>
-                    {i + 1}
-                  </span>
-                  <span style={{ fontFamily: 'var(--font-serif)', fontSize: 15, color: 'var(--color-heading)', fontWeight: 500 }}>
-                    {pickLocalized(faq.question, locale)}
-                  </span>
+      <div className="wrap section">
+        <div className="mx-auto max-w-[820px]">
+          {loading && (
+            <div className="space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="skeleton h-16" />
+              ))}
+            </div>
+          )}
+
+          <div className="border-t border-border">
+            {faqList.map((faq, i) => {
+              const isOpen = open === i;
+              const panelId = `faq-panel-${i}`;
+              return (
+                <div key={faq.id ?? i} className="border-b border-border">
+                  <h3 className="m-0">
+                    <button
+                      type="button"
+                      onClick={() => setOpen(isOpen ? null : i)}
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      className="group flex w-full cursor-pointer items-start gap-5 border-none bg-transparent py-6 text-left"
+                    >
+                      <span className="w-7 shrink-0 pt-1 text-[12px] tabular-nums tracking-[0.1em] text-primary-deep">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="flex-1 font-display text-[18px] leading-snug text-text transition-colors group-hover:text-primary-deep sm:text-[20px]">
+                        {pickLocalized(faq.question, locale)}
+                      </span>
+                      <Plus
+                        size={18}
+                        strokeWidth={1.4}
+                        className={`mt-1 shrink-0 text-muted transition-transform duration-300 ${isOpen ? 'rotate-45 text-text' : ''}`}
+                      />
+                    </button>
+                  </h3>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        id={panelId}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <p className="pb-7 pl-12 pr-8 text-[15px] leading-relaxed text-muted">
+                          {pickLocalized(faq.answer, locale)}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-                <ChevronDown size={18} color="#AFAFAF" style={{ flexShrink: 0, transform: open === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }} />
-              </button>
-
-              <AnimatePresence>
-                {open === i && (
-                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.28 }}>
-                    <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: '#7A7A7A', lineHeight: 1.75, padding: '0 24px 22px 66px' }}>
-                      {pickLocalized(faq.answer, locale)}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
-        </div>
-
-        {!loading && faqList.length === 0 && (
-          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>
-            {t('common.noFaqs')}
+              );
+            })}
           </div>
-        )}
 
-        <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-          style={{ marginTop: 48, background: '#EADFD8', borderRadius: 20, padding: '36px 32px', textAlign: 'center', border: '1px solid #D6C3B3' }}>
-          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 20, fontWeight: 500, color: 'var(--color-heading)', marginBottom: 10 }}>{t('faq.stillQuestions')}</h3>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--color-subtle)', marginBottom: 24 }}>{t('faq.stillQuestionsDesc')}</p>
-          <Link href="/contact" className="btn-primary" style={{ textDecoration: 'none' }}>{t('faq.contactUs')} <ArrowRight size={14} /></Link>
-        </motion.div>
+          {!loading && faqList.length === 0 && (
+            <p className="py-10 text-center text-[14px] text-muted">{t('common.noFaqs')}</p>
+          )}
+
+          <Reveal className="mt-16 flex flex-col items-start gap-6 bg-surface p-8 sm:flex-row sm:items-center sm:justify-between sm:p-10">
+            <div>
+              <h2 className="font-display text-[22px] text-text sm:text-[24px]">{t('faq.stillQuestions')}</h2>
+              <p className="mt-2 text-[15px] text-muted">{t('faq.stillQuestionsDesc')}</p>
+            </div>
+            <Link href="/contact" className="btn-dark shrink-0">
+              {t('faq.contactUs')} <ArrowRight size={15} strokeWidth={1.5} />
+            </Link>
+          </Reveal>
+        </div>
       </div>
     </div>
   );

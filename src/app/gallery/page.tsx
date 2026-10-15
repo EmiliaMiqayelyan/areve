@@ -1,10 +1,10 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useState } from 'react';
-import StoreImage from '@/components/ui/StoreImage';
-import { X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import PageHero from '@/components/ui/PageHero';
+import StoreImage from '@/components/ui/StoreImage';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { pickLocalized } from '@/lib/localizedText';
@@ -14,74 +14,150 @@ export default function GalleryPage() {
   const { t, locale } = useTranslation();
   const { settings } = useSiteSettings();
   const pg = settings.siteContent.pages.gallery;
-  const [lightbox, setLightbox] = useState<string | null>(null);
+  const [active, setActive] = useState<number | null>(null);
   const { data: galleryItems = [], isLoading: loading } = useGalleryQuery();
 
-  return (
-    <div style={{ minHeight: '100vh', paddingTop: 68 }}>
-      <PageHero
-        variant="gallery"
-        eyebrow={pg.eyebrow}
-        title={pg.title}
-        subtitle={pg.subtitle}
-      />
+  const images = useMemo(
+    () =>
+      galleryItems
+        .filter((img) => img.src && !String(img.src).startsWith('blob:'))
+        .map((img, i) => ({
+          key: img.id ?? `${i}`,
+          src: img.src,
+          alt: pickLocalized(img.alt, locale),
+          wide: (img.cols ?? 1) > 1,
+        })),
+    [galleryItems, locale]
+  );
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px' }}>
-        {loading && (
-          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>
-            {t('common.loadingGallery')}
-          </div>
-        )}
-        {/* Masonry-like grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, gridAutoRows: '220px' }}>
-          {galleryItems.map((img, i) => {
-            const altText = pickLocalized(img.alt, locale);
-            return (
-            <motion.div key={i}
-              initial={{ opacity: 0, scale: 0.96 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.45, delay: (i % 6) * 0.06 }}
-              onClick={() => setLightbox(img.src)}
-              style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', cursor: 'zoom-in', gridColumn: `span ${img.cols ?? 1}` }}
+  const close = useCallback(() => setActive(null), []);
+  const step = useCallback(
+    (dir: 1 | -1) => setActive((i) => (i === null ? i : (i + dir + images.length) % images.length)),
+    [images.length]
+  );
+
+  useEffect(() => {
+    if (active === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowRight') step(1);
+      if (e.key === 'ArrowLeft') step(-1);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [active, close, step]);
+
+  const current = active !== null ? images[active] : null;
+
+  return (
+    <div className="min-h-screen">
+      <PageHero eyebrow={pg.eyebrow} title={pg.title} subtitle={pg.subtitle} />
+
+      <div className="wrap section">
+        <div className="grid auto-rows-[220px] grid-flow-dense grid-cols-2 gap-2 sm:auto-rows-[280px] sm:gap-3 md:grid-cols-3 lg:auto-rows-[320px] lg:grid-cols-4">
+          {loading &&
+            Array.from({ length: 8 }).map((_, i) => <div key={i} className="skeleton" />)}
+          {images.map((img, i) => (
+            <motion.button
+              key={img.key}
+              type="button"
+              onClick={() => setActive(i)}
+              aria-label={img.alt || `${i + 1}`}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.5, delay: (i % 4) * 0.05, ease: [0.22, 1, 0.36, 1] }}
+              className={`group relative cursor-zoom-in overflow-hidden border-none bg-surface-deep p-0 ${
+                img.wide ? 'md:col-span-2' : ''
+              }`}
             >
               <StoreImage
-                src={String(img.src).startsWith('blob:') ? '/images/gallery-light-1.png' : img.src}
-                alt={altText}
+                src={img.src}
+                alt={img.alt}
                 fill
-                style={{ transition: 'transform 0.5s' }}
+                className="transition-transform duration-700 ease-[var(--ease-brand)] group-hover:scale-[1.04]"
               />
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(248,245,242,0)', transition: 'background 0.3s', display: 'flex', alignItems: 'flex-end', padding: 14 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(230,201,122,0.15)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,245,242,0)'; }}>
-                <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: '#2B2B2B', background: 'rgba(248,245,242,0.88)', padding: '4px 10px', borderRadius: 99, opacity: 0, transition: 'opacity 0.3s' }}
-                  className="img-caption">
-                  {altText}
-                </p>
-              </div>
-            </motion.div>
-          );})}
+              {img.alt && (
+                <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-secondary/60 to-transparent px-4 pb-3 pt-10 text-left text-[12px] text-background opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                  {img.alt}
+                </span>
+              )}
+            </motion.button>
+          ))}
         </div>
 
-        {!loading && galleryItems.length === 0 && (
-          <div style={{ padding: '24px 0', textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>
-            Gallery is empty.
-          </div>
+        {!loading && images.length === 0 && (
+          <p className="py-10 text-center text-[14px] text-muted">{t('common.noGalleryAdmin')}</p>
         )}
       </div>
 
-      {/* Lightbox */}
-      {lightbox && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          onClick={() => setLightbox(null)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(248,245,242,0.92)', backdropFilter: 'blur(8px)', zIndex: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-          <button onClick={() => setLightbox(null)}
-            style={{ position: 'absolute', top: 24, right: 24, width: 40, height: 40, borderRadius: '50%', background: '#EADFD8', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7A7A7A' }}>
-            <X size={18} />
-          </button>
-          <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} onClick={e => e.stopPropagation()}
-            style={{ position: 'relative', width: '100%', maxWidth: 720, aspectRatio: '4/3', borderRadius: 20, overflow: 'hidden', boxShadow: '0 24px 80px rgba(180,156,140,0.3)' }}>
-            <StoreImage src={lightbox} alt="" fill objectFit="contain" style={{ background: '#fff' }} />
+      <AnimatePresence>
+        {current && (
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label={current.alt || pg.title}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={close}
+            className="fixed inset-0 z-[90] flex items-center justify-center bg-secondary/95 p-4 sm:p-10"
+          >
+            <button
+              type="button"
+              onClick={close}
+              aria-label={t('header.close')}
+              className="icon-btn absolute right-3 top-3 z-10 text-background hover:text-accent sm:right-6 sm:top-6"
+            >
+              <X size={22} strokeWidth={1.4} />
+            </button>
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    step(-1);
+                  }}
+                  aria-label={t('common.previous')}
+                  className="icon-btn absolute left-2 top-1/2 z-10 -translate-y-1/2 bg-secondary/40 text-background hover:text-accent sm:left-6 sm:bg-transparent"
+                >
+                  <ChevronLeft size={26} strokeWidth={1.2} />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    step(1);
+                  }}
+                  aria-label={t('common.next')}
+                  className="icon-btn absolute right-2 top-1/2 z-10 -translate-y-1/2 bg-secondary/40 text-background hover:text-accent sm:right-6 sm:bg-transparent"
+                >
+                  <ChevronRight size={26} strokeWidth={1.2} />
+                </button>
+              </>
+            )}
+            <motion.div
+              key={current.key}
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative h-[78vh] w-full max-w-5xl"
+            >
+              <StoreImage src={current.src} alt={current.alt} fill objectFit="contain" />
+            </motion.div>
+            <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[12px] tabular-nums tracking-[0.12em] text-background/70">
+              {(active ?? 0) + 1} / {images.length}
+            </p>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }

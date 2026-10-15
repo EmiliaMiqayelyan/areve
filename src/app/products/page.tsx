@@ -2,18 +2,21 @@
 
 import { useState, useMemo, Suspense, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, SlidersHorizontal, Tags } from 'lucide-react';
-import ProductCard from '@/components/ui/ProductCard';
+import { motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import ProductCard, { ProductCardSkeleton } from '@/components/ui/ProductCard';
 import PageHero from '@/components/ui/PageHero';
 import SortDropdown from '@/components/ui/SortDropdown';
+import SunMark from '@/components/ui/SunMark';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { pickLocalized } from '@/lib/localizedText';
+import { matchesProductQuery } from '@/lib/productSearch';
 import { useCategoriesQuery, useProductsQuery } from '@/lib/useProductsQuery';
 import type { Product } from '@/lib/store';
 
-type CategoryOption = { id: string; label: string };
+type CategoryOption = { id: string; label: string; count: number };
+type SortKey = 'default' | 'price-asc' | 'price-desc';
 
 const PAGE_SIZE = 12;
 
@@ -25,9 +28,9 @@ function ProductsContent() {
   const pg = settings.siteContent.pages.shop;
   const L = settings.siteContent.productCategoryLabels;
   const sp = useSearchParams();
-  const initialCategory = sp.get('category') || 'all';
-  const [cat, setCat] = useState(initialCategory);
-  const [sort, setSort] = useState<'default' | 'price-asc' | 'price-desc'>('default');
+  const [cat, setCat] = useState(sp.get('category') || 'all');
+  const [query, setQuery] = useState(sp.get('q') || '');
+  const [sort, setSort] = useState<SortKey>('default');
   const [page, setPage] = useState(1);
 
   const {
@@ -42,51 +45,74 @@ function ProductsContent() {
   const loadError = productsError;
 
   useEffect(() => {
-    const category = sp.get('category') || 'all';
-    setCat(category);
+    setCat(sp.get('category') || 'all');
+    setQuery(sp.get('q') || '');
     setPage(1);
   }, [sp]);
 
-  const setCategory = useCallback(
-    (next: string) => {
-      setCat(next);
-      setPage(1);
+  const updateParams = useCallback(
+    (mutate: (params: URLSearchParams) => void) => {
       const params = new URLSearchParams(sp.toString());
-      if (next === 'all') params.delete('category');
-      else params.set('category', next);
+      mutate(params);
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
     [pathname, router, sp]
   );
 
-  const setSortAndReset = useCallback((next: 'default' | 'price-asc' | 'price-desc') => {
+  const setCategory = useCallback(
+    (next: string) => {
+      setCat(next);
+      setPage(1);
+      updateParams((params) => {
+        if (next === 'all') params.delete('category');
+        else params.set('category', next);
+      });
+    },
+    [updateParams]
+  );
+
+  const clearQuery = useCallback(() => {
+    setQuery('');
+    setPage(1);
+    updateParams((params) => params.delete('q'));
+  }, [updateParams]);
+
+  const setSortAndReset = useCallback((next: SortKey) => {
     setSort(next);
     setPage(1);
   }, []);
 
-  const categories = useMemo<CategoryOption[]>(
-    () =>
-      categoryRows.map((row) => ({
-        id: row.id,
-        label: typeof row.name === 'string' ? row.name : pickLocalized(row.name, locale),
-      })),
-    [categoryRows, locale]
+  const labels = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const row of categoryRows) {
+      map[row.id] = typeof row.name === 'string' ? row.name : pickLocalized(row.name, locale);
+    }
+    return map;
+  }, [categoryRows, locale]);
+
+  const searched = useMemo(
+    () => (query.trim() ? productList.filter((p) => matchesProductQuery(p, query, locale, labels[p.category])) : productList),
+    [productList, query, locale, labels]
   );
 
-  const catOptions = useMemo<CategoryOption[]>(
-    () => [{ id: 'all', label: L.all }, ...categories],
-    [categories, L.all]
-  );
+  const catOptions = useMemo<CategoryOption[]>(() => {
+    const counts: Record<string, number> = {};
+    for (const p of searched) counts[p.category] = (counts[p.category] ?? 0) + 1;
+    const rows = categoryRows
+      .map((row) => ({ id: row.id, label: labels[row.id] ?? row.id, count: counts[row.id] ?? 0 }))
+      .filter((row) => row.count > 0 || row.id === cat);
+    return [{ id: 'all', label: L.all, count: searched.length }, ...rows];
+  }, [categoryRows, labels, searched, cat, L.all]);
 
-  const activeCategoryLabel = catOptions.find((item) => item.id === cat)?.label ?? cat;
+  const activeCategoryLabel = cat === 'all' ? '' : labels[cat] ?? cat;
 
   const filtered = useMemo(() => {
-    let list: Product[] = cat === 'all' ? productList : productList.filter((p) => p.category === cat);
+    let list: Product[] = cat === 'all' ? searched : searched.filter((p) => p.category === cat);
     if (sort === 'price-asc') list = [...list].sort((a, b) => a.price - b.price);
-    if (sort === 'price-desc') list = [...list].sort((a, b) => a.price - b.price);
+    if (sort === 'price-desc') list = [...list].sort((a, b) => b.price - a.price);
     return list;
-  }, [cat, sort, productList]);
+  }, [cat, sort, searched]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -99,139 +125,172 @@ function ProductsContent() {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
 
+  const goToPage = (n: number) => {
+    setPage(n);
+    if (typeof window !== 'undefined') {
+      document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const shopCrumb = { label: pg.title, href: activeCategoryLabel ? '/products' : undefined };
+  const breadcrumb = [
+    { label: t('common.home'), href: '/' },
+    shopCrumb,
+    ...(activeCategoryLabel ? [{ label: activeCategoryLabel }] : []),
+  ];
+
   return (
-    <div style={{ minHeight: '100vh', paddingTop: 68 }}>
+    <div className="min-h-screen">
       <PageHero
         variant="shop"
         eyebrow={pg.eyebrow}
-        title={pg.title}
-        subtitle={pg.subtitle}
+        title={activeCategoryLabel || pg.title}
+        subtitle={activeCategoryLabel ? undefined : pg.subtitle}
+        breadcrumb={breadcrumb}
       />
 
-      <div className="mx-auto max-w-[1280px] px-4 py-8 sm:px-6 sm:py-12" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
+      <div className="sticky top-[var(--header-h)] z-30 border-b border-border bg-background/95 backdrop-blur-md">
+        <div className="wrap flex items-center gap-4">
+          <div className="no-scrollbar -ml-[var(--container-px)] flex min-w-0 flex-1 gap-6 overflow-x-auto pl-[var(--container-px)] sm:gap-8" role="tablist" aria-label={t('shop.filterCategory')}>
+            {(loading ? [] : catOptions).map((option) => {
+              const active = option.id === cat;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setCategory(option.id)}
+                  className={`relative shrink-0 cursor-pointer whitespace-nowrap border-none bg-transparent py-4 text-[14px] transition-colors after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-primary after:transition-transform ${
+                    active ? 'text-text after:scale-x-100' : 'text-muted after:scale-x-0 hover:text-text'
+                  }`}
+                >
+                  {option.label}
+                  <sup className="ml-1 text-[10px] tabular-nums text-muted">{option.count}</sup>
+                </button>
+              );
+            })}
+            {loading && <div className="skeleton my-4 h-4 w-72" aria-hidden />}
+          </div>
+          <div className="shrink-0 border-l border-border py-2 pl-3 sm:pl-4">
+            <SortDropdown
+              value={sort}
+              onChange={setSortAndReset}
+              ariaLabel={t('shop.filterSort')}
+              options={[
+                { value: 'default', label: t('shop.sortFeatured') },
+                { value: 'price-asc', label: t('shop.sortPriceAsc') },
+                { value: 'price-desc', label: t('shop.sortPriceDesc') },
+              ]}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div id="catalog" className="wrap scroll-mt-[calc(var(--header-h)+64px)] pb-20 pt-6 sm:pt-8 lg:pb-28">
         {loadError && !loading && (
-          <div className="mb-6 rounded-xl border border-rose/60 bg-rose/30 px-4 py-3 text-center font-sans text-sm text-ink">
+          <div className="mb-6 border border-border bg-surface px-4 py-3 text-center text-[14px] text-text">
             {t('common.apiUnavailable')}
           </div>
         )}
-        <div className="relative z-20 mb-8 rounded-[22px] border border-beige bg-white shadow-[0_4px_28px_rgba(180,156,140,0.08)]">
-          <div className="grid grid-cols-1 gap-5 overflow-visible p-4 sm:p-5 md:grid-cols-2">
-            <div className="relative z-30 space-y-2">
-              <span className="flex items-center gap-2 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-                <Tags size={13} className="text-gold" />
-                {t('shop.filterCategory')}
-              </span>
-              <SortDropdown
-                value={cat}
-                onChange={setCategory}
-                variant="field"
-                options={catOptions.map((option) => ({ value: option.id, label: option.label }))}
-                className="w-full"
-                menuAlign="left"
-              />
-            </div>
-            <div className="relative z-20 space-y-2">
-              <span className="flex items-center gap-2 font-sans text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-                <SlidersHorizontal size={13} className="text-gold" />
-                {t('shop.filterSort')}
-              </span>
-              <SortDropdown
-                value={sort}
-                onChange={setSortAndReset}
-                variant="field"
-                options={[
-                  { value: 'default', label: t('shop.sortFeatured') },
-                  { value: 'price-asc', label: t('shop.sortPriceAsc') },
-                  { value: 'price-desc', label: t('shop.sortPriceDesc') },
-                ]}
-                className="w-full"
-                menuAlign="left"
-              />
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-beige bg-ivory/60 px-4 py-3 sm:px-5">
-            <p className="font-sans text-[13px] text-subtle">
-              <span className="font-serif text-base font-medium text-heading">{filtered.length}</span>
-              {' '}
+
+        <div className="mb-6 flex flex-wrap items-center gap-3 text-[13px] text-muted sm:mb-8">
+          {!loading && (
+            <span>
+              <span className="tabular-nums text-text">{filtered.length}</span>{' '}
               {filtered.length === 1 ? t('common.product') : t('common.products')}
-            </p>
-            {cat !== 'all' && (
-              <p className="font-sans text-[12px] text-muted">
-                {activeCategoryLabel}
-              </p>
-            )}
-          </div>
+            </span>
+          )}
+          {query.trim() && (
+            <button
+              type="button"
+              onClick={clearQuery}
+              className="inline-flex cursor-pointer items-center gap-2 border border-border bg-surface px-3 py-1.5 text-[12.5px] text-text transition-colors hover:border-text"
+              aria-label={t('shop.clearSearch')}
+            >
+              {t('shop.searchFor', { q: query.trim() })}
+              <X size={13} strokeWidth={1.6} />
+            </button>
+          )}
         </div>
 
         {loading ? (
-          <div className="py-10 text-center font-sans text-[#AFAFAF]">
-            {t('common.loadingProducts')}
+          <div className="grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-5 sm:gap-y-12 md:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${cat}-${sort}-${currentPage}`}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.35 }}
-                className="grid grid-cols-1 gap-5 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-              >
-                {paged.map((p, i) => (
-                  <ProductCard key={p.id} product={p} index={i} />
-                ))}
-              </motion.div>
-            </AnimatePresence>
+            <motion.div
+              key={`${cat}-${sort}-${currentPage}-${query}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-5 sm:gap-y-12 md:grid-cols-3 xl:grid-cols-4"
+            >
+              {paged.map((p, i) => (
+                <ProductCard key={p.id} product={p} index={i} priority={i < 4} />
+              ))}
+            </motion.div>
 
             {filtered.length === 0 && (
-              <div className="py-10 text-center font-sans text-[#AFAFAF]">
-                {t('common.noProductsFound')}
+              <div className="flex flex-col items-center py-20 text-center">
+                <SunMark className="mb-6 w-16 text-primary" strokeWidth={1.4} />
+                <p className="font-display text-[22px] text-text">{t('common.noProductsFound')}</p>
+                {(query.trim() || cat !== 'all') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearQuery();
+                      setCategory('all');
+                    }}
+                    className="btn-outline mt-6"
+                  >
+                    {t('shop.showAll')}
+                  </button>
+                )}
               </div>
             )}
 
             {filtered.length > PAGE_SIZE && (
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <nav aria-label="Pagination" className="mt-16 flex flex-wrap items-center justify-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => goToPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage <= 1}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[#EADFD8] bg-white px-4 py-2 font-sans text-[12px] font-medium text-[#2B2B2B] transition-colors hover:border-[#E6C97A] disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label={t('shop.prevPage')}
+                  className="inline-flex h-10 cursor-pointer items-center gap-1.5 border border-border bg-transparent px-4 text-[13px] text-text transition-colors hover:border-text disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <ChevronLeft size={15} strokeWidth={1.8} />
-                  {t('shop.prevPage')}
+                  <ChevronLeft size={15} strokeWidth={1.5} />
+                  <span className="hidden sm:inline">{t('shop.prevPage')}</span>
                 </button>
 
-                <div className="flex items-center gap-1.5">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => setPage(n)}
-                      aria-current={n === currentPage ? 'page' : undefined}
-                      className={`flex h-9 min-w-9 items-center justify-center rounded-full px-2.5 font-sans text-[13px] transition-colors ${
-                        n === currentPage
-                          ? 'bg-[#E6C97A] font-semibold text-[#5a4a1e]'
-                          : 'border border-[#EADFD8] bg-white text-[#7A7A7A] hover:border-[#E6C97A] hover:text-[#2B2B2B]'
-                      }`}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => goToPage(n)}
+                    aria-current={n === currentPage ? 'page' : undefined}
+                    className={`h-10 min-w-10 cursor-pointer px-3 text-[13px] tabular-nums transition-colors ${
+                      n === currentPage
+                        ? 'border border-secondary bg-secondary text-background'
+                        : 'border border-border bg-transparent text-text hover:border-text'
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
 
                 <button
                   type="button"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage >= totalPages}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[#EADFD8] bg-white px-4 py-2 font-sans text-[12px] font-medium text-[#2B2B2B] transition-colors hover:border-[#E6C97A] disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label={t('shop.nextPage')}
+                  className="inline-flex h-10 cursor-pointer items-center gap-1.5 border border-border bg-transparent px-4 text-[13px] text-text transition-colors hover:border-text disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  {t('shop.nextPage')}
-                  <ChevronRight size={15} strokeWidth={1.8} />
+                  <span className="hidden sm:inline">{t('shop.nextPage')}</span>
+                  <ChevronRight size={15} strokeWidth={1.5} />
                 </button>
-              </div>
+              </nav>
             )}
           </>
         )}
@@ -242,7 +301,15 @@ function ProductsContent() {
 
 export default function ProductsPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', paddingTop: 100, textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="wrap grid min-h-screen grid-cols-2 gap-x-3 gap-y-10 pt-32 md:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
+      }
+    >
       <ProductsContent />
     </Suspense>
   );

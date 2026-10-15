@@ -12,6 +12,7 @@ export interface Product {
   badge?: string;
   description?: string;
   isFavorite?: boolean;
+  createdAt?: string;
 }
 
 interface CartItem extends Product {
@@ -96,7 +97,15 @@ export const useCartStore = create<CartStore>()(
         get().items.reduce((sum, i) => sum + i.price * i.quantity, 0),
       count: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),
-    { name: 'areve-cart', storage: createJSONStorage(() => safeStorage) }
+    {
+      name: 'areve-cart',
+      storage: createJSONStorage(() => safeStorage),
+      partialize: (state) => ({ items: state.items }),
+      merge: (persisted, current) => ({
+        ...current,
+        items: (persisted as Partial<CartStore> | undefined)?.items ?? current.items,
+      }),
+    }
   )
 );
 
@@ -120,6 +129,14 @@ export const useWishlistStore = create<WishlistStore>()(
       toggleWishlistPanel: () => set((state) => ({ isOpen: !state.isOpen })),
       closeWishlistPanel: () => set({ isOpen: false }),
     }),
-    { name: 'areve-wishlist', storage: createJSONStorage(() => safeStorage) }
+    {
+      name: 'areve-wishlist',
+      storage: createJSONStorage(() => safeStorage),
+      partialize: (state) => ({ items: state.items }),
+      merge: (persisted, current) => ({
+        ...current,
+        items: (persisted as Partial<WishlistStore> | undefined)?.items ?? current.items,
+      }),
+    }
   )
 );

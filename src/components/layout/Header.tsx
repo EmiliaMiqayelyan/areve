@@ -2,31 +2,35 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Heart, Menu, X } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { ChevronDown, Heart, Menu, Search, ShoppingBag } from 'lucide-react';
 import { useCartStore, useWishlistStore } from '@/lib/store';
 import CartDrawer from '../CartDrawer';
 import WishlistPopover from '../WishlistPopover';
-import areve from "../../../public/areve.png"
-import Image from "next/image";
+import SearchPanel from './SearchPanel';
+import MobileMenu from './MobileMenu';
+import areve from '../../../public/areve.png';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useTranslation } from '@/i18n/I18nProvider';
+import { useCatalogCategories } from '@/lib/useCatalog';
 import type { Locale } from '@/i18n/types';
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [introDone, setIntroDone] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  useEffect(() => { setIntroDone(true); }, []);
+
   const pathname = usePathname();
   const { settings } = useSiteSettings();
-  const { locale, setLocale, locales, localeLabels } = useTranslation();
-  const navLinks = settings.siteContent.nav.filter(
-    (link) => String(link.href) !== '/reviews'
-  );
+  const { t, locale, setLocale, locales, localeLabels } = useTranslation();
+  const { categories } = useCatalogCategories();
+  const navLinks = settings.siteContent.nav.filter((link) => String(link.href) !== '/reviews');
+  const announcement = settings.siteContent.announcement;
+
   const wishlistButtonRef = useRef<HTMLButtonElement>(null);
   const { count, toggleCart, isOpen: cartOpen } = useCartStore();
   const { items: wishlist, toggleWishlistPanel, closeWishlistPanel, isOpen: wishlistOpen } =
@@ -43,171 +47,211 @@ export default function Header() {
   };
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', fn);
+    const fn = () => setScrolled(window.scrollY > 8);
+    fn();
+    window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  useEffect(() => { setMobileOpen(false); }, [pathname]);
+  useEffect(() => { setMobileOpen(false); setSearchOpen(false); }, [pathname]);
   useEffect(() => { closeWishlistPanel(); }, [pathname, closeWishlistPanel]);
 
   if (pathname.startsWith('/admin')) return null;
 
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+
+  const cartCount = mounted ? count() : 0;
+  const wishCount = mounted ? wishlist.length : 0;
+
   return (
     <>
-      <motion.header
-        initial={introDone ? false : { y: -64 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.55, ease: 'easeOut' }}
-        className="fixed top-0 left-0 right-0 z-50"
-        style={{
-          background: (mounted && scrolled) ? 'rgba(248,245,242,0.95)' : 'rgba(248,245,242,0.80)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: (mounted && scrolled) ? '1px solid #EADFD8' : '1px solid transparent',
-          transition: 'background 0.3s, border-color 0.3s',
-        }}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:bg-secondary focus:px-4 focus:py-2 focus:text-background"
       >
-        <div className="mx-auto flex h-[68px] min-h-[68px] max-h-[68px] items-center justify-between gap-3 px-4 sm:px-6 lg:max-w-[1280px]">
+        {locale === 'hy' ? 'Անցնել բովանդակությանը' : 'Skip to content'}
+      </a>
 
-          <Link href="/" className="flex shrink-0 items-center no-underline">
-            <Image src={areve} alt="areve" width={120} height={48} className="h-10 w-auto sm:h-11" priority unoptimized />
+      <div className="bg-secondary text-accent">
+        <div className="wrap flex h-9 items-center justify-center gap-3 text-[11px] tracking-[0.12em] sm:text-[11.5px]">
+          {announcement.map((item, i) => (
+            <span key={item} className={`items-center gap-3 ${i > 1 ? 'hidden md:inline-flex' : 'inline-flex'}`}>
+              {i > 0 && <span aria-hidden className="h-1 w-1 rounded-full bg-primary" />}
+              <span className="whitespace-nowrap">{item}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <header
+        className={`sticky top-0 z-50 border-b transition-[background-color,border-color,box-shadow] duration-300 ${
+          scrolled || searchOpen
+            ? 'border-border bg-background/95 shadow-[0_1px_0_rgba(21,18,15,0.02)] backdrop-blur-md'
+            : 'border-transparent bg-background'
+        }`}
+      >
+        <div className="wrap grid h-[var(--header-h)] grid-cols-[1fr_auto_1fr] items-center gap-4">
+          {/* Left: mobile controls / desktop navigation */}
+          <div className="flex items-center gap-1 lg:gap-0">
+            <button
+              type="button"
+              className="icon-btn -ml-2 lg:hidden"
+              onClick={() => setMobileOpen(true)}
+              aria-label={t('header.menu')}
+              aria-expanded={mobileOpen}
+            >
+              <Menu size={22} strokeWidth={1.4} />
+            </button>
+            <button
+              type="button"
+              className="icon-btn lg:hidden"
+              onClick={() => setSearchOpen((v) => !v)}
+              aria-label={t('header.search')}
+              aria-expanded={searchOpen}
+            >
+              <Search size={20} strokeWidth={1.4} />
+            </button>
+
+            <nav aria-label="Main" className="hidden items-center gap-7 lg:flex xl:gap-9">
+              {navLinks.map((link) => {
+                const active = isActive(link.href);
+                const isShop = link.href === '/products';
+                return (
+                  <div key={`${link.href}-${locale}`} className={isShop ? 'group relative' : undefined}>
+                    <Link
+                      href={link.href}
+                      aria-current={active ? 'page' : undefined}
+                      className={`relative inline-flex items-center gap-1 py-2 text-[14px] no-underline transition-colors after:absolute after:inset-x-0 after:bottom-0.5 after:h-px after:origin-left after:bg-primary after:transition-transform after:duration-300 ${
+                        active
+                          ? 'text-text after:scale-x-100'
+                          : 'text-text/75 after:scale-x-0 hover:text-text hover:after:scale-x-100'
+                      }`}
+                    >
+                      {link.label}
+                      {isShop && categories.length > 0 && (
+                        <ChevronDown size={13} strokeWidth={1.6} className="transition-transform duration-300 group-hover:rotate-180" />
+                      )}
+                    </Link>
+
+                    {isShop && categories.length > 0 && (
+                      <div className="invisible absolute left-[-24px] top-full z-50 pt-3 opacity-0 transition-all duration-200 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                        <div className="w-[300px] border border-border bg-background p-2 shadow-[0_18px_40px_-20px_rgba(21,18,15,0.25)]">
+                          <ul className="py-1">
+                            {categories.map((cat) => (
+                              <li key={cat.id}>
+                                <Link
+                                  href={`/products?category=${encodeURIComponent(cat.id)}`}
+                                  className="flex items-center justify-between gap-4 px-4 py-2.5 text-[14px] text-text no-underline transition-colors hover:bg-surface"
+                                >
+                                  <span>{cat.label}</span>
+                                  <span className="text-[12px] tabular-nums text-muted">{cat.count}</span>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                          <Link
+                            href="/products"
+                            className="mt-1 flex items-center justify-between border-t border-border px-4 py-3 text-[12px] font-medium uppercase tracking-[0.12em] text-primary-deep no-underline hover:text-text"
+                          >
+                            {t('header.allProducts')}
+                            <span aria-hidden>→</span>
+                          </Link>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Center: logo */}
+          <Link href="/" className="flex items-center justify-center no-underline" aria-label="AREVÉ Collections">
+            <Image
+              src={areve}
+              alt="AREVÉ Collections"
+              className="h-9 w-auto sm:h-10 lg:h-12"
+              priority
+              unoptimized
+            />
           </Link>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-3 xl:gap-5 lg:flex px-2">
-            {navLinks.map(link => (
-              <Link
-                key={`${link.href}-${locale}`}
-                href={link.href}
-                className="whitespace-nowrap shrink-0"
-                style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: locale === 'hy' ? 11 : 12,
-                  fontWeight: 500,
-                  letterSpacing: locale === 'hy' ? '0.6px' : '1px',
-                  textTransform: 'uppercase',
-                  textDecoration: 'none',
-                  color: pathname === link.href ? '#E6C97A' : '#7A7A7A',
-                  position: 'relative',
-                  paddingBottom: 2,
-                  transition: 'color 0.2s',
-                }}
-                onMouseEnter={e => { if (pathname !== link.href) (e.target as HTMLElement).style.color = '#2B2B2B'; }}
-                onMouseLeave={e => { if (pathname !== link.href) (e.target as HTMLElement).style.color = '#7A7A7A'; }}
-              >
-                {link.label}
-                {pathname === link.href && (
-                  <span
-                    style={{ position: 'absolute', bottom: -2, left: 0, right: 0, height: 2, background: '#E6C97A', borderRadius: 1 }}
-                  />
-                )}
-              </Link>
-            ))}
-          </nav>
+          {/* Right: actions */}
+          <div className="flex items-center justify-end gap-0.5 sm:gap-1">
+            <button
+              type="button"
+              className="icon-btn hidden lg:inline-flex"
+              onClick={() => setSearchOpen((v) => !v)}
+              aria-label={t('header.search')}
+              aria-expanded={searchOpen}
+            >
+              <Search size={19} strokeWidth={1.4} />
+            </button>
 
-          <div className="flex shrink-0 items-center gap-2.5 sm:gap-3 self-center">
-            <div className="hidden sm:flex h-8 items-center gap-0.5 rounded-full bg-white/80 p-0.5 border border-[#EADFD8]">
-              {locales.map((code) => (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => setLocale(code as Locale)}
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide border-none cursor-pointer transition-colors ${
-                    locale === code ? 'bg-gold text-[#5a4a1e]' : 'bg-transparent text-[#AFAFAF] hover:text-[#2B2B2B]'
-                  }`}
-                >
-                  {localeLabels[code as Locale]}
-                </button>
+            <div className="mx-2 hidden items-center text-[12px] tracking-[0.08em] lg:flex" role="group" aria-label={t('header.language')}>
+              {locales.map((code, i) => (
+                <span key={code} className="flex items-center">
+                  {i > 0 && <span aria-hidden className="mx-1.5 h-3 w-px bg-border" />}
+                  <button
+                    type="button"
+                    onClick={() => setLocale(code as Locale)}
+                    aria-pressed={locale === code}
+                    className={`cursor-pointer border-none bg-transparent px-0.5 py-1 transition-colors ${
+                      locale === code ? 'font-medium text-text' : 'text-muted hover:text-text'
+                    }`}
+                  >
+                    {localeLabels[code as Locale]}
+                  </button>
+                </span>
               ))}
             </div>
-            <div className="relative">
-              <button
-                ref={wishlistButtonRef}
-                type="button"
-                onClick={handleToggleWishlist}
-                className="relative border-none bg-none p-1 cursor-pointer text-subtle"
-                style={{ color: wishlistOpen ? '#E6C97A' : '#7A7A7A' }}
-                aria-expanded={wishlistOpen}
-                aria-haspopup="true"
-                aria-label="Wishlist"
-              >
-                <Heart size={20} strokeWidth={1.6} fill={wishlistOpen ? '#E6C97A25' : 'none'} />
-                {mounted && wishlist.length > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose text-[9px] font-bold text-[#6b3e3a]">
-                    {wishlist.length}
-                  </span>
-                )}
-              </button>
-            </div>
 
-            <button onClick={handleToggleCart} className="group relative border-none bg-none p-1 cursor-pointer text-subtle" style={{ color: '#7A7A7A' }}>
-              <ShoppingBag size={20} strokeWidth={1.6} />
-              {mounted && count() > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-gold text-[9px] font-bold text-[#5a4a1e]">
-                  {count()}
-                </span>
-              )}
+            <button
+              ref={wishlistButtonRef}
+              type="button"
+              onClick={handleToggleWishlist}
+              className="icon-btn"
+              aria-expanded={wishlistOpen}
+              aria-haspopup="dialog"
+              aria-label={`${t('header.wishlist')}${wishCount ? ` (${wishCount})` : ''}`}
+            >
+              <Heart
+                size={20}
+                strokeWidth={1.4}
+                className={wishlistOpen ? 'text-primary' : undefined}
+                fill={wishlistOpen ? 'currentColor' : 'none'}
+              />
+              {wishCount > 0 && <span className="count-badge">{wishCount}</span>}
             </button>
 
             <button
-              className="lg:hidden border-none bg-none p-1 cursor-pointer text-ink flex items-center justify-center"
-              onClick={() => setMobileOpen(v => !v)}
+              type="button"
+              onClick={handleToggleCart}
+              className="icon-btn -mr-2"
+              aria-label={`${t('header.cart')}${cartCount ? ` (${cartCount})` : ''}`}
             >
-              {mobileOpen ? <X size={22} strokeWidth={1.6} /> : <Menu size={22} strokeWidth={1.6} />}
+              <ShoppingBag size={20} strokeWidth={1.4} />
+              {cartCount > 0 && <span className="count-badge">{cartCount}</span>}
             </button>
           </div>
         </div>
 
         <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              style={{ background: '#F8F5F2', borderTop: '1px solid #EADFD8', overflow: 'hidden' }}
-            >
-              <nav style={{ padding: '16px 24px 24px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <div className="flex sm:hidden items-center gap-1 rounded-full bg-white/80 p-0.5 border border-[#EADFD8] w-fit mb-2">
-                  {locales.map((code) => (
-                    <button
-                      key={code}
-                      type="button"
-                      onClick={() => setLocale(code as Locale)}
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide border-none cursor-pointer transition-colors ${
-                        locale === code ? 'bg-gold text-[#5a4a1e]' : 'bg-transparent text-[#AFAFAF]'
-                      }`}
-                    >
-                      {localeLabels[code as Locale]}
-                    </button>
-                  ))}
-                </div>
-                {navLinks.map((link, i) => (
-                  <motion.div key={link.href} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04 }}>
-                    <Link
-                      href={link.href}
-                      style={{
-                        display: 'block',
-                        padding: '12px 16px',
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 14,
-                        fontWeight: 500,
-                        letterSpacing: '1px',
-                        textTransform: 'uppercase',
-                        textDecoration: 'none',
-                        color: pathname === link.href ? '#E6C97A' : '#2B2B2B',
-                        borderRadius: 10,
-                        background: pathname === link.href ? '#E6C97A15' : 'transparent',
-                        transition: 'background 0.2s',
-                      }}
-                    >
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                ))}
-              </nav>
-            </motion.div>
-          )}
+          {searchOpen && <SearchPanel onClose={() => setSearchOpen(false)} />}
         </AnimatePresence>
-      </motion.header>
+      </header>
+
+      <AnimatePresence>
+        {mobileOpen && (
+          <MobileMenu
+            navLinks={navLinks}
+            categories={categories}
+            isActive={isActive}
+            onClose={() => setMobileOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       <CartDrawer />
       <WishlistPopover anchorRef={wishlistButtonRef} />

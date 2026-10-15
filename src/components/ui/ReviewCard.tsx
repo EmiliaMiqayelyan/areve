@@ -1,56 +1,45 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { Star } from 'lucide-react';
+import Reveal from '@/components/ui/Reveal';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { pickLocalized } from '@/lib/localizedText';
 
 interface Review {
-  id: string; name: string; location: string;
-  comment: string; rating: number; product?: string;
+  id: string;
+  name: string;
+  location: string;
+  comment: string;
+  rating: number;
+  product?: string;
 }
 
 export default function ReviewCard({ review, index = 0 }: { review: Review; index?: number }) {
   const { locale } = useTranslation();
   const comment = pickLocalized(review.comment, locale);
   const productLabel = review.product ? pickLocalized(review.product, locale) : '';
+  const rating = Math.max(0, Math.min(5, Math.round(Number(review.rating) || 0)));
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.09 }}
-      style={{ background: '#fff', borderRadius: 20, padding: '28px 28px 24px', border: '1px solid #E8DDD6', display: 'flex', flexDirection: 'column', gap: 14, boxShadow: '0 2px 16px rgba(180,156,140,0.06)' }}
-    >
-      {/* Stars */}
-      <div style={{ display: 'flex', gap: 3 }}>
-        {Array.from({ length: review.rating }).map((_, i) => (
-          <Star key={i} size={14} fill="#E6C97A" color="#E6C97A" />
+    <Reveal delay={Math.min(index * 0.06, 0.3)} className="flex h-full flex-col border border-border bg-white p-6 sm:p-7">
+      <div className="flex gap-1 text-primary" aria-label={`${rating} / 5`}>
+        {Array.from({ length: rating }).map((_, i) => (
+          <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
         ))}
       </div>
-
-      {/* Comment */}
-      <p style={{ fontFamily: 'var(--font-serif)', fontSize: 15, color: '#2B2B2B', lineHeight: 1.75, fontStyle: 'italic', flex: 1 }}>
-        &ldquo;{comment}&rdquo;
-      </p>
-
-      {/* Product tag */}
+      <p className="mt-5 flex-1 font-display text-[16px] leading-relaxed text-text">&ldquo;{comment}&rdquo;</p>
       {productLabel && (
-        <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: '#BFA6A0', letterSpacing: '1px', textTransform: 'uppercase' }}>
-          {productLabel}
-        </span>
+        <p className="mt-4 text-[11px] uppercase tracking-[0.14em] text-primary-deep">{productLabel}</p>
       )}
-
-      {/* Author */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 12, borderTop: '1px solid #E8DDD6' }}>
-        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #E6C97A, #E8CFCB)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <span style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 700, color: '#5a4a1e' }}>{review.name[0]}</span>
-        </div>
-        <div>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600, color: '#2B2B2B' }}>{review.name}</p>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: '#AFAFAF' }}>{review.location}</p>
+      <div className="mt-5 flex items-center gap-3 border-t border-border pt-4">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary font-display text-[15px] text-accent">
+          {review.name?.[0] ?? '·'}
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-[14px] font-medium text-text">{review.name}</p>
+          {review.location && <p className="truncate text-[12px] text-muted">{review.location}</p>}
         </div>
       </div>
-    </motion.div>
+    </Reveal>
   );
 }

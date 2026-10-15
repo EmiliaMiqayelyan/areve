@@ -1,147 +1,145 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef, useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import { Check, Heart, ShoppingBag } from 'lucide-react';
 import StoreImage from '@/components/ui/StoreImage';
-import { Heart, ShoppingBag } from 'lucide-react';
+import SunMark from '@/components/ui/SunMark';
 import { Product, useCartStore, useWishlistStore } from '@/lib/store';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { pickLocalized } from '@/lib/localizedText';
 import { formatPrice } from '@/lib/currency';
 import { publicProductPath } from '@/lib/resourceId';
+import { resolveProductImageSrc } from '@/lib/productImage';
+import { useCategoryLabels } from '@/lib/useCatalog';
 
-const FALLBACK_PRODUCT_IMAGE = '/images/prod-bag-a.png';
-
-function resolveProductImageSrc(image?: string): string {
-  const src = String(image ?? '').trim();
-  if (!src) return FALLBACK_PRODUCT_IMAGE;
-
-  // Uploaded images are stored as /uploads/products/... paths.
-  if (src.startsWith('data:image/') || src.startsWith('blob:')) return FALLBACK_PRODUCT_IMAGE;
-  if (src.startsWith('/uploads/')) return src;
-
-  if (/^https?:\/\//i.test(src)) return src;
-  if (src.startsWith('/')) return src;
-  // Convert relative paths to absolute (public assets)
-  return `/${src.replace(/^\/+/, '')}`;
+export function ProductCardSkeleton() {
+  return (
+    <div aria-hidden className="flex flex-col">
+      <div className="skeleton aspect-[3/4]" />
+      <div className="skeleton mt-4 h-2.5 w-1/3" />
+      <div className="skeleton mt-2.5 h-3.5 w-3/4" />
+      <div className="skeleton mt-2.5 h-3 w-1/4" />
+    </div>
+  );
 }
 
-const badgeColors: Record<string, { bg: string; color: string }> = {
-  New:       { bg: '#C7D3C0', color: '#3d4d38' },
-  Bestseller:{ bg: '#E6C97A', color: '#5a4a1e' },
-  Limited:   { bg: '#E8CFCB', color: '#6b3e3a' },
-  Handmade:  { bg: '#D6C3B3', color: '#5a4040' },
+type Props = {
+  product: Product;
+  index?: number;
+  priority?: boolean;
+  sizes?: 'default' | 'large';
 };
 
-export default function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
-  const { t, locale } = useTranslation();
-  const [mounted, setMounted] = useState(false);
-  const [imgFailed, setImgFailed] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-  useEffect(() => {
-    // Reset per product so switching categories doesn't keep old failure state.
-    setImgFailed(false);
-  }, [product?.image]);
+const noopSubscribe = () => () => {};
 
+export default function ProductCard({ product, priority = false, sizes = 'default' }: Props) {
+  const { t, locale } = useTranslation();
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const [added, setAdded] = useState(false);
+  const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (addedTimer.current) clearTimeout(addedTimer.current); }, []);
+
+  const labels = useCategoryLabels();
   const { addItem } = useCartStore();
   const { toggleWishlist, isWishlisted } = useWishlistStore();
   const wishlisted = mounted && isWishlisted(product.id);
-  const badge = product.badge ? (badgeColors[product.badge] ?? badgeColors.Handmade) : null;
 
   const productHref = publicProductPath(product.id);
   const productName = pickLocalized(product.name, locale);
+  const categoryLabel = labels[product.category];
+  const imageSrc = resolveProductImageSrc(product.image);
+  const badgeRaw = product.badge ? pickLocalized(product.badge, locale) : '';
+  const badgeLabel = badgeRaw ? t(`product.badge_${badgeRaw}`) : '';
+
+  const handleAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem({ ...product, name: productName });
+    setAdded(true);
+    if (addedTimer.current) clearTimeout(addedTimer.current);
+    addedTimer.current = setTimeout(() => setAdded(false), 1600);
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 32 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.4, delay: Math.min(index * 0.04, 0.16) }}
-      className="card"
-      style={{ display: 'flex', flexDirection: 'column' }}
-    >
-      {/* Image */}
-      <div style={{ position: 'relative', height: 260, overflow: 'hidden', flexShrink: 0 }}>
-        <Link href={productHref} className="absolute inset-0 z-[1] block no-underline" aria-label={productName}>
-          <StoreImage
-            src={imgFailed ? FALLBACK_PRODUCT_IMAGE : resolveProductImageSrc(product.image)}
-            alt={productName}
-            fill
-            style={{ transition: 'transform 0.6s' }}
-            className="group-hover:scale-105"
-            onError={() => setImgFailed(true)}
-          />
+    <article className="group relative flex flex-col">
+      <div className="relative aspect-[3/4] overflow-hidden bg-surface-deep">
+        <Link href={productHref} className="absolute inset-0 block no-underline" aria-hidden tabIndex={-1}>
+          {imageSrc && failedSrc !== imageSrc ? (
+            <StoreImage
+              src={imageSrc}
+              alt={productName}
+              fill
+              priority={priority}
+              className="transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.04]"
+              onError={() => setFailedSrc(imageSrc)}
+            />
+          ) : (
+            <span className="absolute inset-0 flex items-center justify-center text-primary/60">
+              <SunMark className="w-16" />
+            </span>
+          )}
         </Link>
-        {/* Soft overlay on hover */}
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(248,245,242,0)', transition: 'background 0.3s' }} className="hover-overlay" />
 
-        {/* Badge */}
-        {badge && product.badge && (
-          <span style={{ position: 'absolute', top: 12, left: 12, ...badge, fontFamily: 'var(--font-sans)', fontSize: 10, fontWeight: 600, letterSpacing: '1.5px', textTransform: 'uppercase', padding: '3px 10px', borderRadius: 99 }}>
-            {t(`product.badge_${product.badge}` as 'product.badge_New') || product.badge}
+        {badgeLabel && (
+          <span className="badge badge-gold pointer-events-none absolute left-2.5 top-2.5 sm:left-3 sm:top-3">
+            {badgeLabel.startsWith('product.') ? badgeRaw : badgeLabel}
           </span>
         )}
 
-        {/* Wishlist */}
         <button
+          type="button"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             toggleWishlist(product);
           }}
-          style={{ position: 'absolute', top: 12, right: 12, zIndex: 2, width: 34, height: 34, borderRadius: '50%', background: 'rgba(248,245,242,0.9)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s', backdropFilter: 'blur(4px)' }}
+          aria-pressed={wishlisted}
+          aria-label={wishlisted ? t('product.removeFromWishlist') : t('product.addToWishlist')}
+          className={`absolute right-1.5 top-1.5 z-[2] flex h-10 w-10 cursor-pointer items-center justify-center border-none bg-transparent transition-colors sm:right-2 sm:top-2 ${
+            wishlisted ? 'text-primary' : 'text-text/70 hover:text-text'
+          }`}
         >
-          <Heart 
-            size={15} 
-            strokeWidth={1.8} 
-            fill={wishlisted ? '#E8CFCB' : 'none'} 
-            color={wishlisted ? '#c97a7a' : '#AFAFAF'} 
-          />
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-background/90 backdrop-blur-sm">
+            <Heart size={15} strokeWidth={1.5} fill={wishlisted ? 'currentColor' : 'none'} />
+          </span>
         </button>
 
-        {/* Quick add — slides up */}
-        <motion.div
-          initial={{ y: 12, opacity: 0 }}
-          whileHover={{ y: 0, opacity: 1 }}
-          style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 12px 12px', zIndex: 2 }}
-          className="quick-add"
+        {/* Desktop: reveal on hover */}
+        <button
+          type="button"
+          onClick={handleAdd}
+          className="pc-quick absolute inset-x-3 bottom-3 z-[2] h-11 cursor-pointer items-center justify-center gap-2 border-none bg-secondary text-[11.5px] font-medium uppercase tracking-[0.12em] text-background transition-colors hover:bg-primary hover:text-secondary"
         >
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              addItem({ ...product, name: productName });
-            }}
-            style={{ width: '100%', padding: '10px', background: '#E6C97A', border: 'none', borderRadius: 99, fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, letterSpacing: '1.2px', textTransform: 'uppercase', color: '#5a4a1e', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background 0.2s' }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F4D58D')}
-            onMouseLeave={e => (e.currentTarget.style.background = '#E6C97A')}
-          >
-            <ShoppingBag size={13} strokeWidth={2} />
-            {t('product.addToBag')}
-          </button>
-        </motion.div>
+          {added ? <Check size={14} strokeWidth={1.8} /> : <ShoppingBag size={14} strokeWidth={1.6} />}
+          {added ? t('product.added') : t('product.addToBag')}
+        </button>
+
+        {/* Touch: always-visible compact button */}
+        <button
+          type="button"
+          onClick={handleAdd}
+          aria-label={t('product.addToBag')}
+          className={`pc-quick-touch absolute bottom-2 right-2 z-[2] flex h-10 w-10 cursor-pointer items-center justify-center border-none transition-colors ${
+            added ? 'bg-primary text-secondary' : 'bg-background/95 text-text'
+          }`}
+        >
+          {added ? <Check size={16} strokeWidth={1.8} /> : <ShoppingBag size={16} strokeWidth={1.5} />}
+        </button>
       </div>
 
-      {/* Content */}
-      <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <Link href={productHref} className="no-underline" style={{ marginBottom: 10 }}>
-          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: 15, fontWeight: 500, color: 'var(--color-heading)', lineHeight: 1.35 }}>
+      <div className="flex flex-1 flex-col pt-3 sm:pt-4">
+        {categoryLabel && (
+          <p className="mb-1 truncate text-[10.5px] uppercase tracking-[0.14em] text-muted sm:text-[11px]">{categoryLabel}</p>
+        )}
+        <h3 className={`font-display font-normal leading-snug text-text ${sizes === 'large' ? 'text-[17px] sm:text-[19px]' : 'text-[15px] sm:text-[16px]'}`}>
+          <Link href={productHref} className="no-underline transition-colors hover:text-primary-deep">
             {productName}
-          </h3>
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
-          <span style={{ fontFamily: 'var(--font-serif)', fontSize: 18, fontWeight: 500, color: 'var(--color-ink)' }}>{formatPrice(product.price)}</span>
-          <Link
-            href={productHref}
-            style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: '#BFA6A0', textDecoration: 'none', borderBottom: '1px solid #BFA6A0', paddingBottom: 1, transition: 'color 0.2s, border-color 0.2s' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#E6C97A'; (e.currentTarget as HTMLElement).style.borderColor = '#E6C97A'; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#BFA6A0'; (e.currentTarget as HTMLElement).style.borderColor = '#BFA6A0'; }}
-          >
-            {t('product.viewDetails')}
           </Link>
-        </div>
+        </h3>
+        <p className="price mt-1.5 text-[14px] text-text sm:text-[15px]">{formatPrice(product.price)}</p>
       </div>
-    </motion.div>
+    </article>
   );
 }

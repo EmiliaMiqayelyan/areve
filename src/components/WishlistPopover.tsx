@@ -3,22 +3,26 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, X } from 'lucide-react';
+import { Heart, ShoppingBag, X } from 'lucide-react';
 import StoreImage from '@/components/ui/StoreImage';
 import Link from 'next/link';
-import { useWishlistStore } from '@/lib/store';
+import { useCartStore, useWishlistStore } from '@/lib/store';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { formatPrice } from '@/lib/currency';
+import { pickLocalized } from '@/lib/localizedText';
+import { resolveProductImageSrc } from '@/lib/productImage';
+import { publicProductPath } from '@/lib/resourceId';
 
 type WishlistPopoverProps = {
   anchorRef: React.RefObject<HTMLButtonElement | null>;
 };
 
-const PANEL_WIDTH = 300;
+const PANEL_WIDTH = 340;
 
 export default function WishlistPopover({ anchorRef }: WishlistPopoverProps) {
   const { items, isOpen, closeWishlistPanel, removeItem } = useWishlistStore();
-  const { t } = useTranslation();
+  const { addItem } = useCartStore();
+  const { t, locale } = useTranslation();
   const panelRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -35,14 +39,9 @@ export default function WishlistPopover({ anchorRef }: WishlistPopoverProps) {
 
     const updatePosition = () => {
       const rect = anchorRef.current!.getBoundingClientRect();
-      const left = Math.min(
-        Math.max(16, rect.right - PANEL_WIDTH),
-        window.innerWidth - PANEL_WIDTH - 16
-      );
-      setPosition({
-        top: rect.bottom + 10,
-        left,
-      });
+      const width = Math.min(PANEL_WIDTH, window.innerWidth - 24);
+      const left = Math.min(Math.max(12, rect.right - width), window.innerWidth - width - 12);
+      setPosition({ top: rect.bottom + 8, left });
     };
 
     updatePosition();
@@ -59,12 +58,7 @@ export default function WishlistPopover({ anchorRef }: WishlistPopoverProps) {
 
     const handlePointerDown = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node;
-      if (
-        panelRef.current?.contains(target) ||
-        anchorRef.current?.contains(target)
-      ) {
-        return;
-      }
+      if (panelRef.current?.contains(target) || anchorRef.current?.contains(target)) return;
       closeWishlistPanel();
     };
 
@@ -89,216 +83,89 @@ export default function WishlistPopover({ anchorRef }: WishlistPopoverProps) {
       {isOpen && position && (
         <motion.div
           ref={panelRef}
-          initial={{ opacity: 0, y: -6, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -6, scale: 0.98 }}
-          transition={{ duration: 0.18, ease: 'easeOut' }}
-          style={{
-            position: 'fixed',
-            top: position.top,
-            left: position.left,
-            width: PANEL_WIDTH,
-            maxWidth: 'calc(100vw - 32px)',
-            background: '#fff',
-            borderRadius: 16,
-            border: '1px solid #EADFD8',
-            boxShadow: '0 12px 40px rgba(43,43,43,0.12)',
-            zIndex: 100,
-            overflow: 'hidden',
-          }}
+          role="dialog"
+          aria-label={t('wishlist.title')}
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+          style={{ top: position.top, left: position.left, width: Math.min(PANEL_WIDTH, typeof window !== 'undefined' ? window.innerWidth - 24 : PANEL_WIDTH) }}
+          className="fixed z-[100] overflow-hidden border border-border bg-background shadow-[0_24px_48px_-24px_rgba(21,18,15,0.35)]"
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '14px 16px',
-              borderBottom: '1px solid #F0E8E2',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Heart size={15} color="#E6C97A" strokeWidth={1.8} fill="#E6C97A30" />
-              <span
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: 16,
-                  color: '#2B2B2B',
-                }}
-              >
-                {t('wishlist.title')}
-              </span>
-              {items.length > 0 && (
-                <span
-                  style={{
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: 12,
-                    color: '#AFAFAF',
-                  }}
-                >
-                  ({items.length})
-                </span>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={closeWishlistPanel}
-              aria-label={t('cart.back')}
-              style={{
-                background: '#F5F0EC',
-                border: 'none',
-                borderRadius: '50%',
-                width: 26,
-                height: 26,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#7A7A7A',
-              }}
-            >
-              <X size={13} />
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <p className="font-display text-[17px] text-text">
+              {t('wishlist.title')}
+              {items.length > 0 && <span className="ml-1.5 text-[13px] tabular-nums text-muted">({items.length})</span>}
+            </p>
+            <button type="button" onClick={closeWishlistPanel} aria-label={t('header.close')} className="icon-btn -mr-2 h-8 w-8">
+              <X size={16} strokeWidth={1.5} />
             </button>
           </div>
 
-          <div
-            style={{
-              maxHeight: 320,
-              overflowY: 'auto',
-              padding: items.length === 0 ? '28px 20px' : '10px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-            }}
-          >
+          <div className="max-h-[360px] overflow-y-auto">
             {items.length === 0 ? (
-              <div style={{ textAlign: 'center' }}>
-                <Heart size={36} color="#D6C3B3" strokeWidth={1.2} style={{ margin: '0 auto 10px' }} />
-                <p
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: 16,
-                    color: '#2B2B2B',
-                    marginBottom: 14,
-                  }}
-                >
-                  {t('wishlist.empty')}
-                </p>
-                <Link
-                  href="/products"
-                  onClick={closeWishlistPanel}
-                  className="btn-primary"
-                  style={{
-                    display: 'inline-flex',
-                    textDecoration: 'none',
-                    fontSize: 13,
-                    padding: '10px 18px',
-                  }}
-                >
+              <div className="px-6 py-10 text-center">
+                <Heart size={30} strokeWidth={1} className="mx-auto text-primary" />
+                <p className="mt-4 font-display text-[18px] text-text">{t('wishlist.empty')}</p>
+                <Link href="/products" onClick={closeWishlistPanel} className="btn-primary mt-6 min-h-[42px] px-5">
                   {t('wishlist.shopNow')}
                 </Link>
               </div>
             ) : (
-              items.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    display: 'flex',
-                    gap: 10,
-                    padding: 8,
-                    borderRadius: 12,
-                    background: '#FAF7F4',
-                    border: '1px solid #F0E8E2',
-                  }}
-                >
-                  <Link
-                    href={`/products/${item.id}`}
-                    onClick={closeWishlistPanel}
-                    style={{
-                      position: 'relative',
-                      width: 56,
-                      height: 56,
-                      borderRadius: 8,
-                      overflow: 'hidden',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <StoreImage src={item.image} alt={item.name} fill />
-                  </Link>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <Link
-                      href={`/products/${item.id}`}
-                      onClick={closeWishlistPanel}
-                      style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 13,
-                        fontWeight: 500,
-                        color: '#2B2B2B',
-                        textDecoration: 'none',
-                        display: 'block',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {item.name}
-                    </Link>
-                    <p
-                      style={{
-                        fontFamily: 'var(--font-serif)',
-                        fontSize: 14,
-                        color: '#2B2B2B',
-                        marginTop: 2,
-                      }}
-                    >
-                      {formatPrice(item.price)}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeItem(item.id)}
-                    aria-label={t('wishlist.remove')}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: '#C9A0A0',
-                      padding: 4,
-                      alignSelf: 'flex-start',
-                    }}
-                  >
-                    <Heart size={15} fill="#E6C97A50" strokeWidth={1.6} />
-                  </button>
-                </div>
-              ))
+              <ul className="divide-y divide-border">
+                {items.map((item) => {
+                  const name = pickLocalized(item.name, locale);
+                  const src = resolveProductImageSrc(item.image);
+                  return (
+                    <li key={item.id} className="flex gap-3 px-4 py-3">
+                      <Link
+                        href={publicProductPath(item.id)}
+                        onClick={closeWishlistPanel}
+                        className="relative block aspect-[3/4] w-14 shrink-0 overflow-hidden bg-surface-deep"
+                      >
+                        {src && <StoreImage src={src} alt={name} fill />}
+                      </Link>
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <Link
+                          href={publicProductPath(item.id)}
+                          onClick={closeWishlistPanel}
+                          className="truncate text-[14px] text-text no-underline hover:text-primary-deep"
+                        >
+                          {name}
+                        </Link>
+                        <p className="price mt-0.5 text-[13px] text-text">{formatPrice(item.price)}</p>
+                        <div className="mt-auto flex items-center gap-4 pt-1.5">
+                          <button
+                            type="button"
+                            onClick={() => addItem({ ...item, name })}
+                            className="inline-flex cursor-pointer items-center gap-1.5 border-none bg-transparent p-0 text-[12px] font-medium text-primary-deep hover:text-text"
+                          >
+                            <ShoppingBag size={13} strokeWidth={1.6} /> {t('product.addToBag')}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.id)}
+                            className="cursor-pointer border-none bg-transparent p-0 text-[12px] text-muted hover:text-text"
+                          >
+                            {t('wishlist.remove')}
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </div>
 
           {items.length > 0 && (
-            <div
-              style={{
-                padding: '10px 12px 12px',
-                borderTop: '1px solid #F0E8E2',
-              }}
+            <Link
+              href="/products"
+              onClick={closeWishlistPanel}
+              className="block border-t border-border py-3 text-center text-[12px] font-medium uppercase tracking-[0.12em] text-text no-underline hover:bg-surface"
             >
-              <Link
-                href="/products"
-                onClick={closeWishlistPanel}
-                style={{
-                  display: 'block',
-                  textAlign: 'center',
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 12,
-                  fontWeight: 500,
-                  letterSpacing: '0.5px',
-                  textTransform: 'uppercase',
-                  color: '#7A7A7A',
-                  textDecoration: 'none',
-                  padding: '8px 0',
-                }}
-              >
-                {t('wishlist.shopNow')}
-              </Link>
-            </div>
+              {t('wishlist.shopNow')}
+            </Link>
           )}
         </motion.div>
       )}

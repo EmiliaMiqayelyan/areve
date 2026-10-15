@@ -1,49 +1,74 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Check, ChevronLeft, ChevronRight, Heart, Minus, Package, Plus, Shield, ShoppingBag, Truck } from 'lucide-react';
 import StoreImage from '@/components/ui/StoreImage';
-import { useEffect, useState } from 'react';
-import { ArrowLeft, Heart, ShoppingBag, Shield, Truck, Package } from 'lucide-react';
+import SunMark from '@/components/ui/SunMark';
+import ProductCard, { ProductCardSkeleton } from '@/components/ui/ProductCard';
+import { WhatsAppIcon } from '@/components/ui/BrandIcons';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useCartStore, useWishlistStore } from '@/lib/store';
-import ProductCard from '@/components/ui/ProductCard';
 import { useTranslation } from '@/i18n/I18nProvider';
 import { pickLocalized } from '@/lib/localizedText';
 import { formatPrice } from '@/lib/currency';
 import { useProductQuery, useProductsQuery } from '@/lib/useProductsQuery';
 import { readExtraImages, stripExtraImages } from '@/lib/extraProductImages';
+import { resolveProductImageSrc } from '@/lib/productImage';
+import { publicProductPath } from '@/lib/resourceId';
+import { useCategoryLabels } from '@/lib/useCatalog';
+import { buildWhatsAppOrderUrl, resolveStoreWhatsAppNumber } from '@/lib/storeContact';
 
-const FALLBACK_PRODUCT_IMAGE = '/images/prod-bag-a.png';
-
-function resolveProductImageSrc(image?: string): string {
-  const src = String(image ?? '').trim();
-  if (!src) return FALLBACK_PRODUCT_IMAGE;
-  if (src.startsWith('blob:') || src.startsWith('data:image/')) return FALLBACK_PRODUCT_IMAGE;
-  if (src.startsWith('/uploads/')) return src;
-  if (/^https?:\/\//i.test(src)) return src;
-  if (src.startsWith('/')) return src;
-  return `/${src.replace(/^\/+/, '')}`;
+function DetailSkeleton() {
+  return (
+    <div className="wrap pb-20 pt-6">
+      <div className="skeleton mb-8 h-3 w-48" />
+      <div className="grid gap-10 lg:grid-cols-12 lg:gap-14">
+        <div className="skeleton aspect-[4/5] lg:col-span-7" />
+        <div className="space-y-4 lg:col-span-5">
+          <div className="skeleton h-3 w-24" />
+          <div className="skeleton h-9 w-3/4" />
+          <div className="skeleton h-6 w-32" />
+          <div className="skeleton mt-8 h-12 w-full" />
+        </div>
+      </div>
+    </div>
+  );
 }
+
+const noopSubscribe = () => () => {};
 
 export default function ProductDetailPage() {
   const { t, locale } = useTranslation();
+  const { settings } = useSiteSettings();
   const { id } = useParams<{ id: string }>();
   const productId = String(id ?? '');
-  const [imgFailed, setImgFailed] = useState(false);
+  const [failed, setFailed] = useState<Record<string, boolean>>({});
   const [activeIndex, setActiveIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
+  const origin = useSyncExternalStore(noopSubscribe, () => window.location.origin, () => '');
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setActiveIndex(0);
-    setImgFailed(false);
+    setFailed({});
+    setQuantity(1);
   }, [productId]);
 
-  const { addItem } = useCartStore();
+  useEffect(() => () => { if (addedTimer.current) clearTimeout(addedTimer.current); }, []);
+
+  const { items: cartItems, addItem, updateQuantity } = useCartStore();
   const { toggleWishlist, isWishlisted } = useWishlistStore();
+  const labels = useCategoryLabels();
 
   const { data: product, isLoading: productLoading } = useProductQuery(productId);
 
-  const { data: relatedPool = [] } = useProductsQuery(
+  const { data: relatedPool = [], isLoading: relatedLoading } = useProductsQuery(
     {
       active: true,
       category: product?.category,
@@ -53,134 +78,301 @@ export default function ProductDetailPage() {
     { enabled: Boolean(product?.category) }
   );
 
-  const loading = productLoading;
+  useEffect(() => {
+    const el = ctaRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [product]);
 
-  if (loading) {
+  if (productLoading) return <DetailSkeleton />;
+
+  if (!product) {
     return (
-      <div style={{ minHeight: '100vh', paddingTop: 120, textAlign: 'center', fontFamily: 'var(--font-sans)', color: '#AFAFAF' }}>
-        {t('product.loading')}
+      <div className="wrap flex min-h-[60vh] flex-col items-center justify-center py-24 text-center">
+        <SunMark className="mb-6 w-16 text-primary" />
+        <p className="font-display text-[26px] text-text">{t('product.notFound')}</p>
+        <Link href="/products" className="btn-outline mt-8">
+          <ChevronLeft size={15} strokeWidth={1.5} /> {t('product.backToProducts')}
+        </Link>
       </div>
     );
   }
 
-  if (!product) return (
-    <div style={{ minHeight: '100vh', paddingTop: 120, textAlign: 'center' }}>
-      <p style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: '#2B2B2B' }}>{t('product.notFound')}</p>
-      <Link href="/products" style={{ color: '#E6C97A', textDecoration: 'none', marginTop: 12, display: 'inline-block' }}>← {t('product.backToProducts')}</Link>
-    </div>
-  );
-
-  const related = relatedPool.slice(0, 3);
+  const related = relatedPool.slice(0, 4);
   const wishlisted = isWishlisted(product.id);
-  const mainSrc = resolveProductImageSrc(product.image);
-  const gallery = [mainSrc, ...readExtraImages(product)]
+  const gallery = [product.image, ...readExtraImages(product)]
     .map((src) => resolveProductImageSrc(src))
     .filter((src, index, all) => src && all.indexOf(src) === index)
     .slice(0, 4);
   const safeIndex = Math.min(activeIndex, Math.max(gallery.length - 1, 0));
-  const activeSrc = gallery[safeIndex] ?? mainSrc;
+  const activeSrc = gallery[safeIndex] ?? '';
   const displayName = pickLocalized(product.name, locale);
   const displayDescription = stripExtraImages(pickLocalized(product.description, locale));
-  const badgeRaw = product.badge ? pickLocalized(product.badge, locale) : null;
-  const badgeLabel = badgeRaw
-    ? (t(`product.badge_${badgeRaw}` as 'product.badge_New') || badgeRaw)
-    : null;
+  const categoryLabel = labels[product.category];
+  const badgeRaw = product.badge ? pickLocalized(product.badge, locale) : '';
+  const badgeTranslated = badgeRaw ? t(`product.badge_${badgeRaw}`) : '';
+  const badgeLabel = badgeTranslated.startsWith('product.') ? badgeRaw : badgeTranslated;
+
+  const whatsappNumber = resolveStoreWhatsAppNumber({
+    businessPhone: settings.businessPhone,
+    whatsappUrl: settings.whatsappUrl,
+  });
+  const askHref = whatsappNumber
+    ? buildWhatsAppOrderUrl(
+        whatsappNumber,
+        `${t('product.askMessage')}\n${displayName}${origin ? `\n${origin}${publicProductPath(product.id)}` : ''}`
+      )
+    : '';
+
+  const handleAdd = () => {
+    const existing = cartItems.find((i) => i.id === product.id);
+    addItem({ ...product, name: displayName });
+    if (quantity > 1) updateQuantity(product.id, (existing?.quantity ?? 0) + quantity);
+    setAdded(true);
+    if (addedTimer.current) clearTimeout(addedTimer.current);
+    addedTimer.current = setTimeout(() => setAdded(false), 1800);
+  };
+
+  const step = (dir: 1 | -1) => setActiveIndex((i) => (i + dir + gallery.length) % gallery.length);
 
   return (
-    <div style={{ minHeight: '100vh', paddingTop: 92, paddingBottom: 80 }}>
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6" style={{ paddingLeft: 'var(--container-px)', paddingRight: 'var(--container-px)' }}>
-        <Link href="/products" className="mb-8 inline-flex items-center gap-1.5 font-sans text-[13px] text-mocha no-underline transition-colors hover:text-gold sm:mb-12">
-          <ArrowLeft size={14} /> {t('product.backToProducts')}
-        </Link>
+    <div className="pb-24 lg:pb-0">
+      <div className="wrap pt-5 sm:pt-6">
+        <nav aria-label="Breadcrumb" className="mb-6 text-[12px] text-muted sm:mb-8">
+          <ol className="flex flex-wrap items-center gap-2">
+            <li><Link href="/" className="no-underline hover:text-text">{t('common.home')}</Link></li>
+            <li aria-hidden>/</li>
+            <li><Link href="/products" className="no-underline hover:text-text">{settings.siteContent.pages.shop.title}</Link></li>
+            {categoryLabel && (
+              <>
+                <li aria-hidden>/</li>
+                <li>
+                  <Link href={`/products?category=${encodeURIComponent(product.category)}`} className="no-underline hover:text-text">
+                    {categoryLabel}
+                  </Link>
+                </li>
+              </>
+            )}
+            <li aria-hidden>/</li>
+            <li aria-current="page" className="max-w-[50vw] truncate text-text">{displayName}</li>
+          </ol>
+        </nav>
 
-        <div className="mb-16 grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16 lg:mb-24">
-          <motion.div initial={{ opacity: 0, x: -32 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55 }} className="flex flex-col">
-            <div className="relative h-[380px] overflow-hidden rounded-[24px] bg-beige sm:h-[500px] lg:h-[600px]">
-              <StoreImage
-                src={imgFailed ? FALLBACK_PRODUCT_IMAGE : activeSrc}
-                alt={displayName}
-                fill
-                priority
-                onError={() => setImgFailed(true)}
-              />
-              {badgeLabel && (
-                <span className="badge badge-gold absolute left-4 top-4 sm:left-6 sm:top-6">{badgeLabel}</span>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-14 xl:gap-20">
+          {/* Gallery */}
+          <div className="lg:col-span-7">
+            <div className={`flex flex-col gap-3 ${gallery.length > 1 ? 'lg:flex-row-reverse' : ''}`}>
+              <div className="relative -mx-[var(--container-px)] aspect-[4/5] flex-1 overflow-hidden bg-surface-deep sm:mx-0">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={activeSrc}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute inset-0"
+                  >
+                    {activeSrc && !failed[activeSrc] ? (
+                      <StoreImage
+                        src={activeSrc}
+                        alt={displayName}
+                        fill
+                        priority
+                        onError={() => setFailed((f) => ({ ...f, [activeSrc]: true }))}
+                      />
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center text-primary/60">
+                        <SunMark className="w-24" />
+                      </span>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+                {badgeLabel && <span className="badge badge-gold absolute left-4 top-4">{badgeLabel}</span>}
+                {gallery.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => step(-1)}
+                      aria-label={t('common.previous')}
+                      className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-background/90 text-text transition-colors hover:bg-background"
+                    >
+                      <ChevronLeft size={18} strokeWidth={1.4} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => step(1)}
+                      aria-label={t('common.next')}
+                      className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-none bg-background/90 text-text transition-colors hover:bg-background"
+                    >
+                      <ChevronRight size={18} strokeWidth={1.4} />
+                    </button>
+                    <span className="absolute bottom-3 right-3 bg-background/90 px-2.5 py-1 text-[11px] tabular-nums text-text">
+                      {safeIndex + 1} / {gallery.length}
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {gallery.length > 1 && (
+                <div className="no-scrollbar flex gap-2 overflow-x-auto lg:w-20 lg:flex-col lg:overflow-visible">
+                  {gallery.map((src, galleryIndex) => {
+                    const selected = galleryIndex === safeIndex;
+                    return (
+                      <button
+                        key={`${src}-${galleryIndex}`}
+                        type="button"
+                        onClick={() => setActiveIndex(galleryIndex)}
+                        aria-label={t('product.imageOf', { n: galleryIndex + 1, count: gallery.length })}
+                        aria-pressed={selected}
+                        className={`relative aspect-[4/5] w-16 shrink-0 cursor-pointer overflow-hidden border bg-surface-deep p-0 transition-opacity sm:w-20 ${
+                          selected ? 'border-text' : 'border-transparent opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        <StoreImage src={src} alt="" fill />
+                      </button>
+                    );
+                  })}
+                </div>
               )}
             </div>
-            {gallery.length > 1 && (
-              <div className="mt-3 flex gap-2">
-                {gallery.map((src, galleryIndex) => {
-                  const selected = galleryIndex === safeIndex;
-                  return (
+          </div>
+
+          {/* Details */}
+          <div className="lg:col-span-5">
+            <div className="lg:sticky lg:top-[calc(var(--header-h)+32px)]">
+              {categoryLabel && (
+                <Link
+                  href={`/products?category=${encodeURIComponent(product.category)}`}
+                  className="eyebrow no-underline hover:text-text"
+                >
+                  {categoryLabel}
+                </Link>
+              )}
+              <h1 className="mt-3 text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.12]">{displayName}</h1>
+              <p className="price mt-4 text-[22px] text-text">{formatPrice(product.price)}</p>
+
+              {displayDescription && (
+                <p className="mt-6 whitespace-pre-line text-[15px] leading-relaxed text-muted">{displayDescription}</p>
+              )}
+
+              <div ref={ctaRef} className="mt-8 border-t border-border pt-8">
+                <div className="flex items-stretch gap-3">
+                  <div className="flex h-[52px] shrink-0 items-center border border-border" role="group" aria-label={t('product.quantity')}>
                     <button
-                      key={`${src}-${galleryIndex}`}
                       type="button"
-                      onClick={() => {
-                        setActiveIndex(galleryIndex);
-                        setImgFailed(false);
-                      }}
-                      aria-label={`${displayName} ${galleryIndex + 1}`}
-                      aria-pressed={selected}
-                      className={`relative h-14 w-14 shrink-0 overflow-hidden rounded-[10px] bg-beige sm:h-16 sm:w-16 ${
-                        selected ? 'ring-2 ring-[#E6C97A]' : 'ring-1 ring-[#EADFD8]'
-                      }`}
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      disabled={quantity <= 1}
+                      aria-label={t('cart.decrease')}
+                      className="flex h-full w-11 cursor-pointer items-center justify-center border-none bg-transparent text-text disabled:cursor-not-allowed disabled:text-muted/50"
                     >
-                      <StoreImage src={src} alt="" fill />
+                      <Minus size={14} strokeWidth={1.5} />
                     </button>
-                  );
-                })}
-              </div>
-            )}
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, x: 32 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55 }} className="flex flex-col justify-center">
-            <p className="mb-3 font-sans text-[11px] font-medium uppercase tracking-[0.28em] text-gold">AREVÉ</p>
-            <h1 className="font-serif text-[clamp(1.7rem,3vw,2.45rem)] font-medium leading-[1.12] text-heading">{displayName}</h1>
-            <div className="divider-gold my-5" />
-
-            {displayDescription ? (
-              <p className="mb-6 font-sans text-sm leading-relaxed text-subtle sm:text-[15px]">{displayDescription}</p>
-            ) : null}
-
-            <p className="mb-6 font-serif text-xl font-medium text-ink sm:text-2xl">{formatPrice(product.price)}</p>
-
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row">
-              <button onClick={() => addItem({ ...product, name: displayName })} className="btn-primary flex-1 justify-center !py-3 !text-[12px] !tracking-[1px]">
-                <ShoppingBag size={14} /> {t('product.addToBag')}
-              </button>
-              <button onClick={() => toggleWishlist(product)}
-                className={`flex h-[44px] w-full items-center justify-center rounded-full border-[1.5px] transition-all sm:w-[44px] ${
-                    wishlisted ? 'border-gold bg-gold/10' : 'border-beige bg-white'
-                }`}
-              >
-                <Heart size={16} strokeWidth={1.6} fill={wishlisted ? '#E8CFCB' : 'none'} color={wishlisted ? '#c97a7a' : '#BFA6A0'} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
-              {[
-                [<Shield size={16} />, t('product.quality')],
-                [<Truck size={16} />, t('product.delivery')],
-                [<Package size={16} />, t('product.packaging')],
-              ].map(([ic, lbl], i) => (
-                <div key={i} className="flex items-center gap-3 rounded-[12px] bg-beige/40 p-4 sm:flex-col sm:justify-center sm:text-center sm:bg-beige/60">
-                  <div className="text-gold">{ic as React.ReactNode}</div>
-                  <p className="font-sans text-[11px] font-medium text-subtle tracking-wide">{lbl as string}</p>
+                    <span className="w-8 text-center text-[15px] tabular-nums" aria-live="polite">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((q) => Math.min(99, q + 1))}
+                      aria-label={t('cart.increase')}
+                      className="flex h-full w-11 cursor-pointer items-center justify-center border-none bg-transparent text-text"
+                    >
+                      <Plus size={14} strokeWidth={1.5} />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAdd}
+                    className="btn-primary min-h-[52px] min-w-0 flex-1 whitespace-normal px-3 text-center leading-tight tracking-[0.08em] sm:px-4 sm:tracking-[0.12em]"
+                  >
+                    {added ? <Check size={16} strokeWidth={1.8} /> : <ShoppingBag size={16} strokeWidth={1.5} />}
+                    {added ? t('product.added') : t('product.addToBag')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleWishlist(product)}
+                    aria-pressed={wishlisted}
+                    aria-label={wishlisted ? t('product.removeFromWishlist') : t('product.addToWishlist')}
+                    className={`flex h-[52px] w-[52px] shrink-0 cursor-pointer items-center justify-center border bg-transparent transition-colors ${
+                      wishlisted ? 'border-primary text-primary' : 'border-border text-text hover:border-text'
+                    }`}
+                  >
+                    <Heart size={18} strokeWidth={1.4} fill={wishlisted ? 'currentColor' : 'none'} />
+                  </button>
                 </div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
 
-        {related.length > 0 && (
-          <div className="border-t border-beige pt-16 sm:pt-24">
-            <h2 className="mb-6 font-serif text-base font-medium text-heading sm:text-lg sm:mb-10">{t('product.relatedTitle')}</h2>
-            <div className="grid grid-cols-1 gap-5 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {related.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+                <p className="mt-4 text-[13px] leading-relaxed text-muted">{t('product.orderHow')}</p>
+
+                {askHref && (
+                  <a href={askHref} target="_blank" rel="noopener noreferrer" className="link-underline mt-5">
+                    <WhatsAppIcon size={15} className="text-primary-deep" /> {t('product.askQuestion')}
+                  </a>
+                )}
+              </div>
+
+              <ul className="mt-10 divide-y divide-border border-y border-border">
+                {[
+                  { icon: Shield, label: t('product.quality') },
+                  { icon: Truck, label: t('product.delivery') },
+                  { icon: Package, label: t('product.packaging') },
+                ].map(({ icon: Icon, label }) => (
+                  <li key={label} className="flex items-center gap-4 py-4 text-[14px] text-text">
+                    <Icon size={18} strokeWidth={1.3} className="text-primary" aria-hidden />
+                    {label}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-        )}
+        </div>
       </div>
+
+      {(relatedLoading || related.length > 0) && product.category && (
+        <section className="section mt-12 border-t border-border lg:mt-20">
+          <div className="wrap">
+            <div className="mb-8 flex flex-col gap-3 sm:mb-10 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+              <h2 className="section-title">{t('product.relatedTitle')}</h2>
+              {categoryLabel && (
+                <Link href={`/products?category=${encodeURIComponent(product.category)}`} className="link-underline shrink-0">
+                  {categoryLabel}
+                </Link>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-5 md:grid-cols-4">
+              {relatedLoading
+                ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
+                : related.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Mobile sticky purchase bar */}
+      <AnimatePresence>
+        {showStickyBar && (
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md lg:hidden"
+            style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] text-text">{displayName}</p>
+                <p className="price text-[14px] text-text">{formatPrice(product.price)}</p>
+              </div>
+              <button type="button" onClick={handleAdd} className="btn-primary min-h-[46px] shrink-0 px-5">
+                {added ? <Check size={15} strokeWidth={1.8} /> : <ShoppingBag size={15} strokeWidth={1.5} />}
+                {added ? t('product.added') : t('product.addToBag')}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

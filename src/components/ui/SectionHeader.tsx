@@ -1,6 +1,7 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
+import Reveal from '@/components/ui/Reveal';
 
 interface Props {
   eyebrow?: string;
@@ -8,6 +9,8 @@ interface Props {
   subtitle?: string;
   centered?: boolean;
   titleSize?: 'default' | 'compact';
+  action?: ReactNode;
+  className?: string;
 }
 
 export default function SectionHeader({
@@ -16,51 +19,23 @@ export default function SectionHeader({
   subtitle,
   centered = false,
   titleSize = 'default',
+  action,
+  className = '',
 }: Props) {
-  const titleStyle =
-    titleSize === 'compact'
-      ? {
-          fontFamily: 'var(--font-serif)',
-          fontSize: 'clamp(18px, 2.4vw, 26px)',
-          color: 'var(--color-heading)',
-          fontWeight: 500,
-          lineHeight: 1.35,
-          marginBottom: 12,
-          maxWidth: centered ? 640 : undefined,
-          marginLeft: centered ? 'auto' : undefined,
-          marginRight: centered ? 'auto' : undefined,
-        }
-      : {
-          fontFamily: 'var(--font-serif)',
-          fontSize: 'clamp(20px, 2.6vw, 30px)',
-          color: 'var(--color-heading)',
-          fontWeight: 500,
-          lineHeight: 1.3,
-          marginBottom: 12,
-        };
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.55 }}
-      style={{ marginBottom: titleSize === 'compact' ? 32 : 40, textAlign: centered ? 'center' : 'left' }}
+    <Reveal
+      className={`mb-8 flex flex-col gap-5 sm:mb-10 lg:mb-12 ${
+        centered ? 'items-center text-center' : 'sm:flex-row sm:items-end sm:justify-between'
+      } ${className}`}
     >
-      {eyebrow && (
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: 10, fontWeight: 500, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#BFA6A0', marginBottom: 10 }}>
-          {eyebrow}
-        </p>
-      )}
-      <h2 style={titleStyle}>
-        {title}
-      </h2>
-      <div className={centered ? 'divider-gold-center' : 'divider-gold'} />
-      {subtitle && (
-        <p style={{ fontFamily: 'var(--font-sans)', fontSize: titleSize === 'compact' ? 14 : 15, color: 'var(--color-subtle)', lineHeight: 1.75, maxWidth: 520, marginTop: 14, marginLeft: centered ? 'auto' : 0, marginRight: centered ? 'auto' : 0 }}>
-          {subtitle}
-        </p>
-      )}
-    </motion.div>
+      <div className={centered ? 'mx-auto max-w-2xl' : 'max-w-2xl'}>
+        {eyebrow && <p className={`eyebrow mb-3 ${centered ? '' : 'eyebrow-line'}`}>{eyebrow}</p>}
+        <h2 className={titleSize === 'compact' ? 'text-[clamp(1.35rem,2.2vw,1.75rem)]' : 'section-title'}>{title}</h2>
+        {subtitle && (
+          <p className={`mt-3 max-w-xl text-[15px] leading-relaxed text-muted ${centered ? 'mx-auto' : ''}`}>{subtitle}</p>
+        )}
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
+    </Reveal>
   );
 }
