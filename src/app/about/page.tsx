@@ -76,13 +76,11 @@ export default function AboutPage() {
         </section>
       )}
 
-      <section className="relative overflow-hidden bg-secondary text-background">
-        <SunMark
-          className="pointer-events-none absolute -bottom-8 left-1/2 w-[640px] max-w-none -translate-x-1/2 text-primary/[0.12]"
-          strokeWidth={0.7}
-        />
-        <Reveal className="wrap relative flex flex-col items-center py-20 text-center lg:py-28">
-          <h2 className="section-title max-w-xl text-background">{about.closing.title}</h2>
+      <section className="bg-background text-text">
+        <Reveal className="wrap flex flex-col items-center py-20 text-center lg:py-28">
+          <h2 className="section-title max-w-none whitespace-nowrap text-[clamp(1.15rem,3.4vw,2.25rem)]!">
+            {about.closing.title}
+          </h2>
           <Link href={about.closing.ctaHref} className="btn-primary mt-8">
             {about.closing.ctaLabel} <ArrowRight size={15} strokeWidth={1.5} />
           </Link>

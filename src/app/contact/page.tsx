@@ -9,9 +9,7 @@ import StoreImage from '@/components/ui/StoreImage';
 import { TelegramIcon, WhatsAppIcon } from '@/components/ui/BrandIcons';
 import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { useI18n } from '@/i18n/I18nProvider';
-import { isFileImage, resolveProductImageSrc } from '@/lib/productImage';
 import { resolveStoreTelegramUsername } from '@/lib/storeContact';
-import { useGalleryQuery } from '@/lib/useProductsQuery';
 
 type Channel = {
   key: string;
@@ -75,10 +73,6 @@ export default function ContactPage() {
   } = settings;
   const isHy = locale === 'hy';
 
-  const { data: gallery = [], isLoading: galleryLoading } = useGalleryQuery(6);
-  const photo = gallery.filter((g) => isFileImage(g.src))[2] ?? gallery.find((g) => isFileImage(g.src));
-  const photoSrc = photo ? resolveProductImageSrc(photo.src) : '';
-
   const telegramUsername = resolveStoreTelegramUsername({ telegramUrl });
   const telegramHref = telegramUsername ? `https://t.me/${telegramUsername}` : '';
 
@@ -126,8 +120,8 @@ export default function ContactPage() {
           </Reveal>
 
           <Reveal className="lg:col-span-5 lg:col-start-8" delay={0.1}>
-            <div className={`relative aspect-[4/5] overflow-hidden bg-surface-deep ${galleryLoading ? 'skeleton' : ''}`}>
-              {photoSrc && <StoreImage src={photoSrc} alt="" fill />}
+            <div className="relative aspect-[4/5] overflow-hidden bg-surface-deep">
+              <StoreImage src="/images/contact.jpg" alt="" fill priority />
             </div>
           </Reveal>
         </div>

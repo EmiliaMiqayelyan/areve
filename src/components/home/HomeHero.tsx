@@ -60,14 +60,16 @@ export default function HomeHero({ copy, leadImage, products, loading }: Props) 
     <section className="relative">
       <div className="wrap grid items-center gap-10 pb-12 pt-8 sm:pb-16 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-20 lg:pt-14">
         <div className="lg:col-span-5">
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease }}
-            className="eyebrow eyebrow-line mb-5 lg:mb-7"
-          >
-            {copy.eyebrow}
-          </motion.p>
+          {copy.eyebrow ? (
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease }}
+              className="eyebrow eyebrow-line mb-5 lg:mb-7"
+            >
+              {copy.eyebrow}
+            </motion.p>
+          ) : null}
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

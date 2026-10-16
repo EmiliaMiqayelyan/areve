@@ -166,7 +166,7 @@ export default function ProductDetailPage() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-14 xl:gap-20">
           {/* Gallery */}
           <div className="lg:col-span-7">
-            <div className={`flex flex-col gap-3 ${gallery.length > 1 ? 'lg:flex-row-reverse' : ''}`}>
+            <div className="flex flex-col gap-3">
               <div className="relative -mx-[var(--container-px)] aspect-[4/5] flex-1 overflow-hidden bg-surface-deep sm:mx-0">
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
@@ -211,15 +211,12 @@ export default function ProductDetailPage() {
                     >
                       <ChevronRight size={18} strokeWidth={1.4} />
                     </button>
-                    <span className="absolute bottom-3 right-3 bg-background/90 px-2.5 py-1 text-[11px] tabular-nums text-text">
-                      {safeIndex + 1} / {gallery.length}
-                    </span>
                   </>
                 )}
               </div>
 
               {gallery.length > 1 && (
-                <div className="no-scrollbar flex gap-2 overflow-x-auto lg:w-20 lg:flex-col lg:overflow-visible">
+                <div className="no-scrollbar flex gap-2 overflow-x-auto">
                   {gallery.map((src, galleryIndex) => {
                     const selected = galleryIndex === safeIndex;
                     return (
@@ -285,7 +282,7 @@ export default function ProductDetailPage() {
                   <button
                     type="button"
                     onClick={handleAdd}
-                    className="btn-primary min-h-[52px] min-w-0 flex-1 whitespace-normal px-3 text-center leading-tight tracking-[0.08em] sm:px-4 sm:tracking-[0.12em]"
+                    className="btn-primary min-h-[52px] min-w-0 flex-1 whitespace-normal rounded-none! px-3 text-center leading-tight tracking-[0.08em] sm:px-4 sm:tracking-[0.12em]"
                   >
                     {added ? <Check size={16} strokeWidth={1.8} /> : <ShoppingBag size={16} strokeWidth={1.5} />}
                     {added ? t('product.added') : t('product.addToBag')}

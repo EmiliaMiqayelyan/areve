@@ -61,16 +61,15 @@ export const SITE_CONTENT_EN = {
   },
   home: {
     hero: {
-      eyebrow: "Handmade · Yerevan",
-      title: "Bead by bead,",
-      titleAccent: "made by hand",
-      subtitle:
-        "Beaded and crochet bags, headpieces and accessories — crafted entirely by hand in Armenia.",
+      eyebrow: "",
+      title: "Sun you wear",
+      titleAccent: "every day",
+      subtitle: "Beaded and crochet bags, headpieces and accessories",
       primaryCta: { label: "Shop the collection", href: "/products" },
       secondaryCta: { label: "Custom order", href: "/contact" },
     },
     trust: [
-      { title: "100% handmade", text: "Every piece is assembled by hand" },
+      { title: "100% handmade", text: "Every piece is made by hand" },
       { title: "Made in Armenia", text: "Created in Yerevan" },
       { title: "Easy ordering", text: "Via WhatsApp or Telegram" },
       { title: "Custom orders", text: "Made especially for you" },
@@ -89,15 +88,14 @@ export const SITE_CONTENT_EN = {
     },
     newSection: {
       eyebrow: "New arrivals",
-      title: "Latest creations",
+      title: "Latest models",
       viewAllLabel: "View all",
     },
     storySection: {
       eyebrow: "About AREVÉ",
-      title: "Every piece is made by hand",
+      title: "A little sun for your day",
       paragraphs: [
-        "The name AREVÉ comes from arév — the Armenian word for sun. We create beaded and crochet bags, headpieces and accessories with attention to every detail.",
-        "Because each piece is made by hand, no two are exactly alike.",
+        "The name AREVÉ comes from arév, the Armenian word for sun. We create beaded and crochet bags, headpieces and accessories with attention to every detail.",
       ],
       points: ["Handmade", "One of a kind", "Quality materials"],
       ctaLabel: "Our story",
@@ -105,8 +103,8 @@ export const SITE_CONTENT_EN = {
     },
     customSection: {
       eyebrow: "Custom orders",
-      title: "Looking for something unique?",
-      text: "We create custom handmade pieces designed especially for you. Message us and we will talk through your idea together.",
+      title: "Want a design that stands out?",
+      text: "We create custom handmade bags designed especially for you. Message us and we will talk through your idea together.",
       whatsappLabel: "Message on WhatsApp",
       contactLabel: "Other ways to reach us",
       contactHref: "/contact",
@@ -124,7 +122,7 @@ export const SITE_CONTENT_EN = {
       eyebrow: "AREVÉ · sun",
       titleLine1: "Created from the",
       titleItalic: "sun",
-      intro: "Made in Armenia",
+      intro: "",
     },
     beginning: {
       eyebrow: "The Beginning",
@@ -210,8 +208,8 @@ export const SITE_CONTENT_EN = {
       ctaLabel: "Contact us",
     },
     customOrder: {
-      title: "Need something unique?",
-      subtitle: "We create custom handmade pieces designed especially for you.",
+      title: "Want a design that stands out?",
+      subtitle: "We create custom handmade bags designed especially for you.",
       ctaLabel: "Start Custom Order",
     },
     social: {
